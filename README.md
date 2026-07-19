@@ -6,7 +6,8 @@ An Android alarm app that **only plays through earphones**, never through speake
 
 ## Screenshot
 
-![Screenshot](./pic/sc.png)
+<img src="./pic/sc.png" width="300" alt="Screenshot">
+
 
 ## Features
 
