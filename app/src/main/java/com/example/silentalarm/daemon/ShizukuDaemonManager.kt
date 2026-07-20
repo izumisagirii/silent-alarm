@@ -3,14 +3,15 @@ package com.example.silentalarm.daemon
 import android.content.ComponentName
 import android.content.Context
 import android.content.ServiceConnection
-import android.os.Handler
 import android.os.IBinder
-import android.os.Looper
 import android.os.Parcel
 import android.util.Log
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withContext
 import rikka.shizuku.Shizuku
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 
 /**
  * ## Shizuku Native Daemon Manager
@@ -35,22 +36,11 @@ import java.util.concurrent.TimeUnit
  * implementation is instantiated by Shizuku inside its own process (shell/root UID),
  * so any `Runtime.exec()` calls from it carry elevated privileges.
  *
- * ## Usage
- * ```kotlin
- * val manager = ShizukuDaemonManager(context)
- * if (manager.isShizukuAvailable() && manager.isShizukuPermitted()) {
- *     manager.applyAntiKillingTweaks()
- *     manager.startWatchdogDaemon()
- * }
- * ```
  */
 class ShizukuDaemonManager(private val context: Context) {
 
     companion object {
         private const val TAG = "ShizukuDaemonMgr"
-
-        /** Maximum wait time for UserService binding (seconds). */
-        private const val BIND_TIMEOUT_SEC = 10L
 
         /** Check interval for the watchdog daemon in seconds. */
         private const val WATCHDOG_INTERVAL_SEC = 5
@@ -102,7 +92,7 @@ class ShizukuDaemonManager(private val context: Context) {
      * These commands require shell UID or higher — the UserService provides this
      * by running [ShellService] inside Shizuku's privileged process.
      */
-    fun applyAntiKillingTweaks() {
+    suspend fun applyAntiKillingTweaks() {
         val pkg = context.packageName
         Log.i(TAG, "Applying anti-killing tweaks for $pkg")
 
@@ -125,7 +115,7 @@ class ShizukuDaemonManager(private val context: Context) {
      *
      * `nohup` + `&` ensures the daemon outlives the UserService call.
      */
-    fun startWatchdogDaemon() {
+    suspend fun startWatchdogDaemon() {
         val pkg = context.packageName
         val startCmd = CMD_START_SERVICE.format(pkg)
 
@@ -145,7 +135,7 @@ class ShizukuDaemonManager(private val context: Context) {
     }
 
     /** Kill any existing watchdog daemon processes for our package. */
-    fun stopWatchdogDaemon() {
+    suspend fun stopWatchdogDaemon() {
         val pkg = context.packageName
         Log.i(TAG, "Stopping watchdog daemon(s) for $pkg")
         executePrivileged("pkill -f 'pidof $pkg'")
@@ -163,77 +153,54 @@ class ShizukuDaemonManager(private val context: Context) {
      * @param command shell command to execute with elevated privileges
      * @return command output, or null on failure
      */
-    private fun executePrivileged(command: String): String? {
-        Log.d(TAG, "executePrivileged: $command")
+    private suspend fun executePrivileged(command: String): String? =
+        withContext(Dispatchers.Main) {
+            Log.d(TAG, "executePrivileged: $command")
 
-        val latch = CountDownLatch(1)
-        var result: String? = null
-        var bindError: Exception? = null
+            val args = Shizuku.UserServiceArgs(
+                ComponentName(context.packageName, ShellService::class.java.name)
+            ).daemon(false).version(1).tag("shell_service")
+              .processNameSuffix("shell")
 
-        val args = Shizuku.UserServiceArgs(
-            ComponentName(
-                context.packageName,
-                ShellService::class.java.name
-            )
-        ).daemon(false).version(1).tag("shell_service")
-          .processNameSuffix("shell")
-
-        // Shizuku's internal bookkeeping is NOT thread-safe — all bindUserService
-        // and unbindUserService calls must be serialized on the main thread.
-        val mainHandler = Handler(Looper.getMainLooper())
-
-        // Post bind to main thread — Shizuku's HashMap iteration is NOT thread-safe.
-        mainHandler.post {
-            try {
-                Shizuku.bindUserService(args, object : ServiceConnection {
-                    override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-                        if (service == null) {
-                            bindError = Exception("Null binder from Shizuku")
-                            latch.countDown()
-                            return
-                        }
-                        try {
-                            val data = Parcel.obtain()
-                            val reply = Parcel.obtain()
-                            try {
-                                data.writeInterfaceToken(ShellService.DESCRIPTOR)
-                                data.writeString(command)
-                                service.transact(1, data, reply, 0)
-                                reply.readException()
-                                result = reply.readString()
-                            } finally {
-                                reply.recycle()
-                                data.recycle()
+            suspendCancellableCoroutine { cont ->
+                try {
+                    Shizuku.bindUserService(args, object : ServiceConnection {
+                        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+                            if (!cont.isActive) return
+                            if (service == null) {
+                                cont.resumeWithException(Exception("Null binder from Shizuku"))
+                                return
                             }
-                        } catch (e: Exception) {
-                            Log.e(TAG, "UserService transact error: ${e.message}", e)
-                            bindError = e
-                        } finally {
-                            try { Shizuku.unbindUserService(args, this, false) } catch (_: Exception) {}
-                            latch.countDown()
+                            try {
+                                val data = Parcel.obtain()
+                                val reply = Parcel.obtain()
+                                try {
+                                    data.writeInterfaceToken(ShellService.DESCRIPTOR)
+                                    data.writeString(command)
+                                    service.transact(1, data, reply, 0)
+                                    reply.readException()
+                                    cont.resume(reply.readString())
+                                } finally {
+                                    reply.recycle()
+                                    data.recycle()
+                                }
+                            } catch (e: Exception) {
+                                Log.e(TAG, "UserService transact error: ${e.message}", e)
+                                cont.resumeWithException(e)
+                            } finally {
+                                try { Shizuku.unbindUserService(args, this, false) } catch (_: Exception) {}
+                            }
                         }
-                    }
 
-                    override fun onServiceDisconnected(name: ComponentName?) {
-                        latch.countDown()
-                    }
-                })
-            } catch (e: Exception) {
-                Log.e(TAG, "Shizuku bindUserService failed: ${e.message}", e)
-                bindError = e
-                latch.countDown()
+                        override fun onServiceDisconnected(name: ComponentName?) {
+                            if (cont.isActive)
+                                cont.resumeWithException(Exception("Shizuku service disconnected"))
+                        }
+                    })
+                } catch (e: Exception) {
+                    Log.e(TAG, "Shizuku bindUserService failed: ${e.message}", e)
+                    if (cont.isActive) cont.resumeWithException(e)
+                }
             }
         }
-
-        if (!latch.await(BIND_TIMEOUT_SEC, TimeUnit.SECONDS)) {
-            Log.w(TAG, "Shizuku UserService bind timed out after ${BIND_TIMEOUT_SEC}s")
-            return null
-        }
-
-        if (bindError != null) {
-            Log.e(TAG, "Command failed: ${bindError.message}")
-        }
-
-        return result
-    }
 }

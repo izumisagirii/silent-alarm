@@ -39,11 +39,16 @@ Three-layer defense against OEM background killers:
 - minSdk 29 / targetSdk 36
 - Kotlin 2.2.10, Compose BOM 2026.02, AGP 9.3
 
+## TODOs
+
+1. Add keep-alive capability on non-shizuku OS.
+2. Add fallback to simple alarm if not closed manually, in case of missing earphone alarm.
+
 ---
 
 ## <a id="chinese"></a>SilentAlarm — 隐私耳机闹钟
 
-一款 **只在耳机中响铃、绝不外放** 的 Android 闹钟应用。Kotlin + Jetpack Compose 构建，利用 shizuku + QS tile 保活，对抗 OEM 杀进程。
+一款 **只在耳机中响铃、绝不外放** 的 Android 闹钟应用。Kotlin + Jetpack Compose 构建，利用 shizuku + Foreground Service保活，对抗 OEM 杀进程。
 
 ### 功能
 

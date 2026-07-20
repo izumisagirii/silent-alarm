@@ -37,12 +37,9 @@ class ShellService : Binder {
         private const val TRANSACTION_EXECUTE = 1
     }
 
-    // Default no-arg constructor — REQUIRED by Shizuku for Class.newInstance()
-    @Suppress("deprecation")
     constructor() : super()
 
-    // Context-accepting constructor — Shizuku v13+ provides app context
-    @Suppress("unused", "deprecation")
+    @Suppress("unused")
     constructor(context: Context) : super()
 
     /**

@@ -16,9 +16,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+//import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import androidx.core.net.toUri
 
 /**
  * Central ViewModel.
@@ -76,6 +78,12 @@ class AlarmViewModel(application: Application) : AndroidViewModel(application) {
 
     init {
         refreshStatusFlags()
+        // Keep foreground service alive for basic process protection
+        viewModelScope.launch {
+//            if (preferences.getAlarms().first().any { it.enabled }) {
+                scheduler.startIdleService()
+//            }
+        }
     }
 
     // ── Status Refresh ───────────────────────────────────────────────────
@@ -98,6 +106,7 @@ class AlarmViewModel(application: Application) : AndroidViewModel(application) {
             shizukuTweaksApplied = true
             viewModelScope.launch {
                 withContext(Dispatchers.IO) {
+                    shizukuManager.stopWatchdogDaemon()
                     shizukuManager.applyAntiKillingTweaks()
                     shizukuManager.startWatchdogDaemon()
                 }
@@ -120,6 +129,7 @@ class AlarmViewModel(application: Application) : AndroidViewModel(application) {
             val item = AlarmItem(hour = hour, minute = minute, label = label)
             preferences.addAlarm(item)
             scheduler.scheduleOne(item)
+            scheduler.startIdleService()
             _snackbarMessage.value = "Alarm set for %02d:%02d".format(hour, minute)
             syncTile()
         }
@@ -129,7 +139,10 @@ class AlarmViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             preferences.updateAlarm(updated)
             scheduler.cancelAlarm(updated.id)
-            if (updated.enabled) scheduler.scheduleOne(updated)
+            if (updated.enabled) {
+                scheduler.scheduleOne(updated)
+                scheduler.startIdleService()
+            }
             syncTile()
         }
     }
@@ -148,7 +161,10 @@ class AlarmViewModel(application: Application) : AndroidViewModel(application) {
             preferences.toggleAlarm(alarmId, enabled)
             if (enabled) {
                 val alarm = alarms.value.find { it.id == alarmId }
-                if (alarm != null) scheduler.scheduleOne(alarm)
+                if (alarm != null) {
+                    scheduler.scheduleOne(alarm)
+                    scheduler.startIdleService()
+                }
             } else {
                 scheduler.cancelAlarm(alarmId)
             }
@@ -183,7 +199,7 @@ class AlarmViewModel(application: Application) : AndroidViewModel(application) {
     /** Opens system battery-optimization settings so the user can exempt us. */
     fun requestBatteryExemption() {
         val intent = Intent(android.provider.Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
-            .apply { data = Uri.parse("package:${getApplication<Application>().packageName}") }
+            .apply { data = "package:${getApplication<Application>().packageName}".toUri() }
             .apply { addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) }
         getApplication<Application>().startActivity(intent)
     }
@@ -191,7 +207,6 @@ class AlarmViewModel(application: Application) : AndroidViewModel(application) {
     // ── Time Picker ──────────────────────────────────────────────────────
 
     fun showAddTimePicker() { editingAlarmId = null; _showTimePicker.value = true }
-    fun showEditTimePicker(alarmId: String) { editingAlarmId = alarmId; _showTimePicker.value = true }
     fun hideTimePicker() { _showTimePicker.value = false }
 
     fun onTimeSelected(hour: Int, minute: Int) {
@@ -215,25 +230,20 @@ class AlarmViewModel(application: Application) : AndroidViewModel(application) {
         refreshStatus()
     }
 
-    /** Manually apply anti-kill tweaks + watchdog (runs off main thread). */
-    fun applyAntiKillingTweaks() {
-        if (!shizukuManager.isShizukuAvailable() || !shizukuManager.isShizukuPermitted()) {
-            _snackbarMessage.value = "Shizuku not available"
-            return
-        }
-        viewModelScope.launch {
-            withContext(Dispatchers.IO) {
-                shizukuManager.applyAntiKillingTweaks()
-                shizukuManager.startWatchdogDaemon()
-            }
-            _snackbarMessage.value = "Anti-kill tweaks applied + watchdog started"
-        }
-    }
-
-    fun showTileInstructions() {
-        _snackbarMessage.value =
-            "Pull down notification shade → Edit tiles → Add 'Earphone Alarm'"
-    }
+//    /** Manually apply anti-kill tweaks + watchdog (runs off main thread). */
+//    fun applyAntiKillingTweaks() {
+//        if (!shizukuManager.isShizukuAvailable() || !shizukuManager.isShizukuPermitted()) {
+//            _snackbarMessage.value = "Shizuku not available"
+//            return
+//        }
+//        viewModelScope.launch {
+//            withContext(Dispatchers.IO) {
+//                shizukuManager.applyAntiKillingTweaks()
+//                shizukuManager.startWatchdogDaemon()
+//            }
+//            _snackbarMessage.value = "Anti-kill tweaks applied + watchdog started"
+//        }
+//    }
 
     // ── Formatting ───────────────────────────────────────────────────────
 

@@ -12,6 +12,9 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
+    <!-- Network (GitHub release check) -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <!-- Audio & Vibration -->
     <uses-permission android:name="android.permission.VIBRATE" />
 
@@ -66,6 +69,7 @@
         <service
             android:name=".service.AlarmAudioService"
             android:exported="false"
+            android:stopWithTask="false"
             android:foregroundServiceType="mediaPlayback" />
 
         <!-- ============================================================ -->

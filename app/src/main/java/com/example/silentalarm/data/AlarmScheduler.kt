@@ -89,6 +89,17 @@ class AlarmScheduler(private val context: Context) {
     }
 
     /**
+     * Start [AlarmAudioService] in idle mode (no alarm playback).
+     * Used to keep the foreground service alive for basic process protection
+     * when Shizuku is not available.
+     */
+    fun startIdleService() {
+        val intent = Intent(context, AlarmAudioService::class.java)
+        context.startForegroundService(intent)
+        Log.d(TAG, "Idle service started for keep-alive")
+    }
+
+    /**
      * Fire the alarm **immediately** for testing purposes.
      * Sends a [ACTION_TEST_ALARM] intent directly to [AlarmAudioService],
      * bypassing the AlarmManager scheduler.

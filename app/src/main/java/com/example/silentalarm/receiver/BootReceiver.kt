@@ -39,9 +39,15 @@ class BootReceiver : BroadcastReceiver() {
                 scheduler.scheduleAll(alarms)
                 Log.i(TAG, "Re-scheduled ${alarms.count { it.enabled }} alarms")
 
+                if (alarms.any { it.enabled }) {
+                    scheduler.startIdleService()
+                }
+
                 if (shizuku.isShizukuAvailable() && shizuku.isShizukuPermitted()) {
+                    shizuku.stopWatchdogDaemon()
                     shizuku.applyAntiKillingTweaks()
                     shizuku.startWatchdogDaemon()
+                    Log.i(TAG, "Success Daemon.")
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Boot processing failed", e)

@@ -5,8 +5,8 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
-import android.content.Context
 import android.content.Intent
+import android.graphics.drawable.Icon
 import android.media.AudioAttributes
 import android.media.AudioDeviceInfo
 import android.media.AudioFocusRequest
@@ -81,7 +81,7 @@ class AlarmAudioService : Service() {
 
     override fun onCreate() {
         super.onCreate()
-        audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        audioManager = getSystemService(AUDIO_SERVICE) as AudioManager
         audioRouter = AudioRouter(audioManager)
         preferences = AlarmPreferences(this)
         scheduler = AlarmScheduler(this)
@@ -215,7 +215,7 @@ class AlarmAudioService : Service() {
     }
 
     private fun resolveRingtoneUri(stored: String): Uri =
-        stored.takeIf { it.isNotBlank() }?.let { Uri.parse(it) }
+        stored.takeIf { it.isNotBlank() }?.toUri()
             ?: android.provider.Settings.System.DEFAULT_ALARM_ALERT_URI
 
     /** Request transient audio focus for alarm playback. */
@@ -240,9 +240,9 @@ class AlarmAudioService : Service() {
     /** Start a repeating vibration pattern (500ms on, 300ms off). */
     private fun startRepeatingVibration() {
         vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            (getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager).defaultVibrator
+            (getSystemService(VIBRATOR_MANAGER_SERVICE) as VibratorManager).defaultVibrator
         } else {
-            @Suppress("DEPRECATION") getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+            @Suppress("DEPRECATION") getSystemService(VIBRATOR_SERVICE) as Vibrator
         }
         vibrator?.vibrate(VibrationEffect.createWaveform(
             longArrayOf(0, 500, 300),
@@ -254,7 +254,7 @@ class AlarmAudioService : Service() {
     // ── Resource Management ──────────────────────────────────────────────
 
     private fun acquireWakeLock() {
-        val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
+        val pm = getSystemService(POWER_SERVICE) as PowerManager
         wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "SilentAlarm::WakeLock").apply {
             acquire(10 * 60 * 1000L)
         }
@@ -280,7 +280,7 @@ class AlarmAudioService : Service() {
     // ── Notification ─────────────────────────────────────────────────────
 
     private fun createNotificationChannel() {
-        val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val nm = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
 
         // Idle channel: silent, no status bar icon — for watchdog background presence
         val idleCh = NotificationChannel(CHANNEL_IDLE,
@@ -294,7 +294,7 @@ class AlarmAudioService : Service() {
         // Active channel: shows status bar icon + stop action — for alarm playback
         val activeCh = NotificationChannel(CHANNEL_ACTIVE,
             "Alarm Playing",
-            NotificationManager.IMPORTANCE_LOW).apply {
+            NotificationManager.IMPORTANCE_HIGH).apply {
             description = "Shown when the alarm is actively playing"
             setShowBadge(false)
         }
@@ -311,7 +311,7 @@ class AlarmAudioService : Service() {
             .setContentTitle(getString(R.string.app_name))
             .setContentText("Waiting for next alarm")
             .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
-            .setOngoing(true)
+            .setOngoing(false)
             .setPriority(NotificationCompat.PRIORITY_MIN)
             .setContentIntent(contentPi)
             .build()
@@ -322,6 +322,7 @@ class AlarmAudioService : Service() {
         val stopPi = PendingIntent.getService(this, 2002,
             Intent(this, AlarmAudioService::class.java).apply { action = ACTION_STOP_ALARM },
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+
         val contentPi = PendingIntent.getActivity(this, 2003,
             Intent(this, MainActivity::class.java),
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
@@ -331,14 +332,18 @@ class AlarmAudioService : Service() {
             AudioRouter.AudioOutputType.SPEAKER_ONLY -> "Earphones not detected"
         }
 
-        return NotificationCompat.Builder(this, CHANNEL_ACTIVE)
+        // fix stop button not showing
+        val stopIcon = Icon.createWithResource(this, android.R.drawable.ic_media_pause)
+        val stopAction = Notification.Action.Builder(stopIcon, "Stop", stopPi).build()
+
+        return Notification.Builder(this, CHANNEL_ACTIVE)
             .setContentTitle("Alarm Active")
             .setContentText(subtitle)
             .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
             .setOngoing(true)
-            .setPriority(NotificationCompat.PRIORITY_LOW)
             .setContentIntent(contentPi)
-            .addAction(android.R.drawable.ic_media_pause, "Stop", stopPi)
+            .addAction(stopAction)
+            .setStyle(Notification.MediaStyle().setShowActionsInCompactView(0))
             .build()
     }
 
@@ -365,14 +370,28 @@ class AlarmAudioService : Service() {
         }
     }
 
-    /** Clean shutdown: release resources, remove notification, stop self. */
+    /**
+     * Stop active alarm playback and transition to idle keep-alive mode.
+     * The foreground service stays alive with a silent notification so the
+     * process is less likely to be killed before the next scheduled alarm.
+     */
     private fun stopAlarm() {
-        Log.i(TAG, "Alarm stopped by user")
+        Log.i(TAG, "Alarm stopped — transitioning to idle keep-alive")
         releaseMediaPlayer()
         releaseVibrator()
         releaseWakeLock()
         releaseAudioFocus()
-        stopForeground(STOP_FOREGROUND_REMOVE)
-        stopSelf()
+        // Check whether there are enabled alarms worth protecting
+        serviceScope.launch {
+            val hasEnabled = preferences.getAlarms().first().any { it.enabled }
+            if (hasEnabled) {
+                // Update notification to idle — service stays alive
+                startForeground(NOTIFICATION_ID, buildIdleNotification())
+            } else {
+                // No alarms left — stop the service
+                stopForeground(STOP_FOREGROUND_REMOVE)
+                stopSelf()
+            }
+        }
     }
 }

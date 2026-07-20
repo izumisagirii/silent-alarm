@@ -57,7 +57,6 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         requestPermissions()
-        viewModel.refreshStatus()
 
         setContent {
             SilentAlarmTheme {

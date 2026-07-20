@@ -53,6 +53,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.example.silentalarm.data.AlarmItem
 import com.example.silentalarm.data.NoEarphoneAction
+import com.example.silentalarm.ui.components.GitHubRepoCard
 import com.example.silentalarm.ui.components.StatusBanner
 import com.example.silentalarm.ui.components.VolumeSlider
 import com.example.silentalarm.ui.viewmodel.AlarmViewModel
@@ -233,9 +234,6 @@ fun AlarmDashboardScreen(
                         Spacer(modifier = Modifier.height(8.dp))
                         Button(
                             onClick = onPickRingtone,
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.secondary
-                            )
                         ) { Text("Pick Ringtone") }
                     }
                 }
@@ -284,6 +282,9 @@ fun AlarmDashboardScreen(
                     }
                 }
             }
+
+            // ── GitHub Repo ─────────────────────────────────────────
+            item { GitHubRepoCard() }
 
             // Bottom spacing
             item { Spacer(modifier = Modifier.height(80.dp)) }
@@ -394,7 +395,7 @@ private fun DayCircleRow(
                         else MaterialTheme.colorScheme.surfaceVariant,
                 modifier = Modifier.size(40.dp)
             ) {
-                androidx.compose.foundation.layout.Box(
+                Box(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier.fillMaxSize()
                 ) {
