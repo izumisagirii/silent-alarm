@@ -32,6 +32,19 @@ enum class NoEarphoneAction(val displayName: String) {
 }
 
 /**
+ * What happens when the earphone alarm timeout expires.
+ */
+enum class TimeoutAction(val displayName: String) {
+    STOP("Stop"),
+    FALLBACK("Fallback");
+
+    companion object {
+        fun fromOrdinal(ordinal: Int): TimeoutAction =
+            entries.getOrElse(ordinal) { STOP }
+    }
+}
+
+/**
  * A single alarm entity. Persisted as JSON in DataStore.
  *
  * @property id unique identifier (UUID string), stable across edits
@@ -67,6 +80,8 @@ class AlarmPreferences(private val context: Context) {
         val SPEAKER_VOLUME = intPreferencesKey("speaker_volume")
         val NO_EARPHONE_ACTION = intPreferencesKey("no_earphone_action")
         val GLOBAL_RINGTONE_URI = stringPreferencesKey("global_ringtone_uri")
+        val TIMEOUT_SECONDS = intPreferencesKey("timeout_seconds")
+        val TIMEOUT_ACTION = intPreferencesKey("timeout_action")
     }
 
     // ── Global Settings (shared across all alarms) ───────────────────────
@@ -89,6 +104,16 @@ class AlarmPreferences(private val context: Context) {
     /** Global ringtone URI (applies to all alarms). Empty = system default. */
     val globalRingtoneUri: Flow<String> = context.dataStore.data.map { p ->
         p[Keys.GLOBAL_RINGTONE_URI] ?: ""
+    }
+
+    /** Earphone alarm timeout in seconds. Range 30–1800, default 300 (5 min). */
+    val timeoutSeconds: Flow<Int> = context.dataStore.data.map { p ->
+        p[Keys.TIMEOUT_SECONDS] ?: 300
+    }
+
+    /** Action to take after the earphone timeout expires. Default: STOP. */
+    val timeoutAction: Flow<TimeoutAction> = context.dataStore.data.map { p ->
+        TimeoutAction.fromOrdinal(p[Keys.TIMEOUT_ACTION] ?: 0)
     }
 
     // ── Alarm List (JSON-backed) ─────────────────────────────────────────
@@ -187,6 +212,18 @@ class AlarmPreferences(private val context: Context) {
         }
         context.dataStore.edit { prefs ->
             prefs[Keys.GLOBAL_RINGTONE_URI] = uri.toString()
+        }
+    }
+
+    suspend fun setTimeoutSeconds(seconds: Int) {
+        context.dataStore.edit { prefs ->
+            prefs[Keys.TIMEOUT_SECONDS] = seconds.coerceIn(30, 1800)
+        }
+    }
+
+    suspend fun setTimeoutAction(action: TimeoutAction) {
+        context.dataStore.edit { prefs ->
+            prefs[Keys.TIMEOUT_ACTION] = action.ordinal
         }
     }
 

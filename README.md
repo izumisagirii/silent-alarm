@@ -43,7 +43,7 @@ Three-layer defense against OEM background killers:
 ## TODOs
 
 1. Add keep-alive capability on non-shizuku OS.
-2. Add fallback to simple alarm if not closed manually, in case of missing earphone alarm.
+2. ~~Add fallback to simple alarm if not closed manually, in case of missing earphone alarm.~~
 
 ---
 

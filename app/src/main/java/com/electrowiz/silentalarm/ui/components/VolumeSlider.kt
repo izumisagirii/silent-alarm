@@ -15,7 +15,8 @@ import androidx.compose.ui.unit.dp
 import kotlin.math.roundToInt
 
 /**
- * Labeled 0–100% volume slider with current value readout.
+ * Labeled slider with current value readout.
+ * Defaults to 0–100% volume; pass [valueRange] and [displayText] for other uses.
  */
 @Composable
 fun VolumeSlider(
@@ -23,7 +24,9 @@ fun VolumeSlider(
     value: Int,
     onValueChange: (Int) -> Unit,
     modifier: Modifier = Modifier,
-    enabled: Boolean = true
+    enabled: Boolean = true,
+    valueRange: ClosedFloatingPointRange<Float> = 0f..100f,
+    displayText: String = "${value}%"
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
         Row(
@@ -32,13 +35,13 @@ fun VolumeSlider(
         ) {
             Text(label, style = MaterialTheme.typography.bodyMedium)
             Spacer(modifier = Modifier.width(8.dp))
-            Text("${value}%", style = MaterialTheme.typography.labelLarge,
+            Text(displayText, style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.primary)
         }
         Slider(
             value = value.toFloat(),
             onValueChange = { onValueChange(it.roundToInt()) },
-            valueRange = 0f..100f,
+            valueRange = valueRange,
             steps = 0,
             enabled = enabled,
             modifier = Modifier.fillMaxWidth()

@@ -10,6 +10,7 @@ import com.electrowiz.silentalarm.data.AlarmItem
 import com.electrowiz.silentalarm.data.AlarmPreferences
 import com.electrowiz.silentalarm.data.AlarmScheduler
 import com.electrowiz.silentalarm.data.NoEarphoneAction
+import com.electrowiz.silentalarm.data.TimeoutAction
 import com.electrowiz.silentalarm.service.AlarmTileService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -53,6 +54,14 @@ class AlarmViewModel(application: Application) : AndroidViewModel(application) {
 
     val globalRingtoneUri: StateFlow<String> = preferences.globalRingtoneUri
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "")
+
+    // ── Timeout Settings ──────────────────────────────────────────────
+
+    val timeoutSeconds: StateFlow<Int> = preferences.timeoutSeconds
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 300)
+
+    val timeoutAction: StateFlow<TimeoutAction> = preferences.timeoutAction
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), TimeoutAction.STOP)
 
     // ── System Status (polled) ───────────────────────────────────────────
 
@@ -181,6 +190,11 @@ class AlarmViewModel(application: Application) : AndroidViewModel(application) {
     fun setRingtone(uri: Uri) {
         viewModelScope.launch { preferences.setGlobalRingtoneUri(uri) }
     }
+
+    // ── Timeout Setters ───────────────────────────────────────────────
+
+    fun setTimeoutSeconds(v: Int) { viewModelScope.launch { preferences.setTimeoutSeconds(v) } }
+    fun setTimeoutAction(a: TimeoutAction) { viewModelScope.launch { preferences.setTimeoutAction(a) } }
 
     // ── Test & Stop ──────────────────────────────────────────────────────
 

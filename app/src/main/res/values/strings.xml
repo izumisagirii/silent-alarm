@@ -44,6 +44,10 @@
     <string name="label_open_accessibility_settings">Open Accessibility Settings</string>
     <string name="label_open_shizuku">Shizuku Not Available</string>
 
+    <!-- Timeout & Speaker -->
+    <string name="label_alarm_timeout">Alarm Timeout</string>
+    <string name="label_speaker_duration">Speaker Duration</string>
+
     <!-- Permissions -->
     <string name="perm_notification_rationale">Notification permission is required to run the alarm service in the background.</string>
     <string name="perm_exact_alarm_rationale">Exact alarm permission is required to trigger the alarm at the scheduled time.</string>

@@ -53,6 +53,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.electrowiz.silentalarm.data.AlarmItem
 import com.electrowiz.silentalarm.data.NoEarphoneAction
+import com.electrowiz.silentalarm.data.TimeoutAction
 import com.electrowiz.silentalarm.ui.components.GitHubRepoCard
 import com.electrowiz.silentalarm.ui.components.StatusBanner
 import com.electrowiz.silentalarm.ui.components.VolumeSlider
@@ -73,6 +74,8 @@ fun AlarmDashboardScreen(
     val speakerVolume by viewModel.speakerVolume.collectAsState()
     val noEarphoneAction by viewModel.noEarphoneAction.collectAsState()
     val globalRingtoneUri by viewModel.globalRingtoneUri.collectAsState()
+    val timeoutSeconds by viewModel.timeoutSeconds.collectAsState()
+    val timeoutAction by viewModel.timeoutAction.collectAsState()
     val showTimePicker by viewModel.showTimePicker.collectAsState()
     val snackbarMessage by viewModel.snackbarMessage.collectAsState()
 
@@ -184,6 +187,56 @@ fun AlarmDashboardScreen(
                         Spacer(modifier = Modifier.height(4.dp))
                         VolumeSlider("Speaker", speakerVolume,
                             onValueChange = { viewModel.setSpeakerVolume(it) })
+                    }
+                }
+            }
+
+            // ── Alarm Timeout ───────────────────────────────────────────
+            item {
+                Card(modifier = Modifier.fillMaxWidth()) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text("Alarm Timeout", style = MaterialTheme.typography.titleMedium)
+                        Spacer(modifier = Modifier.height(8.dp))
+                        VolumeSlider(
+                            label = "Duration",
+                            value = timeoutSeconds,
+                            onValueChange = { viewModel.setTimeoutSeconds((it / 10) * 10) },
+                            valueRange = 30f..1800f,
+                            displayText = formatDuration(timeoutSeconds)
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            "All modes (earphone / vibrate / speaker) share this duration.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text("After Earphone Timeout", style = MaterialTheme.typography.titleSmall)
+                        TimeoutAction.entries.forEach { action ->
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .selectable(
+                                        selected = timeoutAction == action,
+                                        onClick = { viewModel.setTimeoutAction(action) },
+                                        role = Role.RadioButton
+                                    )
+                                    .padding(vertical = 2.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                RadioButton(selected = timeoutAction == action, onClick = null)
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(action.displayName, style = MaterialTheme.typography.bodyLarge)
+                            }
+                        }
+                        if (timeoutAction == TimeoutAction.FALLBACK) {
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                "Fallback uses the \"When No Earphones\" setting below.",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
                 }
             }
@@ -366,6 +419,19 @@ private fun StatusRow(
 /** Single-letter day labels indexed by Calendar.DAY_OF_WEEK (1=Sun..7=Sat). */
 private val DAY_LETTERS = arrayOf("", "S", "M", "T", "W", "T", "F", "S")
 private val ALL_DAYS = 1..7
+
+/**
+ * Format a duration in seconds for display:
+ *   60 → "1 min"
+ *   90 → "1:30"
+ *  300 → "5 min"
+ */
+private fun formatDuration(seconds: Int): String {
+    val mins = seconds / 60
+    val secs = seconds % 60
+    return if (secs == 0) "${mins} min"
+    else "${mins}:%02d".format(secs)
+}
 
 // ── Day Circle Picker ────────────────────────────────────────────────────
 

@@ -25,11 +25,15 @@ import com.electrowiz.silentalarm.MainActivity
 import com.electrowiz.silentalarm.R
 import com.electrowiz.silentalarm.data.AlarmPreferences
 import com.electrowiz.silentalarm.data.AlarmScheduler
+import com.electrowiz.silentalarm.data.NoEarphoneAction
+import com.electrowiz.silentalarm.data.TimeoutAction
 import com.electrowiz.silentalarm.util.AudioRouter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import androidx.core.net.toUri
@@ -74,6 +78,7 @@ class AlarmAudioService : Service() {
     private var wakeLock: PowerManager.WakeLock? = null
     private var vibrator: Vibrator? = null
     private var audioFocusRequest: AudioFocusRequest? = null
+    private var autoStopJob: Job? = null
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
@@ -123,6 +128,7 @@ class AlarmAudioService : Service() {
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onDestroy() {
+        autoStopJob?.cancel(); autoStopJob = null
         releaseMediaPlayer()
         releaseVibrator()
         releaseWakeLock()
@@ -141,24 +147,76 @@ class AlarmAudioService : Service() {
      */
     private suspend fun executeAlarmRoutine() {
         val outputType = audioRouter.detectOutputType()
-        val action = audioRouter.resolveAction(
-            outputType,
-            preferences.noEarphoneAction.first()
-        )
+        val noEarphonePref = preferences.noEarphoneAction.first()
+        val action = audioRouter.resolveAction(outputType, noEarphonePref)
         val earphoneVol = preferences.earphoneVolume.first()
         val speakerVol = preferences.speakerVolume.first()
         val ringtone = preferences.globalRingtoneUri.first()
         val uri = resolveRingtoneUri(ringtone)
+        val timeoutSeconds = preferences.timeoutSeconds.first()
+        val timeoutAction = preferences.timeoutAction.first()
 
-        Log.i(TAG, "Routing: output=$outputType action=$action earVol=$earphoneVol spkVol=$speakerVol")
+        Log.i(TAG, "Routing: output=$outputType action=$action earVol=$earphoneVol spkVol=$speakerVol timeout=$timeoutSeconds s")
 
         when (action) {
-            AudioRouter.ResolvedAction.PLAY_VIA_EARPHONES ->
+            AudioRouter.ResolvedAction.PLAY_VIA_EARPHONES -> {
                 playAudio(uri, earphoneVol, audioRouter.findEarphoneDevice())
-            AudioRouter.ResolvedAction.PLAY_VIA_SPEAKER ->
+                autoStopJob?.cancel()
+                autoStopJob = serviceScope.launch {
+                    delay(timeoutSeconds * 1000L)
+                    Log.i(TAG, "Earphone timeout reached: $timeoutSeconds s, action=$timeoutAction")
+                    when (timeoutAction) {
+                        TimeoutAction.STOP -> stopAlarm()
+                        TimeoutAction.FALLBACK -> {
+                            releaseMediaPlayer()
+                            fallbackToNoEarphone(uri, speakerVol, noEarphonePref, timeoutSeconds)
+                        }
+                    }
+                }
+            }
+            AudioRouter.ResolvedAction.PLAY_VIA_SPEAKER -> {
                 playAudio(uri, speakerVol, audioRouter.findSpeakerDevice())
-            AudioRouter.ResolvedAction.VIBRATE_ONLY ->
+                autoStopJob?.cancel()
+                autoStopJob = serviceScope.launch {
+                    delay(timeoutSeconds * 1000L)
+                    Log.i(TAG, "Speaker auto-stop after $timeoutSeconds s")
+                    stopAlarm()
+                }
+            }
+            AudioRouter.ResolvedAction.VIBRATE_ONLY -> {
                 startRepeatingVibration()
+                autoStopJob?.cancel()
+                autoStopJob = serviceScope.launch {
+                    delay(timeoutSeconds * 1000L)
+                    Log.i(TAG, "Vibrate auto-stop after $timeoutSeconds s")
+                    stopAlarm()
+                }
+            }
+        }
+    }
+
+    /**
+     * Called after earphone timeout with [TimeoutAction.FALLBACK].
+     * Releases earphone resources and executes the no-earphone route
+     * (vibrate or loudspeaker) with its own auto-stop timer.
+     */
+    private fun fallbackToNoEarphone(
+        uri: Uri,
+        speakerVol: Int,
+        noEarphonePref: NoEarphoneAction,
+        timeoutSeconds: Int
+    ) {
+        Log.i(TAG, "Fallback → no-earphone mode: $noEarphonePref")
+        when (noEarphonePref) {
+            NoEarphoneAction.VIBRATE_ONLY -> startRepeatingVibration()
+            NoEarphoneAction.LOUDSPEAKER ->
+                playAudio(uri, speakerVol, audioRouter.findSpeakerDevice())
+        }
+        autoStopJob?.cancel()
+        autoStopJob = serviceScope.launch {
+            delay(timeoutSeconds * 1000L)
+            Log.i(TAG, "No-earphone fallback auto-stop after $timeoutSeconds s")
+            stopAlarm()
         }
     }
 
@@ -256,7 +314,7 @@ class AlarmAudioService : Service() {
     private fun acquireWakeLock() {
         val pm = getSystemService(POWER_SERVICE) as PowerManager
         wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "SilentAlarm::WakeLock").apply {
-            acquire(10 * 60 * 1000L)
+            acquire(60 * 60 * 1000L) // covers max timeout (30 min) + max system alarm (30 min)
         }
     }
 
@@ -377,6 +435,7 @@ class AlarmAudioService : Service() {
      */
     private fun stopAlarm() {
         Log.i(TAG, "Alarm stopped — transitioning to idle keep-alive")
+        autoStopJob?.cancel(); autoStopJob = null
         releaseMediaPlayer()
         releaseVibrator()
         releaseWakeLock()
