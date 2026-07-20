@@ -5,10 +5,9 @@
 An Android alarm app that **only plays through earphones**, never through speakers — so you never wake others. Built with Kotlin, Jetpack Compose, and aggressive process-keeping to survive OEM killers.
 
 ## Screenshot
-<div class="grid-container">
-  <div class="item"><img src="./pic/sc1.png" width="300" alt="Screenshot"></div>
-  <div class="item"><img src="./pic/sc2.png" width="300" alt="Screenshot"></div>
-</div>
+
+<img src="./pic/sc1.png" width="300" alt="Screenshot">  <img src="./pic/sc2.png" width="300" alt="Screenshot">
+
 
 
 ## Features
