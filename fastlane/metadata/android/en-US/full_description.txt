@@ -1,0 +1,14 @@
+SilentAlarm is an alarm app that only plays through earphones, never through speakers, so you never wake others.
+
+It is built with Kotlin and Jetpack Compose, and uses aggressive process-keeping techniques to survive OEM killers.
+
+Features:
+- Multi-alarm support with one-shot and recurring schedules
+- Earphone-only routing for wired, Bluetooth, and USB headsets
+- Bluetooth wake-up handling to prevent audio truncation
+- Fallback modes for vibration-only or speaker playback when no earphones are connected
+- Separate earphone and speaker volume controls per alarm
+- Custom ringtone selection with persisted storage across reboots
+- Quick Settings tile to toggle all alarms from the control center
+
+SilentAlarm is a privacy-focused alarm clock designed for people who do not want their alarms to play out loud.
