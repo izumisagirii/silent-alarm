@@ -23,11 +23,12 @@ An Android alarm app that **only plays through earphones**, never through speake
 
 Three-layer defense against OEM background killers:
 
-| Layer | Mechanism                                                                           | Effect                                                                         |
-| :---: | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
-|   1   | **AccessibilityService** (**Removed** because it triggers Google Play restrictions) | System binds to our process → near-zero `oom_score_adj`                        |
-|   2   | **Shizuku Privileged Shell**                                                        | `cmd deviceidle whitelist` + `am set-standby-bucket active` → exempt from Doze |
-|   3   | **Watchdog Daemon**                                                                 | Shell script under Shizuku's UID monitors our PID → auto-restart if killed     |
+| Layer | Mechanism                                                                           | Effect                                                                                                 |
+| :---: | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+|   1   | **AccessibilityService** (**Removed** because it triggers Google Play restrictions) | System binds to our process → near-zero `oom_score_adj`                                                |
+|   2   | **Shizuku Privileged Shell**                                                        | `cmd deviceidle whitelist` + `am set-standby-bucket active` → exempt from Doze                         |
+|   3   | **Watchdog Daemon**                                                                 | Shell script under Shizuku's UID monitors our PID → auto-restart if killed                             |
+|   4   | **Foreground Service**                                                              | Android foreground service → keeps the process alive, even when the app is closed or the screen is off |
 
 ## Setup
 

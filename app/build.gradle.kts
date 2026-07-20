@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.silentalarm"
+    namespace = "com.electrowiz.silentalarm"
     compileSdk {
         version = release(36) {
             minorApiLevel = 1
@@ -12,11 +12,11 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.example.silentalarm"
+        applicationId = "com.electrowiz.silentalarm"
         minSdk = 29
         targetSdk = 36
         versionCode = 1
-        versionName = "1.0"
+        versionName = "1.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

@@ -3,19 +3,19 @@
 # reflectively (services, receivers, Shizuku provider).
 
 # Keep all declared Android components (Manifest-registered)
--keep class com.example.silentalarm.service.** { *; }
--keep class com.example.silentalarm.receiver.** { *; }
--keep class com.example.silentalarm.daemon.** { *; }
+-keep class com.electrowiz.silentalarm.service.** { *; }
+-keep class com.electrowiz.silentalarm.receiver.** { *; }
+-keep class com.electrowiz.silentalarm.daemon.** { *; }
 
 # Keep Shizuku provider (loaded reflectively by Shizuku framework)
 -keep class rikka.shizuku.ShizukuProvider { *; }
 -keep class rikka.shizuku.** { *; }
 
 # Keep DataStore serialization classes
--keep class com.example.silentalarm.data.NoEarphoneAction { *; }
+-keep class com.electrowiz.silentalarm.data.NoEarphoneAction { *; }
 
 # Keep AudioRouter enum values (may be referenced by ordinal)
--keep class com.example.silentalarm.util.AudioRouter$* { *; }
+-keep class com.electrowiz.silentalarm.util.AudioRouter$* { *; }
 
 # General Android keep rules
 -keepattributes *Annotation*
