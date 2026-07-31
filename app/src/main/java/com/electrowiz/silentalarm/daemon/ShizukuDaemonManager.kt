@@ -17,7 +17,7 @@ import kotlin.coroutines.resumeWithException
  * ## Shizuku Native Daemon Manager
  *
  * Provides the GKD-style anti-killing mechanisms via Shizuku's [UserService].
- * When Shizuku is running and authorized, this class applies three layers of protection:
+ * When Shizuku is running and authorized, this class applies two layers of protection:
  *
  * ### Layer 1: System-Level Whitelisting
  * Executes `cmd deviceidle whitelist +<package>` and `am set-standby-bucket <package> active`
@@ -27,9 +27,6 @@ import kotlin.coroutines.resumeWithException
  * Spawns a lightweight shell script that runs **inside Shizuku's process** under shell UID.
  * This daemon polls our app's process status every 5 seconds and forcefully revives
  * the AlarmAudioService if the app process is killed.
- *
- * ### Layer 3: Deep Doze Disable
- * Executes `dumpsys deviceidle disable` to aggressively disable Doze behavior.
  *
  * ## Architecture
  * Uses Shizuku's [UserService] pattern via [IShellService] AIDL. The [ShellService]
@@ -48,7 +45,6 @@ class ShizukuDaemonManager(private val context: Context) {
         // Shell command templates (format args: packageName)
         private const val CMD_DEVICEIDLE_WHITELIST = "cmd deviceidle whitelist +%s"
         private const val CMD_STANDBY_BUCKET = "am set-standby-bucket %s active"
-        private const val CMD_DEVICEIDLE_DISABLE = "dumpsys deviceidle disable"
         private const val CMD_START_SERVICE = "am start-foreground-service %s/.service.AlarmAudioService"
     }
 
@@ -99,7 +95,6 @@ class ShizukuDaemonManager(private val context: Context) {
         // Fire-and-forget: each command takes effect immediately at system level
         executePrivileged(CMD_DEVICEIDLE_WHITELIST.format(pkg))
         executePrivileged(CMD_STANDBY_BUCKET.format(pkg))
-        executePrivileged(CMD_DEVICEIDLE_DISABLE)
 
         Log.i(TAG, "Anti-killing tweaks applied")
     }

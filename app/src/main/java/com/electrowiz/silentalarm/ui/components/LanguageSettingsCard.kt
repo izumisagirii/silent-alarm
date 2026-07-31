@@ -52,7 +52,7 @@ fun LanguageSettingsCard(modifier: Modifier = Modifier) {
                     tint = MaterialTheme.colorScheme.primary)
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    stringResource(R.string.ringtone),
+                    stringResource(R.string.language_title),
                     style = MaterialTheme.typography.titleMedium
                 )
             }

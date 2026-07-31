@@ -29,8 +29,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.electrowiz.silentalarm.R
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
 import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
@@ -40,11 +43,25 @@ import kotlin.coroutines.cancellation.CancellationException
 // ── Release Check State ────────────────────────────────────────────────────
 
 private sealed class ReleaseStatus {
-    data object Idle : ReleaseStatus()
     data object Loading : ReleaseStatus()
     data class UpToDate(val version: String) : ReleaseStatus()
     data class UpdateAvailable(val current: String, val latest: String) : ReleaseStatus()
     data class Error(val message: String) : ReleaseStatus()
+}
+
+/**
+ * Keeps the release check process-wide so recomposition or scrolling can't
+ * trigger a second GitHub API call.
+ */
+private object ReleaseCheckManager {
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private var pendingCheck: Deferred<ReleaseStatus>? = null
+
+    @Synchronized
+    fun checkOnce(fetch: () -> ReleaseStatus): Deferred<ReleaseStatus> {
+        pendingCheck?.let { return it }
+        return scope.async { fetch() }.also { pendingCheck = it }
+    }
 }
 
 /**
@@ -53,18 +70,19 @@ private sealed class ReleaseStatus {
  */
 @Composable
 fun GitHubRepoCard(modifier: Modifier = Modifier) {
-    val ctx = LocalContext.current
+    val ctx = LocalContext.current.applicationContext
     val repoUrl = "https://github.com/izumisagirii/silent-alarm"
     val apiUrl = "https://api.github.com/repos/izumisagirii/silent-alarm/releases/latest"
 
-    var releaseStatus by remember { mutableStateOf<ReleaseStatus>(ReleaseStatus.Idle) }
-
-    // Auto-check latest release on first composition
-    LaunchedEffect(Unit) {
-        releaseStatus = ReleaseStatus.Loading
-        releaseStatus = withContext(Dispatchers.IO) {
+    val releaseCheck = remember {
+        ReleaseCheckManager.checkOnce {
             fetchLatestRelease(ctx, apiUrl)
         }
+    }
+    var releaseStatus by remember { mutableStateOf<ReleaseStatus>(ReleaseStatus.Loading) }
+
+    LaunchedEffect(releaseCheck) {
+        releaseStatus = releaseCheck.await()
     }
 
     Card(
@@ -127,7 +145,6 @@ fun GitHubRepoCard(modifier: Modifier = Modifier) {
                         style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.error
                     )
-                is ReleaseStatus.Idle -> { /* nothing until LaunchedEffect fires */ }
             }
 
             Spacer(modifier = Modifier.height(12.dp))
