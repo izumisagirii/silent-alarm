@@ -6,6 +6,7 @@ import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
 import android.util.Log
 import com.electrowiz.silentalarm.R
+import com.electrowiz.silentalarm.data.AlarmScheduler
 import com.electrowiz.silentalarm.data.AlarmPreferences
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -78,8 +79,14 @@ class AlarmTileService : TileService() {
         scope.launch {
             try {
                 val alarms = preferences.getAlarms().first()
+                if (alarms.isEmpty()) {
+                    setTileState(false)
+                    return@launch
+                }
                 val newState = !alarms.any { it.enabled }
                 alarms.forEach { preferences.toggleAlarm(it.id, newState) }
+                val updated = alarms.map { it.copy(enabled = newState) }
+                AlarmScheduler(this@AlarmTileService).reconcile(updated)
                 setTileState(newState)
                 Log.i(TAG, "Master toggle: all alarms ${if (newState) "ON" else "OFF"}")
             } catch (e: Exception) {

@@ -4,12 +4,14 @@ import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.util.Log
 import com.electrowiz.silentalarm.service.AlarmAudioService
 import java.util.Calendar
 
 /**
- * Schedules and cancels exact-alarm triggers via [AlarmManager.setAlarmClock].
+ * Schedules exact-alarm triggers via [AlarmManager.setAlarmClock] and arms
+ * keep-alive recovery alarms via [AlarmManager.setExactAndAllowWhileIdle].
  *
  * Each alarm gets a unique [PendingIntent] via a per-ID request code so
  * individual alarms can be cancelled without affecting others. Uses
@@ -29,8 +31,26 @@ class AlarmScheduler(private val context: Context) {
         /** Action for a test/instant alarm fire. */
         const val ACTION_TEST_ALARM = "com.electrowiz.silentalarm.ACTION_TEST_ALARM"
 
+        /** Action for the keep-alive recovery alarm. */
+        const val ACTION_KEEP_ALIVE = "com.electrowiz.silentalarm.ACTION_KEEP_ALIVE"
+
+        /** Action that stops active playback and/or the idle foreground service. */
+        const val ACTION_STOP_ALARM = "com.electrowiz.silentalarm.ACTION_STOP_ALARM"
+
         /** Intent extra key for the alarm ID. */
         const val EXTRA_ALARM_ID = "alarm_id"
+
+        private const val KEEP_ALIVE_REQUEST_CODE = 8001
+
+        /** Keep-alive heartbeat interval when the app is backgrounded without Shizuku. */
+        private const val KEEP_ALIVE_INTERVAL_MS = 6 * 60 * 60 * 1000L
+
+        /**
+         * Delay used after boot. Android 15+ forbids starting a mediaPlayback
+         * foreground service from BOOT_COMPLETED directly, so we use an exact
+         * alarm to start it instead.
+         */
+        private const val BOOT_RECOVERY_DELAY_MS = 15_000L
     }
 
     private val alarmManager: AlarmManager =
@@ -38,13 +58,37 @@ class AlarmScheduler(private val context: Context) {
 
     // ── Public API ───────────────────────────────────────────────────────
 
+    /** Whether exact alarms can currently be scheduled on this device. */
+    fun canScheduleExactAlarms(): Boolean =
+        Build.VERSION.SDK_INT < Build.VERSION_CODES.S || alarmManager.canScheduleExactAlarms()
+
     /**
-     * Schedule all enabled alarms from [alarms]. Safe to call on every
-     * preference change — old intents are overwritten via FLAG_UPDATE_CURRENT.
+     * Single reconciliation point for alarm state and keep-alive state.
+     *
+     * Cancels stale alarms, schedules enabled ones, and then either arms the
+     * keep-alive recovery alarm or tears the service down when nothing is enabled.
+     *
+     * @param startServiceNow when false, the foreground service is not started
+     * directly. This is used from boot because Android 15+ blocks direct
+     * mediaPlayback foreground-service starts from BOOT_COMPLETED; the recovery
+     * exact alarm starts it a moment later.
      */
-    fun scheduleAll(alarms: List<AlarmItem>) {
-        alarms.filter { it.enabled }.forEach { scheduleOne(it) }
-        Log.i(TAG, "Scheduled ${alarms.count { it.enabled }} of ${alarms.size} alarms")
+    fun reconcile(alarms: List<AlarmItem>, startServiceNow: Boolean = true) {
+        val enabled = alarms.filter { it.enabled }
+        cancelAll(alarms)
+        enabled.forEach { scheduleOne(it) }
+
+        if (enabled.isEmpty()) {
+            cancelKeepAlive()
+            stopAlarm()
+            return
+        }
+
+        val recoveryDelay = if (startServiceNow) KEEP_ALIVE_INTERVAL_MS else BOOT_RECOVERY_DELAY_MS
+        scheduleKeepAlive(recoveryDelay)
+        if (startServiceNow) {
+            startIdleService()
+        }
     }
 
     /**
@@ -52,6 +96,11 @@ class AlarmScheduler(private val context: Context) {
      * building a unique PendingIntent, and calling setAlarmClock.
      */
     fun scheduleOne(item: AlarmItem) {
+        if (!canScheduleExactAlarms()) {
+            Log.w(TAG, "Exact alarm permission missing — cannot schedule '${item.label}'")
+            return
+        }
+
         val triggerEpoch = computeNextFireEpoch(item.hour, item.minute, item.daysOfWeek)
         if (triggerEpoch <= System.currentTimeMillis()) {
             Log.w(TAG, "Alarm '${item.label}' trigger time is in the past — skipping")
@@ -90,13 +139,44 @@ class AlarmScheduler(private val context: Context) {
 
     /**
      * Start [AlarmAudioService] in idle mode (no alarm playback).
-     * Used to keep the foreground service alive for basic process protection
-     * when Shizuku is not available.
+     * Used whenever at least one alarm is enabled.
      */
     fun startIdleService() {
         val intent = Intent(context, AlarmAudioService::class.java)
-        context.startForegroundService(intent)
+        try {
+            context.startForegroundService(intent)
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to start idle service", e)
+        }
         Log.d(TAG, "Idle service started for keep-alive")
+    }
+
+    /**
+     * Arm the keep-alive exact alarm. If the process is killed, this alarm can
+     * still wake the app and restart the foreground service.
+     */
+    fun scheduleKeepAlive(delayMs: Long = KEEP_ALIVE_INTERVAL_MS) {
+        if (!canScheduleExactAlarms()) {
+            Log.w(TAG, "Exact alarm permission missing — keep-alive alarm skipped")
+            return
+        }
+
+        val pi = buildKeepAlivePendingIntent()
+        val triggerAt = System.currentTimeMillis() + delayMs.coerceAtLeast(0L)
+        try {
+            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAt, pi)
+            Log.d(TAG, "Keep-alive alarm armed in ${delayMs / 1000}s")
+        } catch (e: SecurityException) {
+            Log.e(TAG, "SCHEDULE_EXACT_ALARM permission missing", e)
+        }
+    }
+
+    /** Cancel the keep-alive exact alarm. */
+    fun cancelKeepAlive() {
+        val pi = buildKeepAlivePendingIntent()
+        alarmManager.cancel(pi)
+        pi.cancel()
+        Log.d(TAG, "Keep-alive alarm cancelled")
     }
 
     /**
@@ -117,9 +197,13 @@ class AlarmScheduler(private val context: Context) {
      */
     fun stopAlarm() {
         val intent = Intent(context, AlarmAudioService::class.java).apply {
-            action = AlarmAudioService.ACTION_STOP_ALARM
+            action = ACTION_STOP_ALARM
         }
-        context.startService(intent)
+        try {
+            context.startService(intent)
+        } catch (e: Exception) {
+            Log.w(TAG, "Stop intent not delivered (service may not be running)", e)
+        }
         Log.i(TAG, "Stop alarm intent sent")
     }
 
@@ -137,7 +221,21 @@ class AlarmScheduler(private val context: Context) {
             putExtra(EXTRA_ALARM_ID, alarmId)
         }
         val flags = PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        return PendingIntent.getService(context, requestCodeFor(alarmId), intent, flags)
+        return PendingIntent.getForegroundService(context, requestCodeFor(alarmId), intent, flags)
+    }
+
+    /** Build the singleton [PendingIntent] used by the keep-alive exact alarm. */
+    private fun buildKeepAlivePendingIntent(): PendingIntent {
+        val intent = Intent(context, AlarmAudioService::class.java).apply {
+            action = ACTION_KEEP_ALIVE
+        }
+        val flags = PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        return PendingIntent.getForegroundService(
+            context,
+            KEEP_ALIVE_REQUEST_CODE,
+            intent,
+            flags
+        )
     }
 
     /**

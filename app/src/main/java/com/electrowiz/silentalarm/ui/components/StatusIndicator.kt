@@ -18,7 +18,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.electrowiz.silentalarm.R
 
 /**
  * Compact Shizuku status indicator for the dashboard header.
@@ -40,7 +42,8 @@ fun StatusBanner(shizukuOk: Boolean, modifier: Modifier = Modifier) {
         Spacer(modifier = Modifier.size(8.dp).clip(CircleShape).background(color))
         Spacer(modifier = Modifier.width(6.dp))
         Text(
-            text = if (shizukuOk) "Shizuku — protected" else "Shizuku — not available",
+            text = if (shizukuOk) stringResource(R.string.shizuku_protected)
+                   else stringResource(R.string.shizuku_not_available),
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )

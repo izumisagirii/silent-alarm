@@ -36,11 +36,11 @@ class BootReceiver : BroadcastReceiver() {
                 val shizuku = ShizukuDaemonManager(context)
 
                 val alarms = preferences.getAlarms().first()
-                scheduler.scheduleAll(alarms)
-                Log.i(TAG, "Re-scheduled ${alarms.count { it.enabled }} alarms")
-
                 if (alarms.any { it.enabled }) {
-                    scheduler.startIdleService()
+                    scheduler.reconcile(alarms, startServiceNow = false)
+                    Log.i(TAG, "Re-scheduled ${alarms.count { it.enabled }} alarms")
+                } else {
+                    scheduler.cancelKeepAlive()
                 }
 
                 if (shizuku.isShizukuAvailable() && shizuku.isShizukuPermitted()) {

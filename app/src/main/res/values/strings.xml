@@ -1,12 +1,111 @@
 <resources>
     <string name="app_name">SilentAlarm</string>
 
-    <!-- Accessibility Service -->
-    <string name="accessibility_service_description">
-        SilentAlarm uses Accessibility Service to maintain a persistent system-level
-        connection, preventing the OS from killing the alarm process. This does not
-        read or interact with any on-screen content. Your privacy is fully protected.
-    </string>
+    <!-- Dashboard -->
+    <string name="dashboard_title">Earphone Alarm</string>
+    <string name="dashboard_subtitle">Plays through earphones only. Never wakes others.</string>
+    <string name="test_alarm">Test Alarm</string>
+    <string name="stop">Stop</string>
+    <string name="no_alarms">No alarms set. Tap + to add one.</string>
+    <string name="add_alarm">Add alarm</string>
+    <string name="delete_alarm">Delete alarm</string>
+    <string name="edit_alarm">Edit Alarm</string>
+    <string name="new_alarm">New Alarm</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+
+    <!-- Volume and timeout settings -->
+    <string name="volume_settings">Volume Settings</string>
+    <string name="earphone">Earphone</string>
+    <string name="speaker">Speaker</string>
+    <string name="alarm_timeout">Alarm Timeout</string>
+    <string name="duration">Duration</string>
+    <string name="timeout_description">All modes (earphone / vibrate / speaker) share this duration.</string>
+    <string name="after_earphone_timeout">After Earphone Timeout</string>
+    <string name="timeout_fallback_hint">Fallback uses the \"When No Earphones\" setting below.</string>
+    <string name="vibrate_only">Vibrate Only</string>
+    <string name="loudspeaker">Loudspeaker</string>
+    <string name="fallback">Fallback</string>
+    <string name="duration_min">%1$d min</string>
+
+    <!-- No-earphone action -->
+    <string name="no_earphone_title">When No Earphones</string>
+
+    <!-- Ringtone -->
+    <string name="ringtone">Ringtone</string>
+    <string name="custom_ringtone_set">Custom ringtone set</string>
+    <string name="system_default_alarm">System default alarm</string>
+    <string name="pick_ringtone">Pick Ringtone</string>
+
+    <!-- Process keeping -->
+    <string name="process_keeping">Process Keeping</string>
+    <string name="shizuku">Shizuku</string>
+    <string name="shizuku_connected">Connected &amp; Authorized</string>
+    <string name="shizuku_waiting_permission">Waiting for permission</string>
+    <string name="shizuku_not_installed">Not installed</string>
+    <string name="shizuku_install">Install Shizuku</string>
+    <string name="shizuku_authorize">Authorize</string>
+    <string name="disable_battery_optimization">Disable Battery Optimization</string>
+    <string name="shizuku_protected">Shizuku — protected</string>
+    <string name="shizuku_not_available">Shizuku — not available</string>
+    <string name="shizuku_activated">Shizuku connected — anti-kill protection active</string>
+
+    <!-- Language -->
+    <string name="language_title">Language</string>
+    <string-array name="language_tags">
+        <item></item>
+        <item>en</item>
+        <item>zh-CN</item>
+    </string-array>
+    <string-array name="language_names">
+        <item>Follow System</item>
+        <item>English</item>
+        <item>简体中文</item>
+    </string-array>
+
+    <!-- Feedback -->
+    <string name="alarm_set_format">Alarm set for %1$02d:%2$02d</string>
+    <string name="alarm_removed">Alarm removed</string>
+    <string name="test_alarm_triggered">Test alarm triggered</string>
+    <string name="alarm_stopped">Alarm stopped</string>
+
+    <!-- Schedule -->
+    <string name="schedule_one_shot">One-shot</string>
+    <string-array name="day_letters">
+        <item></item>
+        <item>S</item>
+        <item>M</item>
+        <item>T</item>
+        <item>W</item>
+        <item>T</item>
+        <item>F</item>
+        <item>S</item>
+    </string-array>
+    <string-array name="day_names_short">
+        <item></item>
+        <item>Sun</item>
+        <item>Mon</item>
+        <item>Tue</item>
+        <item>Wed</item>
+        <item>Thu</item>
+        <item>Fri</item>
+        <item>Sat</item>
+    </string-array>
+
+    <!-- GitHub release check -->
+    <string name="github">GitHub</string>
+    <string name="github_repo_title">Silent Alarm</string>
+    <string name="github_repo_path">izumisagirii/silent-alarm</string>
+    <string name="checking_updates">Checking for updates…</string>
+    <string name="update_available">A new version is available!</string>
+    <string name="update_version_format">v%1$s  →  v%2$s</string>
+    <string name="up_to_date_format">Already up to date  (v%1$s), please add a star!</string>
+    <string name="check_repo">Check Repo</string>
+    <string name="network_error">No network connection</string>
+    <string name="timeout_error">Request timed out</string>
+    <string name="api_error_format">GitHub API error (%1$d)</string>
+    <string name="no_release_tag">No release tag found</string>
+    <string name="update_error_format">Unable to check updates: %1$s</string>
 
     <!-- Quick Settings Tile -->
     <string name="tile_label">Earphone Alarm</string>
@@ -16,39 +115,10 @@
     <!-- Notification Channels -->
     <string name="notification_channel_alarm">Alarm Service</string>
     <string name="notification_channel_desc">Persistent notification for the alarm foreground service</string>
-    <string name="notification_alarm_active">Alarm is active — monitoring earphones</string>
-
-    <!-- UI Labels -->
-    <string name="label_alarm_time">Alarm Time</string>
-    <string name="label_earphone_volume">Earphone Volume</string>
-    <string name="label_speaker_volume">Speaker Volume</string>
-    <string name="label_no_earphone_action">When No Earphones Connected</string>
-    <string name="label_ringtone">Ringtone</string>
-    <string name="label_pick_ringtone">Pick Ringtone</string>
-    <string name="label_no_ringtone">No ringtone selected</string>
-    <string name="label_status">Status</string>
-    <string name="label_shizuku">Shizuku</string>
-    <string name="label_accessibility">Accessibility Service</string>
-    <string name="label_tile">Quick Settings Tile</string>
-    <string name="label_alarm_enabled">Alarm Enabled</string>
-    <string name="label_alarm_disabled">Alarm Disabled</string>
-    <string name="label_connected">Connected</string>
-    <string name="label_not_connected">Not Connected</string>
-    <string name="label_enabled">Enabled</string>
-    <string name="label_disabled">Disabled</string>
-    <string name="label_installed">Installed</string>
-    <string name="label_not_installed">Add from Quick Settings</string>
-    <string name="label_vibrate_only">Vibrate Only</string>
-    <string name="label_speaker">Loudspeaker</string>
-    <string name="label_save">Save</string>
-    <string name="label_open_accessibility_settings">Open Accessibility Settings</string>
-    <string name="label_open_shizuku">Shizuku Not Available</string>
-
-    <!-- Timeout & Speaker -->
-    <string name="label_alarm_timeout">Alarm Timeout</string>
-    <string name="label_speaker_duration">Speaker Duration</string>
-
-    <!-- Permissions -->
-    <string name="perm_notification_rationale">Notification permission is required to run the alarm service in the background.</string>
-    <string name="perm_exact_alarm_rationale">Exact alarm permission is required to trigger the alarm at the scheduled time.</string>
+    <string name="notification_channel_active">Alarm Playing</string>
+    <string name="notification_channel_active_desc">Shown when the alarm is actively playing</string>
+    <string name="notification_waiting">Waiting for next alarm</string>
+    <string name="notification_alarm_active">Alarm Active</string>
+    <string name="notification_earphones">Playing through earphones</string>
+    <string name="notification_no_earphones">Earphones not detected</string>
 </resources>

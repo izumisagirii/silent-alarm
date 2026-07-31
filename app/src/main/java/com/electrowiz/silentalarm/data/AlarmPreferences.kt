@@ -21,9 +21,9 @@ private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(na
  * Defines what the alarm does when no earphones are detected.
  * Shared across all alarms as a global preference.
  */
-enum class NoEarphoneAction(val displayName: String) {
-    VIBRATE_ONLY("Vibrate Only"),
-    LOUDSPEAKER("Loudspeaker");
+enum class NoEarphoneAction {
+    VIBRATE_ONLY,
+    LOUDSPEAKER;
 
     companion object {
         fun fromOrdinal(ordinal: Int): NoEarphoneAction =
@@ -34,9 +34,9 @@ enum class NoEarphoneAction(val displayName: String) {
 /**
  * What happens when the earphone alarm timeout expires.
  */
-enum class TimeoutAction(val displayName: String) {
-    STOP("Stop"),
-    FALLBACK("Fallback");
+enum class TimeoutAction {
+    STOP,
+    FALLBACK;
 
     companion object {
         fun fromOrdinal(ordinal: Int): TimeoutAction =

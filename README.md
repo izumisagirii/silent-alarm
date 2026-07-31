@@ -2,7 +2,7 @@
 
 [中文](#chinese) | English
 
-An Android alarm app that **only plays through earphones**, never through speakers — so you never wake others. Built with Kotlin, Jetpack Compose, and aggressive process-keeping to survive OEM killers.
+An Android alarm app that plays through earphones when connected, with a configurable vibrate-only or loudspeaker fallback. Built with Kotlin, Jetpack Compose, and a foreground service plus exact-alarm recovery to survive OEM killers.
 
 ## Screenshot
 
@@ -13,23 +13,23 @@ An Android alarm app that **only plays through earphones**, never through speake
 ## Features
 
 - **Multi-alarm** — unlimited alarms, one-shot or recurring (any day of week)
-- **Earphone-only routing** — detects wired/BT/USB earphones, routes audio exclusively
+- **Earphone-first routing** — detects wired/BT/USB earphones and routes audio to them when present
 - **BT wake-up** — 500ms silent preamble prevents Bluetooth audio truncation
 - **Fallback modes** — vibrate-only or speaker when no earphones connected
-- **Per-alarm volume** — separate earphone/speaker volume sliders
+- **Volume settings** — separate global earphone/speaker volume sliders
 - **Custom ringtone** — system file picker, persisted across reboots
 - **Quick Settings Tile** — toggle all alarms from the control center
 
 ##  Keeping Alive
 
-Three-layer defense against OEM background killers:
+Keep-alive strategy against OEM background killers:
 
-| Layer | Mechanism                                                                           | Effect                                                                                                 |
-| :---: | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-|   1   | **AccessibilityService** (**Removed** because it triggers Google Play restrictions) | System binds to our process → near-zero `oom_score_adj`                                                |
-|   2   | **Shizuku Privileged Shell**                                                        | `cmd deviceidle whitelist` + `am set-standby-bucket active` → exempt from Doze                         |
-|   3   | **Watchdog Daemon**                                                                 | Shell script under Shizuku's UID monitors our PID → auto-restart if killed                             |
-|   4   | **Foreground Service**                                                              | Android foreground service → keeps the process alive, even when the app is closed or the screen is off |
+| Layer | Mechanism                  | Effect                                                                 |
+| :---: | -------------------------- | ---------------------------------------------------------------------- |
+|   1   | **Exact Alarm Recovery**   | `setAlarmClock` for real alarms plus `setExactAndAllowWhileIdle` recovery alarm, so the system can wake the app even after the process is killed |
+|   2   | **Foreground Service**     | `mediaPlayback` foreground service keeps the process alive while the app is closed or the screen is off |
+|   3   | **Shizuku (optional)**     | `cmd deviceidle whitelist` + `am set-standby-bucket active` to reduce OEM battery-management interference |
+|   4   | **Watchdog Daemon**        | Shell script under Shizuku's UID monitors the app and restarts the service if it is killed |
 
 ## Setup
 
@@ -43,22 +43,22 @@ Three-layer defense against OEM background killers:
 
 ## TODOs
 
-1. Add keep-alive capability on non-shizuku OS.
+1. Keep-alive recovery on non-Shizuku devices is handled by the exact-alarm recovery path; real-device coverage is still being validated.
 2. ~~Add fallback to simple alarm if not closed manually, in case of missing earphone alarm.~~
 
 ---
 
 ## <a id="chinese"></a>SilentAlarm — 隐私耳机闹钟
 
-一款 **只在耳机中响铃、绝不外放** 的 Android 闹钟应用。Kotlin + Jetpack Compose 构建，利用 shizuku + Foreground Service保活，对抗 OEM 杀进程。
+一款耳机优先响铃的 Android 闹钟应用，无耳机时可按设置选择仅振动或外放。Kotlin + Jetpack Compose 构建，利用精确闹钟恢复 + Foreground Service 保活，对抗 OEM 杀进程。
 
 ### 功能
 
 - **多闹钟** — 无上限，支持单次或每周重复
-- **仅耳机响铃** — 自动检测有线/BT/USB 耳机，音频只路由到耳机
+- **耳机优先响铃** — 自动检测有线/BT/USB 耳机，有耳机时路由到耳机
 - **蓝牙唤醒** — 500ms 静音前导，防止蓝牙音频截断
 - **无耳机策略** — 仅振动 或 扬声器外放
-- **独立音量** — 耳机/扬声器音量分开调节
+- **音量设置** — 耳机/扬声器全局音量分开调节
 - **自定义铃声** — 系统文件选择器
 - **快捷磁贴** — 控制中心磁贴一键开关所有闹钟
 

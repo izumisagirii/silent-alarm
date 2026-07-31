@@ -26,6 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.electrowiz.silentalarm.R
 import kotlinx.coroutines.Dispatchers
@@ -74,15 +75,18 @@ fun GitHubRepoCard(modifier: Modifier = Modifier) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
                     painter = painterResource(R.drawable.github_logo_svgrepo_com),
-                    contentDescription = "GitHub",
+                    contentDescription = stringResource(R.string.github),
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(24.dp)
                 )
                 Spacer(modifier = Modifier.width(12.dp))
                 Column {
-                    Text("Silent Alarm", style = MaterialTheme.typography.titleSmall)
                     Text(
-                        "izumisagirii/silent-alarm",
+                        stringResource(R.string.github_repo_title),
+                        style = MaterialTheme.typography.titleSmall
+                    )
+                    Text(
+                        stringResource(R.string.github_repo_path),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -95,25 +99,25 @@ fun GitHubRepoCard(modifier: Modifier = Modifier) {
             when (val s = releaseStatus) {
                 is ReleaseStatus.Loading ->
                     Text(
-                        "Checking for updates…",
+                        stringResource(R.string.checking_updates),
                         style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 is ReleaseStatus.UpdateAvailable -> {
                     Text(
-                        "A new version is available!",
+                        stringResource(R.string.update_available),
                         style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.primary
                     )
                     Text(
-                        "v${s.current}  →  v${s.latest}",
+                        stringResource(R.string.update_version_format, s.current, s.latest),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
                 is ReleaseStatus.UpToDate ->
                     Text(
-                        "Already up to date  (v${s.version}), please add a star!",
+                        stringResource(R.string.up_to_date_format, s.version),
                         style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -137,7 +141,7 @@ fun GitHubRepoCard(modifier: Modifier = Modifier) {
                         ctx.startActivity(i)
                     },
                 ) {
-                    Text("Check Repo")
+                    Text(stringResource(R.string.check_repo))
                 }
             }
         }
@@ -162,7 +166,9 @@ private fun fetchLatestRelease(context: Context, apiUrl: String): ReleaseStatus 
         val code = connection.responseCode
         if (code != 200) {
             connection.disconnect()
-            return ReleaseStatus.Error("GitHub API error ($code)")
+            return ReleaseStatus.Error(
+                context.getString(R.string.api_error_format, code)
+            )
         }
 
         // read data
@@ -172,7 +178,7 @@ private fun fetchLatestRelease(context: Context, apiUrl: String): ReleaseStatus 
         val json = JSONObject(body)
         val tagName = json.optString("tag_name", "")
         if (tagName.isBlank()) {
-            return ReleaseStatus.Error("No release tag found")
+            return ReleaseStatus.Error(context.getString(R.string.no_release_tag))
         }
 
         val latestVersion = stripVersionPrefix(tagName)
@@ -185,15 +191,17 @@ private fun fetchLatestRelease(context: Context, apiUrl: String): ReleaseStatus 
         }
 
     } catch (e: java.net.UnknownHostException) {
-        ReleaseStatus.Error("No network connection")
+        ReleaseStatus.Error(context.getString(R.string.network_error))
     } catch (e: java.net.SocketTimeoutException) {
-        ReleaseStatus.Error("Request timed out")
+        ReleaseStatus.Error(context.getString(R.string.timeout_error))
     } catch (e: CancellationException) {
         // 向上抛出异常
         throw e
     } catch (e: Exception) {
         e.printStackTrace()
-        ReleaseStatus.Error("Unable to check updates: ${e.localizedMessage}")
+        ReleaseStatus.Error(
+            context.getString(R.string.update_error_format, e.message ?: "")
+        )
     }
 }
 // ── Version helpers ─────────────────────────────────────────────────────────

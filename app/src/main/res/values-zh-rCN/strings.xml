@@ -1,0 +1,124 @@
+<resources>
+    <string name="app_name">SilentAlarm</string>
+
+    <!-- Dashboard -->
+    <string name="dashboard_title">耳机闹钟</string>
+    <string name="dashboard_subtitle">优先通过耳机播放，不会吵醒身边的人。</string>
+    <string name="test_alarm">测试闹钟</string>
+    <string name="stop">停止</string>
+    <string name="no_alarms">还没有闹钟，点击 + 添加一个。</string>
+    <string name="add_alarm">添加闹钟</string>
+    <string name="delete_alarm">删除闹钟</string>
+    <string name="edit_alarm">编辑闹钟</string>
+    <string name="new_alarm">新建闹钟</string>
+    <string name="ok">确定</string>
+    <string name="cancel">取消</string>
+
+    <!-- Volume and timeout settings -->
+    <string name="volume_settings">音量设置</string>
+    <string name="earphone">耳机</string>
+    <string name="speaker">扬声器</string>
+    <string name="alarm_timeout">闹钟时长</string>
+    <string name="duration">时长</string>
+    <string name="timeout_description">耳机、振动和扬声器模式共用这个时长。</string>
+    <string name="after_earphone_timeout">耳机播放结束后</string>
+    <string name="timeout_fallback_hint">备用模式使用下方的“无耳机时”设置。</string>
+    <string name="vibrate_only">仅振动</string>
+    <string name="loudspeaker">扬声器外放</string>
+    <string name="fallback">切换备用模式</string>
+    <string name="duration_min">%1$d 分钟</string>
+
+    <!-- No-earphone action -->
+    <string name="no_earphone_title">无耳机时</string>
+
+    <!-- Ringtone -->
+    <string name="ringtone">铃声</string>
+    <string name="custom_ringtone_set">已设置自定义铃声</string>
+    <string name="system_default_alarm">系统默认闹钟铃声</string>
+    <string name="pick_ringtone">选择铃声</string>
+
+    <!-- Process keeping -->
+    <string name="process_keeping">进程保活</string>
+    <string name="shizuku">Shizuku</string>
+    <string name="shizuku_connected">已连接并授权</string>
+    <string name="shizuku_waiting_permission">等待授权</string>
+    <string name="shizuku_not_installed">未安装</string>
+    <string name="shizuku_install">安装 Shizuku</string>
+    <string name="shizuku_authorize">授权</string>
+    <string name="disable_battery_optimization">关闭电池优化</string>
+    <string name="shizuku_protected">Shizuku — 已保护</string>
+    <string name="shizuku_not_available">Shizuku — 不可用</string>
+    <string name="shizuku_activated">Shizuku 已连接 — 防杀保护已启用</string>
+
+    <!-- Language -->
+    <string name="language_title">语言</string>
+    <string-array name="language_tags">
+        <item></item>
+        <item>en</item>
+        <item>zh-CN</item>
+    </string-array>
+    <string-array name="language_names">
+        <item>跟随系统</item>
+        <item>English</item>
+        <item>简体中文</item>
+    </string-array>
+
+    <!-- Feedback -->
+    <string name="alarm_set_format">闹钟已设为 %1$02d:%2$02d</string>
+    <string name="alarm_removed">闹钟已删除</string>
+    <string name="test_alarm_triggered">测试闹钟已触发</string>
+    <string name="alarm_stopped">闹钟已停止</string>
+
+    <!-- Schedule -->
+    <string name="schedule_one_shot">单次</string>
+    <string-array name="day_letters">
+        <item></item>
+        <item>日</item>
+        <item>一</item>
+        <item>二</item>
+        <item>三</item>
+        <item>四</item>
+        <item>五</item>
+        <item>六</item>
+    </string-array>
+    <string-array name="day_names_short">
+        <item></item>
+        <item>周日</item>
+        <item>周一</item>
+        <item>周二</item>
+        <item>周三</item>
+        <item>周四</item>
+        <item>周五</item>
+        <item>周六</item>
+    </string-array>
+
+    <!-- GitHub release check -->
+    <string name="github">GitHub</string>
+    <string name="github_repo_title">Silent Alarm</string>
+    <string name="github_repo_path">izumisagirii/silent-alarm</string>
+    <string name="checking_updates">正在检查更新…</string>
+    <string name="update_available">发现新版本！</string>
+    <string name="update_version_format">v%1$s  →  v%2$s</string>
+    <string name="up_to_date_format">已是最新版本（v%1$s），欢迎加星！</string>
+    <string name="check_repo">查看仓库</string>
+    <string name="network_error">没有网络连接</string>
+    <string name="timeout_error">请求超时</string>
+    <string name="api_error_format">GitHub API 错误（%1$d）</string>
+    <string name="no_release_tag">没有找到发布标签</string>
+    <string name="update_error_format">无法检查更新：%1$s</string>
+
+    <!-- Quick Settings Tile -->
+    <string name="tile_label">耳机闹钟</string>
+    <string name="tile_active">闹钟已开启</string>
+    <string name="tile_inactive">全部闹钟已关闭</string>
+
+    <!-- Notification Channels -->
+    <string name="notification_channel_alarm">闹钟服务</string>
+    <string name="notification_channel_desc">闹钟前台服务的常驻通知</string>
+    <string name="notification_channel_active">闹钟播放中</string>
+    <string name="notification_channel_active_desc">闹钟正在播放时显示</string>
+    <string name="notification_waiting">等待下一个闹钟</string>
+    <string name="notification_alarm_active">闹钟播放中</string>
+    <string name="notification_earphones">正在通过耳机播放</string>
+    <string name="notification_no_earphones">未检测到耳机</string>
+</resources>

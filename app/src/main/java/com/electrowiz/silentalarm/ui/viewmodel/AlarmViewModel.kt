@@ -11,13 +11,14 @@ import com.electrowiz.silentalarm.data.AlarmPreferences
 import com.electrowiz.silentalarm.data.AlarmScheduler
 import com.electrowiz.silentalarm.data.NoEarphoneAction
 import com.electrowiz.silentalarm.data.TimeoutAction
+import com.electrowiz.silentalarm.R
 import com.electrowiz.silentalarm.service.AlarmTileService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-//import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -87,11 +88,8 @@ class AlarmViewModel(application: Application) : AndroidViewModel(application) {
 
     init {
         refreshStatusFlags()
-        // Keep foreground service alive for basic process protection
         viewModelScope.launch {
-//            if (preferences.getAlarms().first().any { it.enabled }) {
-                scheduler.startIdleService()
-//            }
+            scheduler.reconcile(preferences.getAlarms().first())
         }
     }
 
@@ -119,7 +117,8 @@ class AlarmViewModel(application: Application) : AndroidViewModel(application) {
                     shizukuManager.applyAntiKillingTweaks()
                     shizukuManager.startWatchdogDaemon()
                 }
-                _snackbarMessage.value = "Shizuku connected — anti-kill protection active"
+                _snackbarMessage.value = getApplication<Application>()
+                    .getString(R.string.shizuku_activated)
             }
         }
     }
@@ -137,9 +136,9 @@ class AlarmViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             val item = AlarmItem(hour = hour, minute = minute, label = label)
             preferences.addAlarm(item)
-            scheduler.scheduleOne(item)
-            scheduler.startIdleService()
-            _snackbarMessage.value = "Alarm set for %02d:%02d".format(hour, minute)
+            scheduler.reconcile(preferences.getAlarms().first())
+            _snackbarMessage.value = getApplication<Application>()
+                .getString(R.string.alarm_set_format, hour, minute)
             syncTile()
         }
     }
@@ -147,11 +146,7 @@ class AlarmViewModel(application: Application) : AndroidViewModel(application) {
     fun updateAlarm(updated: AlarmItem) {
         viewModelScope.launch {
             preferences.updateAlarm(updated)
-            scheduler.cancelAlarm(updated.id)
-            if (updated.enabled) {
-                scheduler.scheduleOne(updated)
-                scheduler.startIdleService()
-            }
+            scheduler.reconcile(preferences.getAlarms().first())
             syncTile()
         }
     }
@@ -159,8 +154,8 @@ class AlarmViewModel(application: Application) : AndroidViewModel(application) {
     fun deleteAlarm(alarmId: String) {
         viewModelScope.launch {
             preferences.deleteAlarm(alarmId)
-            scheduler.cancelAlarm(alarmId)
-            _snackbarMessage.value = "Alarm removed"
+            scheduler.reconcile(preferences.getAlarms().first())
+            _snackbarMessage.value = getApplication<Application>().getString(R.string.alarm_removed)
             syncTile()
         }
     }
@@ -168,15 +163,7 @@ class AlarmViewModel(application: Application) : AndroidViewModel(application) {
     fun toggleAlarm(alarmId: String, enabled: Boolean) {
         viewModelScope.launch {
             preferences.toggleAlarm(alarmId, enabled)
-            if (enabled) {
-                val alarm = alarms.value.find { it.id == alarmId }
-                if (alarm != null) {
-                    scheduler.scheduleOne(alarm)
-                    scheduler.startIdleService()
-                }
-            } else {
-                scheduler.cancelAlarm(alarmId)
-            }
+            scheduler.reconcile(preferences.getAlarms().first())
             syncTile()
         }
     }
@@ -200,12 +187,13 @@ class AlarmViewModel(application: Application) : AndroidViewModel(application) {
 
     fun testAlarm() {
         scheduler.scheduleTestAlarm()
-        _snackbarMessage.value = "Test alarm triggered"
+        _snackbarMessage.value = getApplication<Application>()
+            .getString(R.string.test_alarm_triggered)
     }
 
     fun stopAlarm() {
         scheduler.stopAlarm()
-        _snackbarMessage.value = "Alarm stopped"
+        _snackbarMessage.value = getApplication<Application>().getString(R.string.alarm_stopped)
     }
 
     // ── Battery Optimization ─────────────────────────────────────────────
@@ -244,32 +232,17 @@ class AlarmViewModel(application: Application) : AndroidViewModel(application) {
         refreshStatus()
     }
 
-//    /** Manually apply anti-kill tweaks + watchdog (runs off main thread). */
-//    fun applyAntiKillingTweaks() {
-//        if (!shizukuManager.isShizukuAvailable() || !shizukuManager.isShizukuPermitted()) {
-//            _snackbarMessage.value = "Shizuku not available"
-//            return
-//        }
-//        viewModelScope.launch {
-//            withContext(Dispatchers.IO) {
-//                shizukuManager.applyAntiKillingTweaks()
-//                shizukuManager.startWatchdogDaemon()
-//            }
-//            _snackbarMessage.value = "Anti-kill tweaks applied + watchdog started"
-//        }
-//    }
-
     // ── Formatting ───────────────────────────────────────────────────────
 
     fun formatTime(hour: Int, minute: Int): String = "%02d:%02d".format(hour, minute)
 
     fun formatSchedule(item: AlarmItem): String {
-        if (item.daysOfWeek.isEmpty()) return "One-shot"
+        val context = getApplication<Application>()
+        if (item.daysOfWeek.isEmpty()) {
+            return context.getString(R.string.schedule_one_shot)
+        }
+        val dayNames = context.resources.getStringArray(R.array.day_names_short)
         return item.daysOfWeek.sorted()
-            .joinToString(",") { DAY_NAMES.getOrElse(it) { "?" } }
-    }
-
-    companion object {
-        private val DAY_NAMES = arrayOf("", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat")
+            .joinToString(",") { dayNames.getOrElse(it) { "?" } }
     }
 }

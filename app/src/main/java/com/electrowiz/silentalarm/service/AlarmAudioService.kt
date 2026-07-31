@@ -44,7 +44,8 @@ import androidx.core.net.toUri
  * ## Entry Points (via intent actions)
  * - [AlarmScheduler.ACTION_ALARM_TRIGGER] — scheduled alarm from AlarmManager
  * - [AlarmScheduler.ACTION_TEST_ALARM] — instant test fire from UI button
- * - [ACTION_STOP_ALARM] — stop from notification action or UI button
+ * - [AlarmScheduler.ACTION_KEEP_ALIVE] — background recovery alarm
+ * - [AlarmScheduler.ACTION_STOP_ALARM] — stop from notification action or UI button
  *
  * ## Audio Routing
  * 1. Detect earphone-type output devices via [AudioManager.getDevices].
@@ -62,9 +63,6 @@ class AlarmAudioService : Service() {
         private const val NOTIFICATION_ID = 2001
         private const val CHANNEL_IDLE = "alarm_idle_channel"
         private const val CHANNEL_ACTIVE = "alarm_active_channel"
-
-        /** Stop the currently playing alarm. */
-        const val ACTION_STOP_ALARM = "com.wiz.wiz.electrowiz.silentalarm.ACTION_STOP_ALARM"
     }
 
     // ── Dependencies ─────────────────────────────────────────────────────
@@ -79,6 +77,7 @@ class AlarmAudioService : Service() {
     private var vibrator: Vibrator? = null
     private var audioFocusRequest: AudioFocusRequest? = null
     private var autoStopJob: Job? = null
+    private var alarmActive = false
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
@@ -100,29 +99,33 @@ class AlarmAudioService : Service() {
         Log.i(TAG, "onStartCommand action=$action alarmId=$alarmId")
 
         // STOP action: shutdown cleanly, no foreground notification needed
-        if (action == ACTION_STOP_ALARM) {
+        if (action == AlarmScheduler.ACTION_STOP_ALARM) {
             stopAlarm()
-            return START_NOT_STICKY
+            return START_STICKY
         }
 
-        // MUST call startForeground() within 5s of startForegroundService().
-        // Use a minimal silent notification when idle (watchdog revive),
-        // and the richer alarm notification when actually playing.
         val isAlarmAction = action == AlarmScheduler.ACTION_ALARM_TRIGGER ||
                             action == AlarmScheduler.ACTION_TEST_ALARM
 
-        startForeground(NOTIFICATION_ID,
-            if (isAlarmAction) buildActiveNotification() else buildIdleNotification())
-        acquireWakeLock()
-
         if (isAlarmAction) {
+            alarmActive = true
+            // MUST call startForeground() within 5s of startForegroundService().
+            startForeground(NOTIFICATION_ID, buildActiveNotification())
+            acquireWakeLock()
             serviceScope.launch {
                 executeAlarmRoutine()
                 handlePostAlarm(alarmId)
             }
+        } else if (!alarmActive) {
+            startForeground(NOTIFICATION_ID, buildIdleNotification())
+            serviceScope.launch { startIdleKeepAlive() }
+        } else {
+            // A recovery alarm arrived while playback is active; leave the
+            // active notification untouched and only re-arm the recovery alarm.
+            serviceScope.launch { scheduler.scheduleKeepAlive() }
         }
 
-        return START_NOT_STICKY
+        return START_STICKY
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
@@ -133,9 +136,20 @@ class AlarmAudioService : Service() {
         releaseVibrator()
         releaseWakeLock()
         releaseAudioFocus()
+        alarmActive = false
         serviceScope.cancel()
         Log.i(TAG, "Service destroyed — all resources released")
         super.onDestroy()
+    }
+
+    /** Start or refresh the idle keep-alive state when the service is recovered. */
+    private suspend fun startIdleKeepAlive() {
+        val hasEnabled = preferences.getAlarms().first().any { it.enabled }
+        if (hasEnabled) {
+            scheduler.scheduleKeepAlive()
+        } else {
+            stopAlarm()
+        }
     }
 
     // ── Alarm Routine ────────────────────────────────────────────────────
@@ -351,9 +365,9 @@ class AlarmAudioService : Service() {
 
         // Active channel: shows status bar icon + stop action — for alarm playback
         val activeCh = NotificationChannel(CHANNEL_ACTIVE,
-            "Alarm Playing",
+            getString(R.string.notification_channel_active),
             NotificationManager.IMPORTANCE_HIGH).apply {
-            description = "Shown when the alarm is actively playing"
+            description = getString(R.string.notification_channel_active_desc)
             setShowBadge(false)
         }
         nm.createNotificationChannel(activeCh)
@@ -367,7 +381,7 @@ class AlarmAudioService : Service() {
 
         return NotificationCompat.Builder(this, CHANNEL_IDLE)
             .setContentTitle(getString(R.string.app_name))
-            .setContentText("Waiting for next alarm")
+            .setContentText(getString(R.string.notification_waiting))
             .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
             .setOngoing(false)
             .setPriority(NotificationCompat.PRIORITY_MIN)
@@ -378,7 +392,9 @@ class AlarmAudioService : Service() {
     /** Richer notification with stop button shown during alarm playback. */
     private fun buildActiveNotification(): Notification {
         val stopPi = PendingIntent.getService(this, 2002,
-            Intent(this, AlarmAudioService::class.java).apply { action = ACTION_STOP_ALARM },
+            Intent(this, AlarmAudioService::class.java).apply {
+                action = AlarmScheduler.ACTION_STOP_ALARM
+            },
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
 
         val contentPi = PendingIntent.getActivity(this, 2003,
@@ -386,16 +402,22 @@ class AlarmAudioService : Service() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
 
         val subtitle = when (audioRouter.detectOutputType()) {
-            AudioRouter.AudioOutputType.EARPHONES_AVAILABLE -> "Playing through earphones"
-            AudioRouter.AudioOutputType.SPEAKER_ONLY -> "Earphones not detected"
+            AudioRouter.AudioOutputType.EARPHONES_AVAILABLE ->
+                getString(R.string.notification_earphones)
+            AudioRouter.AudioOutputType.SPEAKER_ONLY ->
+                getString(R.string.notification_no_earphones)
         }
 
         // fix stop button not showing
-        val stopIcon = Icon.createWithResource(this, android.R.drawable.ic_media_pause)
-        val stopAction = Notification.Action.Builder(stopIcon, "Stop", stopPi).build()
+        val stopIcon = Icon.createWithResource(this, android.R.drawable.ic_media_ff)
+        val stopAction = Notification.Action.Builder(
+            stopIcon,
+            getString(R.string.stop),
+            stopPi
+        ).build()
 
         return Notification.Builder(this, CHANNEL_ACTIVE)
-            .setContentTitle("Alarm Active")
+            .setContentTitle(getString(R.string.notification_alarm_active))
             .setContentText(subtitle)
             .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
             .setOngoing(true)
@@ -424,6 +446,7 @@ class AlarmAudioService : Service() {
         } else {
             // Recurring: re-schedule for next matching day
             scheduler.scheduleOne(alarm)
+            scheduler.scheduleKeepAlive()
             Log.i(TAG, "Recurring alarm '$alarmId' re-scheduled")
         }
     }
@@ -436,6 +459,7 @@ class AlarmAudioService : Service() {
     private fun stopAlarm() {
         Log.i(TAG, "Alarm stopped — transitioning to idle keep-alive")
         autoStopJob?.cancel(); autoStopJob = null
+        alarmActive = false
         releaseMediaPlayer()
         releaseVibrator()
         releaseWakeLock()
@@ -444,6 +468,7 @@ class AlarmAudioService : Service() {
         serviceScope.launch {
             val hasEnabled = preferences.getAlarms().first().any { it.enabled }
             if (hasEnabled) {
+                scheduler.scheduleKeepAlive()
                 // Update notification to idle — service stays alive
                 startForeground(NOTIFICATION_ID, buildIdleNotification())
             } else {

@@ -36,6 +36,15 @@
         android:theme="@style/Theme.SilentAlarm"
         tools:targetApi="36">
 
+        <service
+            android:name="androidx.appcompat.app.AppLocalesMetadataHolderService"
+            android:enabled="false"
+            android:exported="false">
+            <meta-data
+                android:name="autoStoreLocales"
+                android:value="true" />
+        </service>
+
         <!-- ============================================================ -->
         <!-- Shizuku Content Provider (for Shizuku API binding)           -->
         <!-- ============================================================ -->
@@ -97,8 +106,6 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
-                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
-                <action android:name="com.htc.intent.action.QUICKBOOT_POWERON" />
             </intent-filter>
         </receiver>
 

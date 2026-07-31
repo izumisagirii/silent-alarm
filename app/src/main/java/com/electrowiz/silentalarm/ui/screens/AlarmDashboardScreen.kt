@@ -50,11 +50,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.res.stringArrayResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.electrowiz.silentalarm.R
 import com.electrowiz.silentalarm.data.AlarmItem
 import com.electrowiz.silentalarm.data.NoEarphoneAction
 import com.electrowiz.silentalarm.data.TimeoutAction
 import com.electrowiz.silentalarm.ui.components.GitHubRepoCard
+import com.electrowiz.silentalarm.ui.components.LanguageSettingsCard
 import com.electrowiz.silentalarm.ui.components.StatusBanner
 import com.electrowiz.silentalarm.ui.components.VolumeSlider
 import com.electrowiz.silentalarm.ui.viewmodel.AlarmViewModel
@@ -100,7 +104,10 @@ fun AlarmDashboardScreen(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         floatingActionButton = {
             FloatingActionButton(onClick = { viewModel.showAddTimePicker() }) {
-                Icon(Icons.Default.Add, contentDescription = "Add alarm")
+                Icon(
+                    Icons.Default.Add,
+                    contentDescription = stringResource(R.string.add_alarm)
+                )
             }
         }
     ) { innerPadding ->
@@ -114,8 +121,11 @@ fun AlarmDashboardScreen(
             // ── Header ──────────────────────────────────────────────────
             item {
                 Spacer(modifier = Modifier.height(8.dp))
-                Text("Earphone Alarm", style = MaterialTheme.typography.headlineMedium)
-                Text("Plays through earphones only. Never wakes others.",
+                Text(
+                    stringResource(R.string.dashboard_title),
+                    style = MaterialTheme.typography.headlineMedium
+                )
+                Text(stringResource(R.string.dashboard_subtitle),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
@@ -134,7 +144,7 @@ fun AlarmDashboardScreen(
                     Button(
                         onClick = { viewModel.testAlarm() },
                         modifier = Modifier.weight(1f)
-                    ) { Text("Test Alarm") }
+                    ) { Text(stringResource(R.string.test_alarm)) }
                     Button(
                         onClick = { viewModel.stopAlarm() },
                         modifier = Modifier.weight(1f),
@@ -144,7 +154,7 @@ fun AlarmDashboardScreen(
                     ) {
                         Icon(Icons.Default.Close, contentDescription = null,
                             modifier = Modifier.padding(end = 4.dp))
-                        Text("Stop")
+                        Text(stringResource(R.string.stop))
                     }
                 }
             }
@@ -153,7 +163,7 @@ fun AlarmDashboardScreen(
             if (alarms.isEmpty()) {
                 item {
                     Text(
-                        "No alarms set. Tap + to add one.",
+                        stringResource(R.string.no_alarms),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(vertical = 24.dp)
@@ -180,12 +190,15 @@ fun AlarmDashboardScreen(
             item {
                 Card(modifier = Modifier.fillMaxWidth()) {
                     Column(modifier = Modifier.padding(16.dp)) {
-                        Text("Volume Settings", style = MaterialTheme.typography.titleMedium)
+                        Text(
+                            stringResource(R.string.volume_settings),
+                            style = MaterialTheme.typography.titleMedium
+                        )
                         Spacer(modifier = Modifier.height(8.dp))
-                        VolumeSlider("Earphone", earphoneVolume,
+                        VolumeSlider(stringResource(R.string.earphone), earphoneVolume,
                             onValueChange = { viewModel.setEarphoneVolume(it) })
                         Spacer(modifier = Modifier.height(4.dp))
-                        VolumeSlider("Speaker", speakerVolume,
+                        VolumeSlider(stringResource(R.string.speaker), speakerVolume,
                             onValueChange = { viewModel.setSpeakerVolume(it) })
                     }
                 }
@@ -195,23 +208,32 @@ fun AlarmDashboardScreen(
             item {
                 Card(modifier = Modifier.fillMaxWidth()) {
                     Column(modifier = Modifier.padding(16.dp)) {
-                        Text("Alarm Timeout", style = MaterialTheme.typography.titleMedium)
+                        Text(
+                            stringResource(R.string.alarm_timeout),
+                            style = MaterialTheme.typography.titleMedium
+                        )
                         Spacer(modifier = Modifier.height(8.dp))
                         VolumeSlider(
-                            label = "Duration",
+                            label = stringResource(R.string.duration),
                             value = timeoutSeconds,
                             onValueChange = { viewModel.setTimeoutSeconds((it / 10) * 10) },
                             valueRange = 30f..1800f,
-                            displayText = formatDuration(timeoutSeconds)
+                            displayText = formatDuration(
+                                timeoutSeconds,
+                                stringResource(R.string.duration_min)
+                            )
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            "All modes (earphone / vibrate / speaker) share this duration.",
+                            stringResource(R.string.timeout_description),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Spacer(modifier = Modifier.height(8.dp))
-                        Text("After Earphone Timeout", style = MaterialTheme.typography.titleSmall)
+                        Text(
+                            stringResource(R.string.after_earphone_timeout),
+                            style = MaterialTheme.typography.titleSmall
+                        )
                         TimeoutAction.entries.forEach { action ->
                             Row(
                                 modifier = Modifier
@@ -226,13 +248,16 @@ fun AlarmDashboardScreen(
                             ) {
                                 RadioButton(selected = timeoutAction == action, onClick = null)
                                 Spacer(modifier = Modifier.width(8.dp))
-                                Text(action.displayName, style = MaterialTheme.typography.bodyLarge)
+                                Text(
+                                    timeoutActionLabel(action),
+                                    style = MaterialTheme.typography.bodyLarge
+                                )
                             }
                         }
                         if (timeoutAction == TimeoutAction.FALLBACK) {
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
-                                "Fallback uses the \"When No Earphones\" setting below.",
+                                stringResource(R.string.timeout_fallback_hint),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -245,7 +270,10 @@ fun AlarmDashboardScreen(
             item {
                 Card(modifier = Modifier.fillMaxWidth()) {
                     Column(modifier = Modifier.padding(16.dp)) {
-                        Text("When No Earphones", style = MaterialTheme.typography.titleMedium)
+                        Text(
+                            stringResource(R.string.no_earphone_title),
+                            style = MaterialTheme.typography.titleMedium
+                        )
                         Spacer(modifier = Modifier.height(4.dp))
                         NoEarphoneAction.entries.forEach { action ->
                             Row(
@@ -261,7 +289,10 @@ fun AlarmDashboardScreen(
                             ) {
                                 RadioButton(selected = noEarphoneAction == action, onClick = null)
                                 Spacer(modifier = Modifier.width(8.dp))
-                                Text(action.displayName, style = MaterialTheme.typography.bodyLarge)
+                                Text(
+                                    noEarphoneActionLabel(action),
+                                    style = MaterialTheme.typography.bodyLarge
+                                )
                             }
                         }
                     }
@@ -276,18 +307,24 @@ fun AlarmDashboardScreen(
                             Icon(Icons.Default.PlayArrow, null,
                                 tint = MaterialTheme.colorScheme.primary)
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text("Ringtone", style = MaterialTheme.typography.titleMedium)
+                            Text(
+                                stringResource(R.string.ringtone),
+                                style = MaterialTheme.typography.titleMedium
+                            )
                         }
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            if (globalRingtoneUri.isNotBlank()) "Custom ringtone set"
-                            else "System default alarm",
+                            if (globalRingtoneUri.isNotBlank()) {
+                                stringResource(R.string.custom_ringtone_set)
+                            } else {
+                                stringResource(R.string.system_default_alarm)
+                            },
                             style = MaterialTheme.typography.bodySmall
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Button(
                             onClick = onPickRingtone,
-                        ) { Text("Pick Ringtone") }
+                        ) { Text(stringResource(R.string.pick_ringtone)) }
                     }
                 }
             }
@@ -303,21 +340,26 @@ fun AlarmDashboardScreen(
                             Icon(Icons.Default.Settings, null,
                                 tint = MaterialTheme.colorScheme.primary)
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text("Process Keeping", style = MaterialTheme.typography.titleMedium)
+                            Text(
+                                stringResource(R.string.process_keeping),
+                                style = MaterialTheme.typography.titleMedium
+                            )
                         }
 
                         // ── Row 1: Shizuku ─────────────────────────────────
                         StatusRow(
-                            label = "Shizuku",
+                            label = stringResource(R.string.shizuku),
                             ok = shizukuOk && shizukuPerm,
                             statusText = when {
-                                shizukuOk && shizukuPerm -> "Connected & Authorized"
-                                shizukuOk && !shizukuPerm -> "Waiting for permission"
-                                else -> "Not installed"
+                                shizukuOk && shizukuPerm ->
+                                    stringResource(R.string.shizuku_connected)
+                                shizukuOk && !shizukuPerm ->
+                                    stringResource(R.string.shizuku_waiting_permission)
+                                else -> stringResource(R.string.shizuku_not_installed)
                             },
                             actionText = when {
-                                !shizukuOk -> "Install Shizuku"
-                                !shizukuPerm -> "Authorize"
+                                !shizukuOk -> stringResource(R.string.shizuku_install)
+                                !shizukuPerm -> stringResource(R.string.shizuku_authorize)
                                 else -> null
                             },
                             onAction = when {
@@ -331,10 +373,15 @@ fun AlarmDashboardScreen(
                         TextButton(
                             onClick = { viewModel.requestBatteryExemption() },
                             modifier = Modifier.fillMaxWidth()
-                        ) { Text("Disable Battery Optimization") }
+                        ) {
+                            Text(stringResource(R.string.disable_battery_optimization))
+                        }
                     }
                 }
             }
+
+            // ── Language ────────────────────────────────────────────────
+            item { LanguageSettingsCard() }
 
             // ── GitHub Repo ─────────────────────────────────────────
             item { GitHubRepoCard() }
@@ -355,15 +402,22 @@ fun AlarmDashboardScreen(
 
         AlertDialog(
             onDismissRequest = { viewModel.hideTimePicker() },
-            title = { Text(if (editing != null) "Edit Alarm" else "New Alarm") },
+            title = {
+                Text(
+                    if (editing != null) stringResource(R.string.edit_alarm)
+                    else stringResource(R.string.new_alarm)
+                )
+            },
             text = { TimePicker(state = pickerState) },
             confirmButton = {
                 TextButton(onClick = {
                     viewModel.onTimeSelected(pickerState.hour, pickerState.minute)
-                }) { Text("OK") }
+                }) { Text(stringResource(R.string.ok)) }
             },
             dismissButton = {
-                TextButton(onClick = { viewModel.hideTimePicker() }) { Text("Cancel") }
+                TextButton(onClick = { viewModel.hideTimePicker() }) {
+                    Text(stringResource(R.string.cancel))
+                }
             }
         )
     }
@@ -416,8 +470,6 @@ private fun StatusRow(
 
 // ── Day-of-Week Constants ────────────────────────────────────────────────
 
-/** Single-letter day labels indexed by Calendar.DAY_OF_WEEK (1=Sun..7=Sat). */
-private val DAY_LETTERS = arrayOf("", "S", "M", "T", "W", "T", "F", "S")
 private val ALL_DAYS = 1..7
 
 /**
@@ -426,11 +478,23 @@ private val ALL_DAYS = 1..7
  *   90 → "1:30"
  *  300 → "5 min"
  */
-private fun formatDuration(seconds: Int): String {
+private fun formatDuration(seconds: Int, minuteFormat: String): String {
     val mins = seconds / 60
     val secs = seconds % 60
-    return if (secs == 0) "${mins} min"
+    return if (secs == 0) minuteFormat.format(mins)
     else "${mins}:%02d".format(secs)
+}
+
+@Composable
+private fun timeoutActionLabel(action: TimeoutAction): String = when (action) {
+    TimeoutAction.STOP -> stringResource(R.string.stop)
+    TimeoutAction.FALLBACK -> stringResource(R.string.fallback)
+}
+
+@Composable
+private fun noEarphoneActionLabel(action: NoEarphoneAction): String = when (action) {
+    NoEarphoneAction.VIBRATE_ONLY -> stringResource(R.string.vibrate_only)
+    NoEarphoneAction.LOUDSPEAKER -> stringResource(R.string.loudspeaker)
 }
 
 // ── Day Circle Picker ────────────────────────────────────────────────────
@@ -448,6 +512,8 @@ private fun DayCircleRow(
     onToggleDay: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val dayLetters = stringArrayResource(R.array.day_letters)
+
     Row(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceEvenly
@@ -466,7 +532,7 @@ private fun DayCircleRow(
                     modifier = Modifier.fillMaxSize()
                 ) {
                     Text(
-                        text = DAY_LETTERS[day],
+                        text = dayLetters[day],
                         style = MaterialTheme.typography.labelLarge,
                         color = if (isSelected) MaterialTheme.colorScheme.onPrimary
                                 else MaterialTheme.colorScheme.onSurfaceVariant
@@ -517,7 +583,9 @@ private fun AlarmCard(
                 }
                 Switch(checked = alarm.enabled, onCheckedChange = onToggle)
                 IconButton(onClick = onDelete) {
-                    Icon(Icons.Default.Delete, "Delete alarm",
+                    Icon(
+                        Icons.Default.Delete,
+                        stringResource(R.string.delete_alarm),
                         tint = MaterialTheme.colorScheme.error)
                 }
             }
