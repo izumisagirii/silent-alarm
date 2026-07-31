@@ -72,15 +72,24 @@ class AlarmScheduler(private val context: Context) {
      * directly. This is used from boot because Android 15+ blocks direct
      * mediaPlayback foreground-service starts from BOOT_COMPLETED; the recovery
      * exact alarm starts it a moment later.
+     * @param stopServiceWhenDisabled when false, a disabled one-shot alarm that
+     * is currently ringing is left running. The app startup path uses this so
+     * opening the app while an alarm is active doesn't stop it.
      */
-    fun reconcile(alarms: List<AlarmItem>, startServiceNow: Boolean = true) {
+    fun reconcile(
+        alarms: List<AlarmItem>,
+        startServiceNow: Boolean = true,
+        stopServiceWhenDisabled: Boolean = true
+    ) {
         val enabled = alarms.filter { it.enabled }
         cancelAll(alarms)
         enabled.forEach { scheduleOne(it) }
 
         if (enabled.isEmpty()) {
             cancelKeepAlive()
-            stopAlarm()
+            if (stopServiceWhenDisabled) {
+                stopAlarm()
+            }
             return
         }
 

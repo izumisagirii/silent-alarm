@@ -89,7 +89,10 @@ class AlarmViewModel(application: Application) : AndroidViewModel(application) {
     init {
         refreshStatusFlags()
         viewModelScope.launch {
-            scheduler.reconcile(preferences.getAlarms().first())
+            scheduler.reconcile(
+                preferences.getAlarms().first(),
+                stopServiceWhenDisabled = false
+            )
         }
     }
 

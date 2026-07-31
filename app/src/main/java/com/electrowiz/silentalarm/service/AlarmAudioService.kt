@@ -409,7 +409,7 @@ class AlarmAudioService : Service() {
         }
 
         // fix stop button not showing
-        val stopIcon = Icon.createWithResource(this, android.R.drawable.ic_media_ff)
+        val stopIcon = Icon.createWithResource(this, android.R.drawable.ic_media_pause)
         val stopAction = Notification.Action.Builder(
             stopIcon,
             getString(R.string.stop),
