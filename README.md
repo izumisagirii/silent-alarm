@@ -2,7 +2,7 @@
 
 [中文](#chinese) | English
 
-An Android alarm app that plays through earphones when connected, with a configurable vibrate-only or loudspeaker fallback. Built with Kotlin, Jetpack Compose, and a foreground service plus exact-alarm recovery to survive OEM killers.
+SilentAlarm - An Android alarm app that plays through earphones when connected, with a configurable vibrate-only or loudspeaker fallback. Built with Kotlin, Jetpack Compose, and a foreground service plus exact-alarm recovery to survive OEM killers.
 
 ## Screenshot
 
