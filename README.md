@@ -2,7 +2,7 @@
 
 [中文](#chinese) | English
 
-An Android alarm app that plays through earphones when connected, with a configurable vibrate-only or loudspeaker fallback. Built with Kotlin, Jetpack Compose, and a foreground service plus exact-alarm recovery to survive OEM killers.
+SilentAlarm - An Android alarm app that plays through earphones when connected, with a configurable vibrate-only or loudspeaker fallback. Built with Kotlin, Jetpack Compose, and a foreground service plus exact-alarm recovery to survive OEM killers.
 
 ## Screenshot
 
@@ -33,7 +33,7 @@ Keep-alive strategy against OEM background killers:
 
 ## Setup
 
-1. Install [Shizuku](https://shizuku.rikka.app/) or a fork like [thedjchi/Shizuku](https://github.com/thedjchi/Shizuku)
+1. Install [Shizuku](https://shizuku.rikka.app/) or a fork like [thedjchi/Shizuku](https://github.com/thedjchi/Shizuku) (Optional)
 2. Open SilentAlarm and follow the guided setup to enable process-keeping features.
 
 ## Build
@@ -43,7 +43,7 @@ Keep-alive strategy against OEM background killers:
 
 ## TODOs
 
-1. Keep-alive recovery on non-Shizuku devices is handled by the exact-alarm recovery path; real-device coverage is still being validated.
+1. ~~Keep-alive recovery on non-Shizuku devices is handled by the exact-alarm recovery path; real-device coverage is still being validated.~~
 2. ~~Add fallback to simple alarm if not closed manually, in case of missing earphone alarm.~~
 
 ---
@@ -65,5 +65,5 @@ Keep-alive strategy against OEM background killers:
 
 ### 使用指导
 
-1. 安装并配置 [Shizuku](https://shizuku.rikka.app/) 或者 [Shizuku fork](https://github.com/thedjchi/Shizuku)
+1. 安装并配置 [Shizuku](https://shizuku.rikka.app/) 或者 [Shizuku fork](https://github.com/thedjchi/Shizuku) (可选)
 2. 打开 SilentAlarm ，根据引导启用保活功能
