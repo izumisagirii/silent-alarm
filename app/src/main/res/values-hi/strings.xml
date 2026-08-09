@@ -1,0 +1,109 @@
+<resources>
+    <string name="app_name">SilentAlarm</string>
+
+    <string name="dashboard_title">इयरफ़ोन अलार्म</string>
+    <string name="dashboard_subtitle">सिर्फ़ इयरफ़ोन से बजता है। किसी और को नहीं जगाता।</string>
+    <string name="test_alarm">अलार्म टेस्ट</string>
+    <string name="stop">रोकें</string>
+    <string name="no_alarms">कोई अलार्म सेट नहीं है। जोड़ने के लिए + पर टैप करें।</string>
+    <string name="add_alarm">अलार्म जोड़ें</string>
+    <string name="delete_alarm">अलार्म हटाएं</string>
+    <string name="edit_alarm">अलार्म संपादित करें</string>
+    <string name="new_alarm">नया अलार्म</string>
+    <string name="ok">ठीक है</string>
+    <string name="cancel">रद्द करें</string>
+
+    <string name="volume_settings">वॉल्यूम सेटिंग</string>
+    <string name="earphone">इयरफ़ोन</string>
+    <string name="speaker">स्पीकर</string>
+    <string name="alarm_timeout">अलार्म अवधि</string>
+    <string name="duration">अवधि</string>
+    <string name="timeout_description">सभी मोड (इयरफ़ोन, वाइब्रेशन, स्पीकर) इसी अवधि का उपयोग करते हैं।</string>
+    <string name="after_earphone_timeout">इयरफ़ोन समय समाप्त होने के बाद</string>
+    <string name="timeout_fallback_hint">बैकअप मोड नीचे दिए गए “इयरफ़ोन नहीं” सेटिंग का उपयोग करता है।</string>
+    <string name="vibrate_only">सिर्फ़ वाइब्रेट करें</string>
+    <string name="loudspeaker">स्पीकर</string>
+    <string name="fallback">बैकअप मोड पर जाएं</string>
+    <string name="duration_min">%1$d मिनट</string>
+
+    <string name="no_earphone_title">इयरफ़ोन नहीं</string>
+
+    <string name="ringtone">रिंगटोन</string>
+    <string name="custom_ringtone_set">कस्टम रिंगटोन सेट है</string>
+    <string name="system_default_alarm">सिस्टम डिफ़ॉल्ट अलार्म</string>
+    <string name="pick_ringtone">रिंगटोन चुनें</string>
+
+    <string name="process_keeping">प्रोसेस सुरक्षा</string>
+    <string name="exact_alarm">सटीक अलार्म</string>
+    <string name="exact_alarm_allowed">अनुमति है</string>
+    <string name="exact_alarm_denied">अनुमति नहीं है</string>
+    <string name="exact_alarm_request">चालू करें</string>
+    <string name="shizuku">Shizuku</string>
+    <string name="shizuku_connected">कनेक्टेड और अधिकृत</string>
+    <string name="shizuku_waiting_permission">अनुमति की प्रतीक्षा है</string>
+    <string name="shizuku_not_installed">इंस्टॉल नहीं है</string>
+    <string name="shizuku_install">Shizuku इंस्टॉल करें</string>
+    <string name="shizuku_authorize">अधिकृत करें</string>
+    <string name="disable_battery_optimization">बैटरी ऑप्टिमाइज़ेशन बंद करें</string>
+    <string name="shizuku_activated">Shizuku कनेक्टेड, प्रोसेस सुरक्षा सक्रिय</string>
+
+    <string name="language_title">भाषा</string>
+    <string name="follow_system">सिस्टम के अनुसार</string>
+    <string name="search_languages">भाषा खोजें</string>
+    <string name="no_languages_found">कोई भाषा नहीं मिली</string>
+
+    <string name="alarm_set_format">अलार्म %1$02d:%2$02d पर सेट हुआ</string>
+    <string name="alarm_removed">अलार्म हटा दिया गया</string>
+    <string name="test_alarm_triggered">टेस्ट अलार्म बजाया गया</string>
+    <string name="alarm_stopped">अलार्म रोक दिया गया</string>
+
+    <string name="schedule_one_shot">एक बार</string>
+
+    <string-array name="day_letters">
+        <item></item>
+        <item>र</item>
+        <item>सो</item>
+        <item>मं</item>
+        <item>बु</item>
+        <item>गु</item>
+        <item>शु</item>
+        <item>श</item>
+    </string-array>
+    <string-array name="day_names_short">
+        <item></item>
+        <item>रवि</item>
+        <item>सोम</item>
+        <item>मंगल</item>
+        <item>बुध</item>
+        <item>गुरु</item>
+        <item>शुक्र</item>
+        <item>शनि</item>
+    </string-array>
+
+    <string name="github">GitHub</string>
+    <string name="github_repo_title">Silent Alarm</string>
+    <string name="github_repo_path">izumisagirii/silent-alarm</string>
+    <string name="checking_updates">अपडेट जांचे जा रहे हैं…</string>
+    <string name="update_available">नया संस्करण उपलब्ध है!</string>
+    <string name="update_version_format">v%1$s → v%2$s</string>
+    <string name="up_to_date_format">पहले से नवीनतम है (v%1$s), कृपया स्टार जोड़ें!</string>
+    <string name="check_repo">रिपॉज़िटरी देखें</string>
+    <string name="network_error">नेटवर्क कनेक्शन नहीं है</string>
+    <string name="timeout_error">अनुरोध समय समाप्त</string>
+    <string name="api_error_format">GitHub API त्रुटि (%1$d)</string>
+    <string name="no_release_tag">कोई रिलीज़ टैग नहीं मिला</string>
+    <string name="update_error_format">अपडेट जांचा नहीं जा सका: %1$s</string>
+
+    <string name="tile_label">इयरफ़ोन अलार्म</string>
+    <string name="tile_active">अलार्म चालू हैं</string>
+    <string name="tile_inactive">सभी अलार्म बंद हैं</string>
+
+    <string name="notification_channel_alarm">अलार्म सेवा</string>
+    <string name="notification_channel_desc">अलार्म फोरग्राउंड सेवा की लगातार सूचना</string>
+    <string name="notification_channel_active">अलार्म बज रहा है</string>
+    <string name="notification_channel_active_desc">अलार्म बजने पर दिखाई देती है</string>
+    <string name="notification_waiting">अगले अलार्म की प्रतीक्षा</string>
+    <string name="notification_alarm_active">अलार्म सक्रिय</string>
+    <string name="notification_earphones">इयरफ़ोन से बज रहा है</string>
+    <string name="notification_no_earphones">इयरफ़ोन नहीं मिला</string>
+</resources>

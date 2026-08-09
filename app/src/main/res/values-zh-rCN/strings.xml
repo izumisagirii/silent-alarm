@@ -39,6 +39,10 @@
 
     <!-- Process keeping -->
     <string name="process_keeping">进程保活</string>
+    <string name="exact_alarm">精确闹钟</string>
+    <string name="exact_alarm_allowed">已允许</string>
+    <string name="exact_alarm_denied">未允许</string>
+    <string name="exact_alarm_request">开启</string>
     <string name="shizuku">Shizuku</string>
     <string name="shizuku_connected">已连接并授权</string>
     <string name="shizuku_waiting_permission">等待授权</string>
@@ -46,22 +50,13 @@
     <string name="shizuku_install">安装 Shizuku</string>
     <string name="shizuku_authorize">授权</string>
     <string name="disable_battery_optimization">关闭电池优化</string>
-    <string name="shizuku_protected">Shizuku — 已保护</string>
-    <string name="shizuku_not_available">Shizuku — 不可用</string>
     <string name="shizuku_activated">Shizuku 已连接 — 防杀保护已启用</string>
 
     <!-- Language -->
     <string name="language_title">语言</string>
-    <string-array name="language_tags">
-        <item></item>
-        <item>en</item>
-        <item>zh-CN</item>
-    </string-array>
-    <string-array name="language_names">
-        <item>跟随系统</item>
-        <item>English</item>
-        <item>简体中文</item>
-    </string-array>
+    <string name="follow_system">跟随系统</string>
+    <string name="search_languages">搜索语言</string>
+    <string name="no_languages_found">未找到语言</string>
 
     <!-- Feedback -->
     <string name="alarm_set_format">闹钟已设为 %1$02d:%2$02d</string>

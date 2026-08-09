@@ -78,6 +78,7 @@ class AlarmAudioService : Service() {
     private var audioFocusRequest: AudioFocusRequest? = null
     private var autoStopJob: Job? = null
     private var alarmActive = false
+    private val defaultAlarmUri = android.provider.Settings.System.DEFAULT_ALARM_ALERT_URI
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
@@ -241,14 +242,44 @@ class AlarmAudioService : Service() {
      *
      * Two-phase playback:
      * 1. 500ms silent WAV wakes the Bluetooth/DAC pipeline (prevents truncation).
-     * 2. On completion, loop the user's ringtone indefinitely.
+     * 2. On completion, loop the user's ringtone; fall back to the system
+     *    default alarm sound if the custom source cannot be played.
      */
     private fun playAudio(ringtoneUri: Uri, volumePercent: Int, preferredDevice: AudioDeviceInfo?) {
         val max = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
         audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, (max * volumePercent / 100).coerceIn(0, max), 0)
         requestAudioFocus()
 
-        mediaPlayer = MediaPlayer().apply {
+        val silentUri = "android.resource://${packageName}/${R.raw.silent_500ms}".toUri()
+        val warmUpPlayer = try {
+            prepareMediaPlayer(silentUri, preferredDevice)
+        } catch (e: Exception) {
+            Log.e(TAG, "Silent warm-up failed, using default alarm directly", e)
+            mediaPlayer = startLoopingPlayer(defaultAlarmUri, preferredDevice, allowDefaultFallback = false)
+            return
+        }
+
+        mediaPlayer = warmUpPlayer
+        warmUpPlayer.setOnCompletionListener { completed ->
+            completed.release()
+            mediaPlayer = startLoopingPlayer(ringtoneUri, preferredDevice, allowDefaultFallback = true)
+        }
+        try {
+            warmUpPlayer.start()
+        } catch (e: Exception) {
+            Log.e(TAG, "Silent warm-up start failed, using default alarm directly", e)
+            warmUpPlayer.release()
+            mediaPlayer = startLoopingPlayer(defaultAlarmUri, preferredDevice, allowDefaultFallback = false)
+        }
+    }
+
+    /**
+     * Build a fully configured MediaPlayer and leave it Prepared. Audio
+     * attributes, wake mode, and the preferred routing device are applied
+     * before [MediaPlayer.prepare], per the MediaPlayer state machine.
+     */
+    private fun prepareMediaPlayer(uri: Uri, preferredDevice: AudioDeviceInfo?): MediaPlayer =
+        MediaPlayer().apply {
             setAudioAttributes(AudioAttributes.Builder()
                 .setUsage(AudioAttributes.USAGE_MEDIA)
                 .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
@@ -257,38 +288,37 @@ class AlarmAudioService : Service() {
                 setPreferredDevice(preferredDevice)
             }
             setWakeMode(this@AlarmAudioService, PowerManager.PARTIAL_WAKE_LOCK)
-            setDataSource(this@AlarmAudioService,
-                "android.resource://${packageName}/${R.raw.silent_500ms}".toUri())
+            setDataSource(this@AlarmAudioService, uri)
             prepare()
-
-            setOnCompletionListener { mp ->
-                mp.reset()
-                try {
-                    mp.setDataSource(this@AlarmAudioService, ringtoneUri)
-                    mp.prepare(); mp.isLooping = true; mp.start()
-                } catch (e: Exception) {
-                    Log.e(TAG, "Ringtone failed, falling back to default alarm", e)
-                    fallbackToDefaultAlarm(mp)
-                }
-            }
-            start()
         }
-    }
 
-    /** Fall back to the system default alarm sound. */
-    private fun fallbackToDefaultAlarm(mp: MediaPlayer) {
+    /**
+     * Prepare, loop, and start [uri]. If [uri] is a custom ringtone and it
+     * cannot be prepared, fall back to the system default alarm sound.
+     */
+    private fun startLoopingPlayer(
+        uri: Uri,
+        preferredDevice: AudioDeviceInfo?,
+        allowDefaultFallback: Boolean
+    ): MediaPlayer? {
         try {
-            mp.reset()
-            mp.setDataSource(this, android.provider.Settings.System.DEFAULT_ALARM_ALERT_URI)
-            mp.prepare(); mp.isLooping = true; mp.start()
+            return prepareMediaPlayer(uri, preferredDevice).apply {
+                isLooping = true
+                start()
+            }
         } catch (e: Exception) {
-            Log.e(TAG, "Default alarm also failed", e)
+            Log.e(TAG, "Failed to play ${if (uri == defaultAlarmUri) "default alarm" else "custom ringtone"}", e)
+            if (allowDefaultFallback && uri != defaultAlarmUri) {
+                Log.w(TAG, "Custom ringtone unavailable, using default alarm")
+                return startLoopingPlayer(defaultAlarmUri, preferredDevice, allowDefaultFallback = false)
+            }
+            return null
         }
     }
 
     private fun resolveRingtoneUri(stored: String): Uri =
         stored.takeIf { it.isNotBlank() }?.toUri()
-            ?: android.provider.Settings.System.DEFAULT_ALARM_ALERT_URI
+            ?: defaultAlarmUri
 
     /** Request transient audio focus for alarm playback. */
     private fun requestAudioFocus() {

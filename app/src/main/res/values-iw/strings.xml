@@ -1,0 +1,109 @@
+<resources>
+    <string name="app_name">SilentAlarm</string>
+
+    <string name="dashboard_title">שעון מעורר עם אוזניות</string>
+    <string name="dashboard_subtitle">מנגן רק דרך אוזניות. לא מעיר אחרים.</string>
+    <string name="test_alarm">בדיקה</string>
+    <string name="stop">עצור</string>
+    <string name="no_alarms">אין שעון מעורר מוגדר. הקש + כדי להוסיף.</string>
+    <string name="add_alarm">הוסף שעון מעורר</string>
+    <string name="delete_alarm">מחק שעון מעורר</string>
+    <string name="edit_alarm">ערוך שעון מעורר</string>
+    <string name="new_alarm">שעון מעורר חדש</string>
+    <string name="ok">אישור</string>
+    <string name="cancel">ביטול</string>
+
+    <string name="volume_settings">הגדרות עוצמת קול</string>
+    <string name="earphone">אוזניות</string>
+    <string name="speaker">רמקול</string>
+    <string name="alarm_timeout">משך השעון המעורר</string>
+    <string name="duration">משך</string>
+    <string name="timeout_description">כל המצבים (אוזניות, רטט, רמקול) חולקים את משך הזמן הזה.</string>
+    <string name="after_earphone_timeout">אחרי סיום זמן האוזניות</string>
+    <string name="timeout_fallback_hint">מצב הגיבוי משתמש בהגדרה „אין אוזניות” למטה.</string>
+    <string name="vibrate_only">רטט בלבד</string>
+    <string name="loudspeaker">רמקול</string>
+    <string name="fallback">שימוש במצב גיבוי</string>
+    <string name="duration_min">%1$d דק׳</string>
+
+    <string name="no_earphone_title">אין אוזניות</string>
+
+    <string name="ringtone">צלצול</string>
+    <string name="custom_ringtone_set">הוגדר צלצול מותאם אישית</string>
+    <string name="system_default_alarm">צליל המעורר המוגדר כברירת מחדל</string>
+    <string name="pick_ringtone">בחירת צלצול</string>
+
+    <string name="process_keeping">שמירה על התהליך</string>
+    <string name="exact_alarm">שעון מעורר מדויק</string>
+    <string name="exact_alarm_allowed">מותר</string>
+    <string name="exact_alarm_denied">לא מותר</string>
+    <string name="exact_alarm_request">הפעל</string>
+    <string name="shizuku">Shizuku</string>
+    <string name="shizuku_connected">מחובר ומורשה</string>
+    <string name="shizuku_waiting_permission">ממתין להרשאה</string>
+    <string name="shizuku_not_installed">לא מותקן</string>
+    <string name="shizuku_install">התקנת Shizuku</string>
+    <string name="shizuku_authorize">אישור</string>
+    <string name="disable_battery_optimization">השבתת אופטימיזציית סוללה</string>
+    <string name="shizuku_activated">Shizuku מחובר, הגנת התהליך פעילה</string>
+
+    <string name="language_title">שפה</string>
+    <string name="follow_system">עקוב אחרי המערכת</string>
+    <string name="search_languages">חיפוש שפה</string>
+    <string name="no_languages_found">לא נמצאו שפות</string>
+
+    <string name="alarm_set_format">השעון המעורר הוגדר לשעה %1$02d:%2$02d</string>
+    <string name="alarm_removed">השעון המעורר הוסר</string>
+    <string name="test_alarm_triggered">שעון המעורר לבדיקה הופעל</string>
+    <string name="alarm_stopped">השעון המעורר הופסק</string>
+
+    <string name="schedule_one_shot">פעם אחת</string>
+
+    <string-array name="day_letters">
+        <item></item>
+        <item>א</item>
+        <item>ב</item>
+        <item>ג</item>
+        <item>ד</item>
+        <item>ה</item>
+        <item>ו</item>
+        <item>ש</item>
+    </string-array>
+    <string-array name="day_names_short">
+        <item></item>
+        <item>ראשון</item>
+        <item>שני</item>
+        <item>שלישי</item>
+        <item>רביעי</item>
+        <item>חמישי</item>
+        <item>שישי</item>
+        <item>שבת</item>
+    </string-array>
+
+    <string name="github">GitHub</string>
+    <string name="github_repo_title">Silent Alarm</string>
+    <string name="github_repo_path">izumisagirii/silent-alarm</string>
+    <string name="checking_updates">בודק עדכונים…</string>
+    <string name="update_available">קיים גרסה חדשה!</string>
+    <string name="update_version_format">v%1$s ← v%2$s</string>
+    <string name="up_to_date_format">כבר מעודכן (v%1$s), הוסף כוכב!</string>
+    <string name="check_repo">צפייה במאגר</string>
+    <string name="network_error">אין חיבור לרשת</string>
+    <string name="timeout_error">הבקשה עברה את מגבלת הזמן</string>
+    <string name="api_error_format">שגיאת GitHub API (%1$d)</string>
+    <string name="no_release_tag">לא נמצאה תגית שחרור</string>
+    <string name="update_error_format">לא ניתן לבדוק עדכונים: %1$s</string>
+
+    <string name="tile_label">שעון מעורר עם אוזניות</string>
+    <string name="tile_active">השעונים המעוררים מופעלים</string>
+    <string name="tile_inactive">כל השעונים המעוררים כבויים</string>
+
+    <string name="notification_channel_alarm">שירות שעון מעורר</string>
+    <string name="notification_channel_desc">התראה קבועה לשירות הרקע של השעון המעורר</string>
+    <string name="notification_channel_active">השעון המעורר מנגן</string>
+    <string name="notification_channel_active_desc">מוצג כשהשעון המעורר מנגן</string>
+    <string name="notification_waiting">ממתין לשעון המעורר הבא</string>
+    <string name="notification_alarm_active">שעון מעורר פעיל</string>
+    <string name="notification_earphones">מנגן דרך אוזניות</string>
+    <string name="notification_no_earphones">לא זוהו אוזניות</string>
+</resources>

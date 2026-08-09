@@ -66,6 +66,9 @@ class AlarmViewModel(application: Application) : AndroidViewModel(application) {
 
     // ── System Status (polled) ───────────────────────────────────────────
 
+    private val _exactAlarmAllowed = MutableStateFlow(scheduler.canScheduleExactAlarms())
+    val exactAlarmAllowed: StateFlow<Boolean> = _exactAlarmAllowed.asStateFlow()
+
     private val _shizukuConnected = MutableStateFlow(false)
     val shizukuConnected: StateFlow<Boolean> = _shizukuConnected.asStateFlow()
 
@@ -100,8 +103,21 @@ class AlarmViewModel(application: Application) : AndroidViewModel(application) {
 
     /** Fast (non-blocking) status read — safe for init/onResume. */
     private fun refreshStatusFlags() {
+        val wasExactAlarmAllowed = _exactAlarmAllowed.value
+        _exactAlarmAllowed.value = scheduler.canScheduleExactAlarms()
         _shizukuConnected.value = shizukuManager.isShizukuAvailable()
         _shizukuPermitted.value = shizukuManager.isShizukuPermitted()
+
+        // AlarmManager deletes exact alarms when the permission is revoked, so
+        // re-arm after the user grants it through system settings.
+        if (!wasExactAlarmAllowed && _exactAlarmAllowed.value) {
+            viewModelScope.launch {
+                scheduler.reconcile(
+                    preferences.getAlarms().first(),
+                    stopServiceWhenDisabled = false
+                )
+            }
+        }
     }
 
     /**

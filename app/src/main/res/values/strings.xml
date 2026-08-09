@@ -39,6 +39,10 @@
 
     <!-- Process keeping -->
     <string name="process_keeping">Process Keeping</string>
+    <string name="exact_alarm">Exact Alarm</string>
+    <string name="exact_alarm_allowed">Allowed</string>
+    <string name="exact_alarm_denied">Not allowed</string>
+    <string name="exact_alarm_request">Enable</string>
     <string name="shizuku">Shizuku</string>
     <string name="shizuku_connected">Connected &amp; Authorized</string>
     <string name="shizuku_waiting_permission">Waiting for permission</string>
@@ -46,22 +50,13 @@
     <string name="shizuku_install">Install Shizuku</string>
     <string name="shizuku_authorize">Authorize</string>
     <string name="disable_battery_optimization">Disable Battery Optimization</string>
-    <string name="shizuku_protected">Shizuku — protected</string>
-    <string name="shizuku_not_available">Shizuku — not available</string>
     <string name="shizuku_activated">Shizuku connected — anti-kill protection active</string>
 
     <!-- Language -->
     <string name="language_title">Language</string>
-    <string-array name="language_tags">
-        <item></item>
-        <item>en</item>
-        <item>zh-CN</item>
-    </string-array>
-    <string-array name="language_names">
-        <item>Follow System</item>
-        <item>English</item>
-        <item>简体中文</item>
-    </string-array>
+    <string name="follow_system">Follow System</string>
+    <string name="search_languages">Search languages</string>
+    <string name="no_languages_found">No languages found</string>
 
     <!-- Feedback -->
     <string name="alarm_set_format">Alarm set for %1$02d:%2$02d</string>

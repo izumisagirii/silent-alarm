@@ -1,0 +1,109 @@
+<resources>
+    <string name="app_name">SilentAlarm</string>
+
+    <string name="dashboard_title">Báo thức tai nghe</string>
+    <string name="dashboard_subtitle">Chỉ phát qua tai nghe. Không đánh thức người khác.</string>
+    <string name="test_alarm">Thử báo thức</string>
+    <string name="stop">Dừng</string>
+    <string name="no_alarms">Chưa có báo thức nào. Chạm + để thêm.</string>
+    <string name="add_alarm">Thêm báo thức</string>
+    <string name="delete_alarm">Xóa báo thức</string>
+    <string name="edit_alarm">Sửa báo thức</string>
+    <string name="new_alarm">Báo thức mới</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Hủy</string>
+
+    <string name="volume_settings">Cài đặt âm lượng</string>
+    <string name="earphone">Tai nghe</string>
+    <string name="speaker">Loa</string>
+    <string name="alarm_timeout">Thời lượng báo thức</string>
+    <string name="duration">Thời lượng</string>
+    <string name="timeout_description">Mọi chế độ (tai nghe, rung, loa) dùng chung thời lượng này.</string>
+    <string name="after_earphone_timeout">Sau khi hết thời gian tai nghe</string>
+    <string name="timeout_fallback_hint">Chế độ dự phòng dùng cài đặt “Không có tai nghe” bên dưới.</string>
+    <string name="vibrate_only">Chỉ rung</string>
+    <string name="loudspeaker">Lo ngoài</string>
+    <string name="fallback">Dùng chế độ dự phòng</string>
+    <string name="duration_min">%1$d phút</string>
+
+    <string name="no_earphone_title">Không có tai nghe</string>
+
+    <string name="ringtone">Nhạc chuông</string>
+    <string name="custom_ringtone_set">Đã đặt nhạc chuông tùy chỉnh</string>
+    <string name="system_default_alarm">Nhạc báo thức mặc định của hệ thống</string>
+    <string name="pick_ringtone">Chọn nhạc chuông</string>
+
+    <string name="process_keeping">Giữ tiến trình</string>
+    <string name="exact_alarm">Báo thức chính xác</string>
+    <string name="exact_alarm_allowed">Được phép</string>
+    <string name="exact_alarm_denied">Không được phép</string>
+    <string name="exact_alarm_request">Bật</string>
+    <string name="shizuku">Shizuku</string>
+    <string name="shizuku_connected">Đã kết nối và cấp quyền</string>
+    <string name="shizuku_waiting_permission">Đang chờ quyền</string>
+    <string name="shizuku_not_installed">Chưa cài đặt</string>
+    <string name="shizuku_install">Cài Shizuku</string>
+    <string name="shizuku_authorize">Cấp quyền</string>
+    <string name="disable_battery_optimization">Tắt tối ưu hóa pin</string>
+    <string name="shizuku_activated">Shizuku đã kết nối, bảo vệ tiến trình đang bật</string>
+
+    <string name="language_title">Ngôn ngữ</string>
+    <string name="follow_system">Theo hệ thống</string>
+    <string name="search_languages">Tìm ngôn ngữ</string>
+    <string name="no_languages_found">Không tìm thấy ngôn ngữ</string>
+
+    <string name="alarm_set_format">Đã đặt báo thức lúc %1$02d:%2$02d</string>
+    <string name="alarm_removed">Đã xóa báo thức</string>
+    <string name="test_alarm_triggered">Đã kích hoạt báo thức thử</string>
+    <string name="alarm_stopped">Đã dừng báo thức</string>
+
+    <string name="schedule_one_shot">Một lần</string>
+
+    <string-array name="day_letters">
+        <item></item>
+        <item>C</item>
+        <item>H</item>
+        <item>T</item>
+        <item>T</item>
+        <item>N</item>
+        <item>S</item>
+        <item>B</item>
+    </string-array>
+    <string-array name="day_names_short">
+        <item></item>
+        <item>CN</item>
+        <item>T2</item>
+        <item>T3</item>
+        <item>T4</item>
+        <item>T5</item>
+        <item>T6</item>
+        <item>T7</item>
+    </string-array>
+
+    <string name="github">GitHub</string>
+    <string name="github_repo_title">Silent Alarm</string>
+    <string name="github_repo_path">izumisagirii/silent-alarm</string>
+    <string name="checking_updates">Đang kiểm tra cập nhật…</string>
+    <string name="update_available">Đã có phiên bản mới!</string>
+    <string name="update_version_format">v%1$s → v%2$s</string>
+    <string name="up_to_date_format">Đã là bản mới nhất (v%1$s), hãy thêm sao!</string>
+    <string name="check_repo">Xem kho lưu trữ</string>
+    <string name="network_error">Không có kết nối mạng</string>
+    <string name="timeout_error">Yêu cầu hết thời gian</string>
+    <string name="api_error_format">Lỗi API GitHub (%1$d)</string>
+    <string name="no_release_tag">Không tìm thấy thẻ phát hành</string>
+    <string name="update_error_format">Không thể kiểm tra cập nhật: %1$s</string>
+
+    <string name="tile_label">Báo thức tai nghe</string>
+    <string name="tile_active">Báo thức đang bật</string>
+    <string name="tile_inactive">Tất cả báo thức đã tắt</string>
+
+    <string name="notification_channel_alarm">Dịch vụ báo thức</string>
+    <string name="notification_channel_desc">Thông báo thường trực cho dịch vụ nền báo thức</string>
+    <string name="notification_channel_active">Báo thức đang phát</string>
+    <string name="notification_channel_active_desc">Hiển thị khi báo thức đang phát</string>
+    <string name="notification_waiting">Đang chờ báo thức tiếp theo</string>
+    <string name="notification_alarm_active">Báo thức đang hoạt động</string>
+    <string name="notification_earphones">Đang phát qua tai nghe</string>
+    <string name="notification_no_earphones">Không phát hiện tai nghe</string>
+</resources>

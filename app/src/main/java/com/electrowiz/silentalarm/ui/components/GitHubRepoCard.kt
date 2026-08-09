@@ -101,7 +101,7 @@ fun GitHubRepoCard(modifier: Modifier = Modifier) {
                 Column {
                     Text(
                         stringResource(R.string.github_repo_title),
-                        style = MaterialTheme.typography.titleSmall
+                        style = MaterialTheme.typography.titleMedium
                     )
                     Text(
                         stringResource(R.string.github_repo_path),
@@ -155,6 +155,7 @@ fun GitHubRepoCard(modifier: Modifier = Modifier) {
                 Button(
                     onClick = {
                         val i = Intent(Intent.ACTION_VIEW, repoUrl.toUri())
+                            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                         ctx.startActivity(i)
                     },
                 ) {

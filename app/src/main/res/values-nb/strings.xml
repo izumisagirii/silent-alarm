@@ -1,0 +1,109 @@
+<resources>
+    <string name="app_name">SilentAlarm</string>
+
+    <string name="dashboard_title">Hodetelefon-alarm</string>
+    <string name="dashboard_subtitle">Spiller bare via hodetelefoner. Vekker ikke andre.</string>
+    <string name="test_alarm">Test alarm</string>
+    <string name="stop">Stopp</string>
+    <string name="no_alarms">Ingen alarmer angitt. Trykk på + for å legge til.</string>
+    <string name="add_alarm">Legg til alarm</string>
+    <string name="delete_alarm">Slett alarm</string>
+    <string name="edit_alarm">Rediger alarm</string>
+    <string name="new_alarm">Ny alarm</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Avbryt</string>
+
+    <string name="volume_settings">Voluminnstillinger</string>
+    <string name="earphone">Hodetelefoner</string>
+    <string name="speaker">Høyttaler</string>
+    <string name="alarm_timeout">Alarmens varighet</string>
+    <string name="duration">Varighet</string>
+    <string name="timeout_description">Alle moduser (hodetelefoner, vibrasjon, høyttaler) bruker denne varigheten.</string>
+    <string name="after_earphone_timeout">Etter hodetelefontiden</string>
+    <string name="timeout_fallback_hint">Reservemodus bruker innstillingen “Ingen hodetelefoner” nedenfor.</string>
+    <string name="vibrate_only">Kun vibrasjon</string>
+    <string name="loudspeaker">Høyttaler</string>
+    <string name="fallback">Bruk reservemodus</string>
+    <string name="duration_min">%1$d min</string>
+
+    <string name="no_earphone_title">Ingen hodetelefoner</string>
+
+    <string name="ringtone">Ringetone</string>
+    <string name="custom_ringtone_set">Tilpasset ringetone angitt</string>
+    <string name="system_default_alarm">Systemets standardalarmlyd</string>
+    <string name="pick_ringtone">Velg ringetone</string>
+
+    <string name="process_keeping">Prosessbeskyttelse</string>
+    <string name="exact_alarm">Eksakt alarm</string>
+    <string name="exact_alarm_allowed">Tillatt</string>
+    <string name="exact_alarm_denied">Ikke tillatt</string>
+    <string name="exact_alarm_request">Aktiver</string>
+    <string name="shizuku">Shizuku</string>
+    <string name="shizuku_connected">Tilkoblet og autorisert</string>
+    <string name="shizuku_waiting_permission">Venter på tillatelse</string>
+    <string name="shizuku_not_installed">Ikke installert</string>
+    <string name="shizuku_install">Installer Shizuku</string>
+    <string name="shizuku_authorize">Autoriser</string>
+    <string name="disable_battery_optimization">Slå av batterioptimalisering</string>
+    <string name="shizuku_activated">Shizuku tilkoblet, prosessbeskyttelse aktiv</string>
+
+    <string name="language_title">Språk</string>
+    <string name="follow_system">Følg systemet</string>
+    <string name="search_languages">Søk etter språk</string>
+    <string name="no_languages_found">Fant ingen språk</string>
+
+    <string name="alarm_set_format">Alarm angitt til %1$02d:%2$02d</string>
+    <string name="alarm_removed">Alarm slettet</string>
+    <string name="test_alarm_triggered">Testalarm utløst</string>
+    <string name="alarm_stopped">Alarm stoppet</string>
+
+    <string name="schedule_one_shot">Én gang</string>
+
+    <string-array name="day_letters">
+        <item></item>
+        <item>S</item>
+        <item>M</item>
+        <item>T</item>
+        <item>O</item>
+        <item>T</item>
+        <item>F</item>
+        <item>L</item>
+    </string-array>
+    <string-array name="day_names_short">
+        <item></item>
+        <item>søn</item>
+        <item>man</item>
+        <item>tir</item>
+        <item>ons</item>
+        <item>tor</item>
+        <item>fre</item>
+        <item>lør</item>
+    </string-array>
+
+    <string name="github">GitHub</string>
+    <string name="github_repo_title">Silent Alarm</string>
+    <string name="github_repo_path">izumisagirii/silent-alarm</string>
+    <string name="checking_updates">Søker etter oppdateringer…</string>
+    <string name="update_available">Det finnes en ny versjon!</string>
+    <string name="update_version_format">v%1$s → v%2$s</string>
+    <string name="up_to_date_format">Allerede oppdatert (v%1$s). Legg til en stjerne!</string>
+    <string name="check_repo">Vis repository</string>
+    <string name="network_error">Ingen nettverkstilkobling</string>
+    <string name="timeout_error">Forespørselen tok for lang tid</string>
+    <string name="api_error_format">GitHub API-feil (%1$d)</string>
+    <string name="no_release_tag">Fant ingen utgivelsestagg</string>
+    <string name="update_error_format">Kan ikke sjekke oppdateringer: %1$s</string>
+
+    <string name="tile_label">Hodetelefon-alarm</string>
+    <string name="tile_active">Alarmer aktivert</string>
+    <string name="tile_inactive">Alle alarmer deaktivert</string>
+
+    <string name="notification_channel_alarm">Alarmtjeneste</string>
+    <string name="notification_channel_desc">Vedvarende varsel for alarmens forgrunnstjeneste</string>
+    <string name="notification_channel_active">Alarm spiller</string>
+    <string name="notification_channel_active_desc">Vises når alarmen spiller</string>
+    <string name="notification_waiting">Venter på neste alarm</string>
+    <string name="notification_alarm_active">Alarm aktiv</string>
+    <string name="notification_earphones">Spiller via hodetelefoner</string>
+    <string name="notification_no_earphones">Fant ingen hodetelefoner</string>
+</resources>

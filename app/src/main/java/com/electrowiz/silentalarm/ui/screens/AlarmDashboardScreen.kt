@@ -17,12 +17,17 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.VolumeUp
 import androidx.compose.foundation.layout.Box
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.outlined.Alarm
+import androidx.compose.material.icons.outlined.HeadsetOff
+import androidx.compose.material.icons.outlined.MusicNote
+import androidx.compose.material.icons.outlined.Shield
+import androidx.compose.material.icons.outlined.Timer
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -52,6 +57,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.electrowiz.silentalarm.R
 import com.electrowiz.silentalarm.data.AlarmItem
@@ -59,18 +65,19 @@ import com.electrowiz.silentalarm.data.NoEarphoneAction
 import com.electrowiz.silentalarm.data.TimeoutAction
 import com.electrowiz.silentalarm.ui.components.GitHubRepoCard
 import com.electrowiz.silentalarm.ui.components.LanguageSettingsCard
-import com.electrowiz.silentalarm.ui.components.StatusBanner
+import com.electrowiz.silentalarm.ui.components.SettingsCardHeader
 import com.electrowiz.silentalarm.ui.components.VolumeSlider
 import com.electrowiz.silentalarm.ui.viewmodel.AlarmViewModel
 
 /**
- * Main dashboard: status banner → test/stop → alarm list → settings → process keeping.
+ * Main dashboard: test/stop → alarm list → settings → process keeping.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AlarmDashboardScreen(
     viewModel: AlarmViewModel,
     onPickRingtone: () -> Unit,
+    onRequestExactAlarmPermission: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val alarms by viewModel.alarms.collectAsState()
@@ -85,6 +92,7 @@ fun AlarmDashboardScreen(
 
     val shizukuOk by viewModel.shizukuConnected.collectAsState()
     val shizukuPerm by viewModel.shizukuPermitted.collectAsState()
+    val exactAlarmAllowed by viewModel.exactAlarmAllowed.collectAsState()
 
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -130,11 +138,6 @@ fun AlarmDashboardScreen(
                     color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
 
-            // ── Status Banner ───────────────────────────────────────────
-            item {
-                StatusBanner(shizukuOk = shizukuOk && shizukuPerm)
-            }
-
             // ── Test / Stop Buttons ─────────────────────────────────────
             item {
                 Row(
@@ -144,7 +147,16 @@ fun AlarmDashboardScreen(
                     Button(
                         onClick = { viewModel.testAlarm() },
                         modifier = Modifier.weight(1f)
-                    ) { Text(stringResource(R.string.test_alarm)) }
+                    ) {
+                        Icon(Icons.Default.PlayArrow, contentDescription = null,
+                            modifier = Modifier.padding(end = 4.dp))
+                        Text(
+                            stringResource(R.string.test_alarm),
+                            maxLines = 1,
+                            softWrap = false,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
                     Button(
                         onClick = { viewModel.stopAlarm() },
                         modifier = Modifier.weight(1f),
@@ -190,9 +202,9 @@ fun AlarmDashboardScreen(
             item {
                 Card(modifier = Modifier.fillMaxWidth()) {
                     Column(modifier = Modifier.padding(16.dp)) {
-                        Text(
-                            stringResource(R.string.volume_settings),
-                            style = MaterialTheme.typography.titleMedium
+                        SettingsCardHeader(
+                            icon = Icons.AutoMirrored.Outlined.VolumeUp,
+                            title = stringResource(R.string.volume_settings)
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         VolumeSlider(stringResource(R.string.earphone), earphoneVolume,
@@ -208,9 +220,9 @@ fun AlarmDashboardScreen(
             item {
                 Card(modifier = Modifier.fillMaxWidth()) {
                     Column(modifier = Modifier.padding(16.dp)) {
-                        Text(
-                            stringResource(R.string.alarm_timeout),
-                            style = MaterialTheme.typography.titleMedium
+                        SettingsCardHeader(
+                            icon = Icons.Outlined.Timer,
+                            title = stringResource(R.string.alarm_timeout)
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         VolumeSlider(
@@ -270,9 +282,9 @@ fun AlarmDashboardScreen(
             item {
                 Card(modifier = Modifier.fillMaxWidth()) {
                     Column(modifier = Modifier.padding(16.dp)) {
-                        Text(
-                            stringResource(R.string.no_earphone_title),
-                            style = MaterialTheme.typography.titleMedium
+                        SettingsCardHeader(
+                            icon = Icons.Outlined.HeadsetOff,
+                            title = stringResource(R.string.no_earphone_title)
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         NoEarphoneAction.entries.forEach { action ->
@@ -303,15 +315,10 @@ fun AlarmDashboardScreen(
             item {
                 Card(modifier = Modifier.fillMaxWidth()) {
                     Column(modifier = Modifier.padding(16.dp)) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.Default.PlayArrow, null,
-                                tint = MaterialTheme.colorScheme.primary)
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                stringResource(R.string.ringtone),
-                                style = MaterialTheme.typography.titleMedium
-                            )
-                        }
+                        SettingsCardHeader(
+                            icon = Icons.Outlined.MusicNote,
+                            title = stringResource(R.string.ringtone)
+                        )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
                             if (globalRingtoneUri.isNotBlank()) {
@@ -336,17 +343,33 @@ fun AlarmDashboardScreen(
                         modifier = Modifier.padding(16.dp),
                         verticalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.Default.Settings, null,
-                                tint = MaterialTheme.colorScheme.primary)
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                stringResource(R.string.process_keeping),
-                                style = MaterialTheme.typography.titleMedium
-                            )
-                        }
+                        SettingsCardHeader(
+                            icon = Icons.Outlined.Shield,
+                            title = stringResource(R.string.process_keeping)
+                        )
 
-                        // ── Row 1: Shizuku ─────────────────────────────────
+                        // ── Exact Alarm ─────────────────────────────────
+                        StatusRow(
+                            label = stringResource(R.string.exact_alarm),
+                            ok = exactAlarmAllowed,
+                            statusText = if (exactAlarmAllowed) {
+                                stringResource(R.string.exact_alarm_allowed)
+                            } else {
+                                stringResource(R.string.exact_alarm_denied)
+                            },
+                            actionText = if (exactAlarmAllowed) {
+                                null
+                            } else {
+                                stringResource(R.string.exact_alarm_request)
+                            },
+                            onAction = if (exactAlarmAllowed) {
+                                null
+                            } else {
+                                onRequestExactAlarmPermission
+                            }
+                        )
+
+                        // ── Shizuku ─────────────────────────────────────
                         StatusRow(
                             label = stringResource(R.string.shizuku),
                             ok = shizukuOk && shizukuPerm,
@@ -572,14 +595,26 @@ private fun AlarmCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(formatTime(), style = MaterialTheme.typography.headlineSmall)
-                    if (alarm.label.isNotBlank()) {
-                        Text(alarm.label, style = MaterialTheme.typography.bodyMedium)
+                Row(
+                    modifier = Modifier.weight(1f),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        Icons.Outlined.Alarm,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(formatTime(), style = MaterialTheme.typography.headlineSmall)
+                        if (alarm.label.isNotBlank()) {
+                            Text(alarm.label, style = MaterialTheme.typography.bodyMedium)
+                        }
+                        Text(formatSchedule(),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
-                    Text(formatSchedule(),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
                 Switch(checked = alarm.enabled, onCheckedChange = onToggle)
                 IconButton(onClick = onDelete) {

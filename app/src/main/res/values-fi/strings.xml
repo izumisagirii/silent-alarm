@@ -1,0 +1,109 @@
+<resources>
+    <string name="app_name">SilentAlarm</string>
+
+    <string name="dashboard_title">Kuulokehälytys</string>
+    <string name="dashboard_subtitle">Soi vain kuulokkeista. Ei herätä muita.</string>
+    <string name="test_alarm">Testaa hälytys</string>
+    <string name="stop">Pysäytä</string>
+    <string name="no_alarms">Ei hälytyksiä. Lisää napauttamalla +.</string>
+    <string name="add_alarm">Lisää hälytys</string>
+    <string name="delete_alarm">Poista hälytys</string>
+    <string name="edit_alarm">Muokkaa hälytystä</string>
+    <string name="new_alarm">Uusi hälytys</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Peruuta</string>
+
+    <string name="volume_settings">Äänenvoimakkuusasetukset</string>
+    <string name="earphone">Kuulokkeet</string>
+    <string name="speaker">Kaiutin</string>
+    <string name="alarm_timeout">Hälytyksen kesto</string>
+    <string name="duration">Kesto</string>
+    <string name="timeout_description">Kaikki tilat (kuulokkeet, tärinä, kaiutin) käyttävät tätä kestoa.</string>
+    <string name="after_earphone_timeout">Kuulokeajan päätyttyä</string>
+    <string name="timeout_fallback_hint">Varatila käyttää alla olevaa “Ei kuulokkeita” -asetusta.</string>
+    <string name="vibrate_only">Vain tärinä</string>
+    <string name="loudspeaker">Kaiutin</string>
+    <string name="fallback">Käytä varatilaa</string>
+    <string name="duration_min">%1$d min</string>
+
+    <string name="no_earphone_title">Ei kuulokkeita</string>
+
+    <string name="ringtone">Soittoääni</string>
+    <string name="custom_ringtone_set">Mukautettu soittoääni asetettu</string>
+    <string name="system_default_alarm">Järjestelmän oletushälytysääni</string>
+    <string name="pick_ringtone">Valitse soittoääni</string>
+
+    <string name="process_keeping">Prosessin ylläpito</string>
+    <string name="exact_alarm">Tarkka hälytys</string>
+    <string name="exact_alarm_allowed">Sallittu</string>
+    <string name="exact_alarm_denied">Ei sallittu</string>
+    <string name="exact_alarm_request">Ota käyttöön</string>
+    <string name="shizuku">Shizuku</string>
+    <string name="shizuku_connected">Yhdistetty ja valtuutettu</string>
+    <string name="shizuku_waiting_permission">Odotetaan käyttöoikeutta</string>
+    <string name="shizuku_not_installed">Ei asennettu</string>
+    <string name="shizuku_install">Asenna Shizuku</string>
+    <string name="shizuku_authorize">Valtuuta</string>
+    <string name="disable_battery_optimization">Poista akun optimointi käytöstä</string>
+    <string name="shizuku_activated">Shizuku yhdistetty, prosessisuojaus käytössä</string>
+
+    <string name="language_title">Kieli</string>
+    <string name="follow_system">Seuraa järjestelmää</string>
+    <string name="search_languages">Etsi kieltä</string>
+    <string name="no_languages_found">Ei kieliä löytynyt</string>
+
+    <string name="alarm_set_format">Hälytys asetettu kello %1$02d:%2$02d</string>
+    <string name="alarm_removed">Hälytys poistettu</string>
+    <string name="test_alarm_triggered">Testihälytys käynnistetty</string>
+    <string name="alarm_stopped">Hälytys pysäytetty</string>
+
+    <string name="schedule_one_shot">Kerran</string>
+
+    <string-array name="day_letters">
+        <item></item>
+        <item>S</item>
+        <item>M</item>
+        <item>T</item>
+        <item>K</item>
+        <item>T</item>
+        <item>P</item>
+        <item>L</item>
+    </string-array>
+    <string-array name="day_names_short">
+        <item></item>
+        <item>su</item>
+        <item>ma</item>
+        <item>ti</item>
+        <item>ke</item>
+        <item>to</item>
+        <item>pe</item>
+        <item>la</item>
+    </string-array>
+
+    <string name="github">GitHub</string>
+    <string name="github_repo_title">Silent Alarm</string>
+    <string name="github_repo_path">izumisagirii/silent-alarm</string>
+    <string name="checking_updates">Tarkistetaan päivityksiä…</string>
+    <string name="update_available">Uusi versio on saatavilla!</string>
+    <string name="update_version_format">v%1$s → v%2$s</string>
+    <string name="up_to_date_format">Jo ajan tasalla (v%1$s). Lisää tähti!</string>
+    <string name="check_repo">Näytä säilytyspaikka</string>
+    <string name="network_error">Ei verkkoyhteyttä</string>
+    <string name="timeout_error">Pyyntö aikakatkaistiin</string>
+    <string name="api_error_format">GitHub API -virhe (%1$d)</string>
+    <string name="no_release_tag">Julkaisutunnistetta ei löytynyt</string>
+    <string name="update_error_format">Päivityksiä ei voi tarkistaa: %1$s</string>
+
+    <string name="tile_label">Kuulokehälytys</string>
+    <string name="tile_active">Hälytykset käytössä</string>
+    <string name="tile_inactive">Kaikki hälytykset pois käytöstä</string>
+
+    <string name="notification_channel_alarm">Hälytyspalvelu</string>
+    <string name="notification_channel_desc">Pysyvä ilmoitus hälytyksen taustapalvelusta</string>
+    <string name="notification_channel_active">Hälytys soi</string>
+    <string name="notification_channel_active_desc">Näytetään, kun hälytys soi</string>
+    <string name="notification_waiting">Odotetaan seuraavaa hälytystä</string>
+    <string name="notification_alarm_active">Hälytys aktiivinen</string>
+    <string name="notification_earphones">Soi kuulokkeista</string>
+    <string name="notification_no_earphones">Kuulokkeita ei havaittu</string>
+</resources>

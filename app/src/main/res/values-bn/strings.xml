@@ -1,0 +1,109 @@
+<resources>
+    <string name="app_name">SilentAlarm</string>
+
+    <string name="dashboard_title">ইয়ারফোন অ্যালার্ম</string>
+    <string name="dashboard_subtitle">শুধুমাত্র ইয়ারফোনে বাজে। অন্য কাউকে জাগায় না।</string>
+    <string name="test_alarm">পরীক্ষা</string>
+    <string name="stop">বন্ধ</string>
+    <string name="no_alarms">কোনো অ্যালার্ম সেট নেই। যোগ করতে + ট্যাপ করুন।</string>
+    <string name="add_alarm">অ্যালার্ম যোগ করুন</string>
+    <string name="delete_alarm">অ্যালার্ম মুছুন</string>
+    <string name="edit_alarm">অ্যালার্ম সম্পাদনা করুন</string>
+    <string name="new_alarm">নতুন অ্যালার্ম</string>
+    <string name="ok">ঠিক আছে</string>
+    <string name="cancel">বাতিল</string>
+
+    <string name="volume_settings">ভলিউম সেটিংস</string>
+    <string name="earphone">ইয়ারফোন</string>
+    <string name="speaker">স্পিকার</string>
+    <string name="alarm_timeout">অ্যালার্মের সময়কাল</string>
+    <string name="duration">সময়কাল</string>
+    <string name="timeout_description">সব মোড (ইয়ারফোন, কম্পন, স্পিকার) এই সময়কাল ব্যবহার করে।</string>
+    <string name="after_earphone_timeout">ইয়ারফোন সময় শেষ হওয়ার পরে</string>
+    <string name="timeout_fallback_hint">ব্যাকআপ মোড নিচের “ইয়ারফোন নেই” সেটিং ব্যবহার করে।</string>
+    <string name="vibrate_only">শুধু কম্পন</string>
+    <string name="loudspeaker">স্পিকার</string>
+    <string name="fallback">ব্যাকআপ মোড ব্যবহার করুন</string>
+    <string name="duration_min">%1$d মিনিট</string>
+
+    <string name="no_earphone_title">ইয়ারফোন নেই</string>
+
+    <string name="ringtone">রিংটোন</string>
+    <string name="custom_ringtone_set">কাস্টম রিংটোন সেট আছে</string>
+    <string name="system_default_alarm">সিস্টেমের ডিফল্ট অ্যালার্ম</string>
+    <string name="pick_ringtone">রিংটোন বাছাই করুন</string>
+
+    <string name="process_keeping">প্রসেস সুরক্ষা</string>
+    <string name="exact_alarm">সঠিক অ্যালার্ম</string>
+    <string name="exact_alarm_allowed">অনুমতি আছে</string>
+    <string name="exact_alarm_denied">অনুমতি নেই</string>
+    <string name="exact_alarm_request">চালু করুন</string>
+    <string name="shizuku">Shizuku</string>
+    <string name="shizuku_connected">সংযুক্ত এবং অনুমোদিত</string>
+    <string name="shizuku_waiting_permission">অনুমতির অপেক্ষা</string>
+    <string name="shizuku_not_installed">ইনস্টল নেই</string>
+    <string name="shizuku_install">Shizuku ইনস্টল করুন</string>
+    <string name="shizuku_authorize">অনুমোদন করুন</string>
+    <string name="disable_battery_optimization">ব্যাটারি অপ্টিমাইজেশন বন্ধ করুন</string>
+    <string name="shizuku_activated">Shizuku সংযুক্ত, প্রসেস সুরক্ষা সক্রিয়</string>
+
+    <string name="language_title">ভাষা</string>
+    <string name="follow_system">সিস্টেম অনুসরণ করুন</string>
+    <string name="search_languages">ভাষা খুঁজুন</string>
+    <string name="no_languages_found">কোনো ভাষা পাওয়া যায়নি</string>
+
+    <string name="alarm_set_format">অ্যালার্ম %1$02d:%2$02d এ সেট হয়েছে</string>
+    <string name="alarm_removed">অ্যালার্ম মুছে ফেলা হয়েছে</string>
+    <string name="test_alarm_triggered">পরীক্ষার অ্যালার্ম বাজানো হয়েছে</string>
+    <string name="alarm_stopped">অ্যালার্ম বন্ধ হয়েছে</string>
+
+    <string name="schedule_one_shot">একবার</string>
+
+    <string-array name="day_letters">
+        <item></item>
+        <item>র</item>
+        <item>সো</item>
+        <item>ম</item>
+        <item>বু</item>
+        <item>বৃ</item>
+        <item>শু</item>
+        <item>শ</item>
+    </string-array>
+    <string-array name="day_names_short">
+        <item></item>
+        <item>রবি</item>
+        <item>সোম</item>
+        <item>মঙ্গল</item>
+        <item>বুধ</item>
+        <item>বৃহস্পতি</item>
+        <item>শুক্র</item>
+        <item>শনি</item>
+    </string-array>
+
+    <string name="github">GitHub</string>
+    <string name="github_repo_title">Silent Alarm</string>
+    <string name="github_repo_path">izumisagirii/silent-alarm</string>
+    <string name="checking_updates">আপডেট যাচাই হচ্ছে…</string>
+    <string name="update_available">নতুন সংস্করণ পাওয়া গেছে!</string>
+    <string name="update_version_format">v%1$s → v%2$s</string>
+    <string name="up_to_date_format">ইতিমধ্যে হালনাগাদ (v%1$s), একটি স্টার যোগ করুন!</string>
+    <string name="check_repo">রিপোজিটরি দেখুন</string>
+    <string name="network_error">নেটওয়ার্ক সংযোগ নেই</string>
+    <string name="timeout_error">অনুরোধের সময় শেষ</string>
+    <string name="api_error_format">GitHub API ত্রুটি (%1$d)</string>
+    <string name="no_release_tag">কোনো রিলিজ ট্যাগ পাওয়া যায়নি</string>
+    <string name="update_error_format">আপডেট যাচাই করা যায়নি: %1$s</string>
+
+    <string name="tile_label">ইয়ারফোন অ্যালার্ম</string>
+    <string name="tile_active">অ্যালার্ম সক্রিয়</string>
+    <string name="tile_inactive">সব অ্যালার্ম বন্ধ</string>
+
+    <string name="notification_channel_alarm">অ্যালার্ম পরিষেবা</string>
+    <string name="notification_channel_desc">অ্যালার্ম ফোরগ্রাউন্ড পরিষেবার স্থায়ী বিজ্ঞপ্তি</string>
+    <string name="notification_channel_active">অ্যালার্ম বাজছে</string>
+    <string name="notification_channel_active_desc">অ্যালার্ম বাজলে দেখানো হয়</string>
+    <string name="notification_waiting">পরবর্তী অ্যালার্মের অপেক্ষা</string>
+    <string name="notification_alarm_active">অ্যালার্ম সক্রিয়</string>
+    <string name="notification_earphones">ইয়ারফোনে বাজছে</string>
+    <string name="notification_no_earphones">কোনো ইয়ারফোন পাওয়া যায়নি</string>
+</resources>

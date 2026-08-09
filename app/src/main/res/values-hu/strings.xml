@@ -1,0 +1,109 @@
+<resources>
+    <string name="app_name">SilentAlarm</string>
+
+    <string name="dashboard_title">Fejhallgató-ébresztő</string>
+    <string name="dashboard_subtitle">Csak fejhallgatón szólal meg. Nem ébreszt fel másokat.</string>
+    <string name="test_alarm">Ébresztő tesztje</string>
+    <string name="stop">Leállítás</string>
+    <string name="no_alarms">Nincs ébresztő beállítva. A + megérintésével adhat hozzá.</string>
+    <string name="add_alarm">Ébresztő hozzáadása</string>
+    <string name="delete_alarm">Ébresztő törlése</string>
+    <string name="edit_alarm">Ébresztő szerkesztése</string>
+    <string name="new_alarm">Új ébresztő</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Mégse</string>
+
+    <string name="volume_settings">Hangerő beállítások</string>
+    <string name="earphone">Fejhallgató</string>
+    <string name="speaker">Hangszóró</string>
+    <string name="alarm_timeout">Az ébresztő hossza</string>
+    <string name="duration">Időtartam</string>
+    <string name="timeout_description">Minden mód (fejhallgató, rezgés, hangszóró) ezt az időtartamot használja.</string>
+    <string name="after_earphone_timeout">A fejhallgatós idő letelte után</string>
+    <string name="timeout_fallback_hint">A tartalék mód az alábbi „Nincs fejhallgató” beállítást használja.</string>
+    <string name="vibrate_only">Csak rezgés</string>
+    <string name="loudspeaker">Hangszóró</string>
+    <string name="fallback">Tartalék mód használata</string>
+    <string name="duration_min">%1$d perc</string>
+
+    <string name="no_earphone_title">Nincs fejhallgató</string>
+
+    <string name="ringtone">Csengőhang</string>
+    <string name="custom_ringtone_set">Egyéni csengőhang beállítva</string>
+    <string name="system_default_alarm">Rendszer alapértelmezett ébresztési hangja</string>
+    <string name="pick_ringtone">Csengőhang kiválasztása</string>
+
+    <string name="process_keeping">Folyamat életben tartása</string>
+    <string name="exact_alarm">Pontos ébresztő</string>
+    <string name="exact_alarm_allowed">Engedélyezett</string>
+    <string name="exact_alarm_denied">Nem engedélyezett</string>
+    <string name="exact_alarm_request">Bekapcsolás</string>
+    <string name="shizuku">Shizuku</string>
+    <string name="shizuku_connected">Csatlakoztatva és jogosítva</string>
+    <string name="shizuku_waiting_permission">Engedélyre vár</string>
+    <string name="shizuku_not_installed">Nincs telepítve</string>
+    <string name="shizuku_install">Shizuku telepítése</string>
+    <string name="shizuku_authorize">Jogosítás</string>
+    <string name="disable_battery_optimization">Az akkumulátor-optimalizálás kikapcsolása</string>
+    <string name="shizuku_activated">Shizuku csatlakoztatva, folyamatvédelem aktív</string>
+
+    <string name="language_title">Nyelv</string>
+    <string name="follow_system">Rendszer követése</string>
+    <string name="search_languages">Nyelv keresése</string>
+    <string name="no_languages_found">Nem található nyelv</string>
+
+    <string name="alarm_set_format">Ébresztő beállítva: %1$02d:%2$02d</string>
+    <string name="alarm_removed">Ébresztő törölve</string>
+    <string name="test_alarm_triggered">Teszt ébresztő elindítva</string>
+    <string name="alarm_stopped">Ébresztő leállítva</string>
+
+    <string name="schedule_one_shot">Egyszeri</string>
+
+    <string-array name="day_letters">
+        <item></item>
+        <item>V</item>
+        <item>H</item>
+        <item>K</item>
+        <item>S</item>
+        <item>C</item>
+        <item>P</item>
+        <item>S</item>
+    </string-array>
+    <string-array name="day_names_short">
+        <item></item>
+        <item>V</item>
+        <item>H</item>
+        <item>K</item>
+        <item>Sze</item>
+        <item>Cs</item>
+        <item>P</item>
+        <item>Szo</item>
+    </string-array>
+
+    <string name="github">GitHub</string>
+    <string name="github_repo_title">Silent Alarm</string>
+    <string name="github_repo_path">izumisagirii/silent-alarm</string>
+    <string name="checking_updates">Frissítések keresése…</string>
+    <string name="update_available">Új verzió érhető el!</string>
+    <string name="update_version_format">v%1$s → v%2$s</string>
+    <string name="up_to_date_format">Már naprakész (v%1$s). Adj hozzá egy csillagot!</string>
+    <string name="check_repo">Adattár megtekintése</string>
+    <string name="network_error">Nincs hálózati kapcsolat</string>
+    <string name="timeout_error">A kérés időtúllépés miatt megszakadt</string>
+    <string name="api_error_format">GitHub API-hiba (%1$d)</string>
+    <string name="no_release_tag">Nem található kiadási címke</string>
+    <string name="update_error_format">A frissítés nem ellenőrizhető: %1$s</string>
+
+    <string name="tile_label">Fejhallgató-ébresztő</string>
+    <string name="tile_active">Az ébresztők be vannak kapcsolva</string>
+    <string name="tile_inactive">Minden ébresztő ki van kapcsolva</string>
+
+    <string name="notification_channel_alarm">Ébresztőszolgáltatás</string>
+    <string name="notification_channel_desc">Állandó értesítés az ébresztő előtérszolgáltatásához</string>
+    <string name="notification_channel_active">Az ébresztő szól</string>
+    <string name="notification_channel_active_desc">Akkor jelenik meg, amikor az ébresztő szól</string>
+    <string name="notification_waiting">Várakozás a következő ébresztőre</string>
+    <string name="notification_alarm_active">Az ébresztő aktív</string>
+    <string name="notification_earphones">Lejátszás fejhallgatón</string>
+    <string name="notification_no_earphones">Nem észlelhető fejhallgató</string>
+</resources>

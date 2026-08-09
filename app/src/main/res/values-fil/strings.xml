@@ -1,0 +1,109 @@
+<resources>
+    <string name="app_name">SilentAlarm</string>
+
+    <string name="dashboard_title">Alarm sa earphone</string>
+    <string name="dashboard_subtitle">Tumutunog lang sa earphone. Hindi ginigising ang iba.</string>
+    <string name="test_alarm">Subukan ang alarm</string>
+    <string name="stop">Itigil</string>
+    <string name="no_alarms">Walang alarm na naka-set. I-tap ang + para magdagdag.</string>
+    <string name="add_alarm">Magdagdag ng alarm</string>
+    <string name="delete_alarm">Tanggalin ang alarm</string>
+    <string name="edit_alarm">I-edit ang alarm</string>
+    <string name="new_alarm">Bagong alarm</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Kanselahin</string>
+
+    <string name="volume_settings">Mga setting ng volume</string>
+    <string name="earphone">Earphone</string>
+    <string name="speaker">Speaker</string>
+    <string name="alarm_timeout">Tagal ng alarm</string>
+    <string name="duration">Tagal</string>
+    <string name="timeout_description">Lahat ng mode (earphone, vibration, speaker) ay gumagamit ng tagal na ito.</string>
+    <string name="after_earphone_timeout">Pagkatapos ng oras ng earphone</string>
+    <string name="timeout_fallback_hint">Ginagamit ng backup mode ang setting na “Walang earphone” sa ibaba.</string>
+    <string name="vibrate_only">Vibrate lang</string>
+    <string name="loudspeaker">Speaker</string>
+    <string name="fallback">Gamitin ang backup mode</string>
+    <string name="duration_min">%1$d min</string>
+
+    <string name="no_earphone_title">Walang earphone</string>
+
+    <string name="ringtone">Ringtone</string>
+    <string name="custom_ringtone_set">Naka-set na ang custom na ringtone</string>
+    <string name="system_default_alarm">Default na alarm ng system</string>
+    <string name="pick_ringtone">Pumili ng ringtone</string>
+
+    <string name="process_keeping">Pagpapanatili ng proseso</string>
+    <string name="exact_alarm">Eksaktong alarm</string>
+    <string name="exact_alarm_allowed">Pinapayagan</string>
+    <string name="exact_alarm_denied">Hindi pinapayagan</string>
+    <string name="exact_alarm_request">I-enable</string>
+    <string name="shizuku">Shizuku</string>
+    <string name="shizuku_connected">Nakakonekta at awtorisado</string>
+    <string name="shizuku_waiting_permission">Naghihintay ng pahintulot</string>
+    <string name="shizuku_not_installed">Hindi naka-install</string>
+    <string name="shizuku_install">I-install ang Shizuku</string>
+    <string name="shizuku_authorize">Pahintulutan</string>
+    <string name="disable_battery_optimization">I-off ang battery optimization</string>
+    <string name="shizuku_activated">Nakakonekta ang Shizuku, aktibo ang proteksyon ng proseso</string>
+
+    <string name="language_title">Wika</string>
+    <string name="follow_system">Sundin ang system</string>
+    <string name="search_languages">Maghanap ng wika</string>
+    <string name="no_languages_found">Walang nakitang wika</string>
+
+    <string name="alarm_set_format">Naka-set ang alarm sa %1$02d:%2$02d</string>
+    <string name="alarm_removed">Naalis ang alarm</string>
+    <string name="test_alarm_triggered">Na-trigger ang test alarm</string>
+    <string name="alarm_stopped">Na-stop ang alarm</string>
+
+    <string name="schedule_one_shot">Isang beses</string>
+
+    <string-array name="day_letters">
+        <item></item>
+        <item>L</item>
+        <item>L</item>
+        <item>M</item>
+        <item>H</item>
+        <item>H</item>
+        <item>B</item>
+        <item>S</item>
+    </string-array>
+    <string-array name="day_names_short">
+        <item></item>
+        <item>Lin</item>
+        <item>Lun</item>
+        <item>Mar</item>
+        <item>Miy</item>
+        <item>Huw</item>
+        <item>Biy</item>
+        <item>Sab</item>
+    </string-array>
+
+    <string name="github">GitHub</string>
+    <string name="github_repo_title">Silent Alarm</string>
+    <string name="github_repo_path">izumisagirii/silent-alarm</string>
+    <string name="checking_updates">Sinusuri ang mga update…</string>
+    <string name="update_available">May bagong bersyon!</string>
+    <string name="update_version_format">v%1$s → v%2$s</string>
+    <string name="up_to_date_format">Napapanahon na (v%1$s), magdagdag ng bituin!</string>
+    <string name="check_repo">Tingnan ang repository</string>
+    <string name="network_error">Walang koneksyon sa network</string>
+    <string name="timeout_error">Naubos ang oras ng request</string>
+    <string name="api_error_format">Error sa GitHub API (%1$d)</string>
+    <string name="no_release_tag">Walang nakitang release tag</string>
+    <string name="update_error_format">Hindi ma-check ang update: %1$s</string>
+
+    <string name="tile_label">Alarm sa earphone</string>
+    <string name="tile_active">Naka-enable ang mga alarm</string>
+    <string name="tile_inactive">Naka-off ang lahat ng alarm</string>
+
+    <string name="notification_channel_alarm">Serbisyo ng alarm</string>
+    <string name="notification_channel_desc">Permanenteng notification para sa foreground service</string>
+    <string name="notification_channel_active">Tumutunog ang alarm</string>
+    <string name="notification_channel_active_desc">Ipapakita habang tumutunog ang alarm</string>
+    <string name="notification_waiting">Naghihintay sa susunod na alarm</string>
+    <string name="notification_alarm_active">Aktibo ang alarm</string>
+    <string name="notification_earphones">Tumutunog sa earphone</string>
+    <string name="notification_no_earphones">Walang nakitang earphone</string>
+</resources>

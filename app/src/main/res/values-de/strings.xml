@@ -1,0 +1,109 @@
+<resources>
+    <string name="app_name">SilentAlarm</string>
+
+    <string name="dashboard_title">Kopfhörer-Alarm</string>
+    <string name="dashboard_subtitle">Nur über Kopfhörer. Weckt niemanden sonst.</string>
+    <string name="test_alarm">Alarm testen</string>
+    <string name="stop">Stopp</string>
+    <string name="no_alarms">Keine Alarme eingerichtet. Tippe auf +, um einen hinzuzufügen.</string>
+    <string name="add_alarm">Alarm hinzufügen</string>
+    <string name="delete_alarm">Alarm löschen</string>
+    <string name="edit_alarm">Alarm bearbeiten</string>
+    <string name="new_alarm">Neuer Alarm</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Abbrechen</string>
+
+    <string name="volume_settings">Lautstärkeeinstellungen</string>
+    <string name="earphone">Kopfhörer</string>
+    <string name="speaker">Lautsprecher</string>
+    <string name="alarm_timeout">Alarmdauer</string>
+    <string name="duration">Dauer</string>
+    <string name="timeout_description">Alle Modi (Kopfhörer, Vibration, Lautsprecher) verwenden diese Dauer.</string>
+    <string name="after_earphone_timeout">Nach der Kopfhörerzeit</string>
+    <string name="timeout_fallback_hint">Der Ersatzmodus verwendet die Einstellung „Ohne Kopfhörer“ unten.</string>
+    <string name="vibrate_only">Nur vibrieren</string>
+    <string name="loudspeaker">Lautsprecher</string>
+    <string name="fallback">Ersatzmodus verwenden</string>
+    <string name="duration_min">%1$d Min.</string>
+
+    <string name="no_earphone_title">Ohne Kopfhörer</string>
+
+    <string name="ringtone">Klingelton</string>
+    <string name="custom_ringtone_set">Benutzerdefinierter Klingelton festgelegt</string>
+    <string name="system_default_alarm">Systemstandard-Alarmton</string>
+    <string name="pick_ringtone">Klingelton wählen</string>
+
+    <string name="process_keeping">Prozess-Aufrechterhaltung</string>
+    <string name="exact_alarm">Exakter Alarm</string>
+    <string name="exact_alarm_allowed">Erlaubt</string>
+    <string name="exact_alarm_denied">Nicht erlaubt</string>
+    <string name="exact_alarm_request">Aktivieren</string>
+    <string name="shizuku">Shizuku</string>
+    <string name="shizuku_connected">Verbunden und autorisiert</string>
+    <string name="shizuku_waiting_permission">Warte auf Berechtigung</string>
+    <string name="shizuku_not_installed">Nicht installiert</string>
+    <string name="shizuku_install">Shizuku installieren</string>
+    <string name="shizuku_authorize">Autorisieren</string>
+    <string name="disable_battery_optimization">Batterieoptimierung deaktivieren</string>
+    <string name="shizuku_activated">Shizuku verbunden, Anti-Kill-Schutz aktiv</string>
+
+    <string name="language_title">Sprache</string>
+    <string name="follow_system">System folgen</string>
+    <string name="search_languages">Sprache suchen</string>
+    <string name="no_languages_found">Keine Sprachen gefunden</string>
+
+    <string name="alarm_set_format">Alarm für %1$02d:%2$02d eingestellt</string>
+    <string name="alarm_removed">Alarm entfernt</string>
+    <string name="test_alarm_triggered">Testalarm ausgelöst</string>
+    <string name="alarm_stopped">Alarm gestoppt</string>
+
+    <string name="schedule_one_shot">Einmalig</string>
+
+    <string-array name="day_letters">
+        <item></item>
+        <item>S</item>
+        <item>M</item>
+        <item>D</item>
+        <item>M</item>
+        <item>D</item>
+        <item>F</item>
+        <item>S</item>
+    </string-array>
+    <string-array name="day_names_short">
+        <item></item>
+        <item>So.</item>
+        <item>Mo.</item>
+        <item>Di.</item>
+        <item>Mi.</item>
+        <item>Do.</item>
+        <item>Fr.</item>
+        <item>Sa.</item>
+    </string-array>
+
+    <string name="github">GitHub</string>
+    <string name="github_repo_title">Silent Alarm</string>
+    <string name="github_repo_path">izumisagirii/silent-alarm</string>
+    <string name="checking_updates">Suche nach Updates…</string>
+    <string name="update_available">Eine neue Version ist verfügbar!</string>
+    <string name="update_version_format">v%1$s → v%2$s</string>
+    <string name="up_to_date_format">Bereits aktuell (v%1$s). Bitte einen Stern vergeben!</string>
+    <string name="check_repo">Repository ansehen</string>
+    <string name="network_error">Keine Netzwerkverbindung</string>
+    <string name="timeout_error">Anfrage abgelaufen</string>
+    <string name="api_error_format">GitHub-API-Fehler (%1$d)</string>
+    <string name="no_release_tag">Kein Release-Tag gefunden</string>
+    <string name="update_error_format">Updateprüfung nicht möglich: %1$s</string>
+
+    <string name="tile_label">Kopfhörer-Alarm</string>
+    <string name="tile_active">Alarme aktiviert</string>
+    <string name="tile_inactive">Alle Alarme deaktiviert</string>
+
+    <string name="notification_channel_alarm">Alarmdienst</string>
+    <string name="notification_channel_desc">Dauerhafte Benachrichtigung für den Vordergrunddienst</string>
+    <string name="notification_channel_active">Alarm spielt</string>
+    <string name="notification_channel_active_desc">Wird angezeigt, wenn der Alarm aktiv spielt</string>
+    <string name="notification_waiting">Warte auf den nächsten Alarm</string>
+    <string name="notification_alarm_active">Alarm aktiv</string>
+    <string name="notification_earphones">Wiedergabe über Kopfhörer</string>
+    <string name="notification_no_earphones">Keine Kopfhörer erkannt</string>
+</resources>

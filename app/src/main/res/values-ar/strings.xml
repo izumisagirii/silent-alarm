@@ -1,0 +1,109 @@
+<resources>
+    <string name="app_name">SilentAlarm</string>
+
+    <string name="dashboard_title">منبه سماعة الرأس</string>
+    <string name="dashboard_subtitle">يصدر الصوت من سماعة الرأس فقط، ولا يوقظ الآخرين.</string>
+    <string name="test_alarm">تجربة المنبه</string>
+    <string name="stop">إيقاف</string>
+    <string name="no_alarms">لا توجد منبهات مضبوطة. اضغط + لإضافة منبه.</string>
+    <string name="add_alarm">إضافة منبه</string>
+    <string name="delete_alarm">حذف المنبه</string>
+    <string name="edit_alarm">تعديل المنبه</string>
+    <string name="new_alarm">منبه جديد</string>
+    <string name="ok">موافق</string>
+    <string name="cancel">إلغاء</string>
+
+    <string name="volume_settings">إعدادات الصوت</string>
+    <string name="earphone">سماعة الرأس</string>
+    <string name="speaker">مكبر الصوت</string>
+    <string name="alarm_timeout">مدة المنبه</string>
+    <string name="duration">المدة</string>
+    <string name="timeout_description">جميع الأوضاع (سماعة الرأس، الاهتزاز، مكبر الصوت) تشترك في هذه المدة.</string>
+    <string name="after_earphone_timeout">بعد انتهاء وقت سماعة الرأس</string>
+    <string name="timeout_fallback_hint">يستخدم الوضع البديل إعداد «لا توجد سماعة رأس» أدناه.</string>
+    <string name="vibrate_only">اهتزاز فقط</string>
+    <string name="loudspeaker">مكبر الصوت</string>
+    <string name="fallback">التبديل إلى الوضع البديل</string>
+    <string name="duration_min">%1$d دقيقة</string>
+
+    <string name="no_earphone_title">لا توجد سماعة رأس</string>
+
+    <string name="ringtone">نغمة</string>
+    <string name="custom_ringtone_set">تم تعيين نغمة مخصصة</string>
+    <string name="system_default_alarm">نغمة المنبه الافتراضية</string>
+    <string name="pick_ringtone">اختيار نغمة</string>
+
+    <string name="process_keeping">إبقاء العملية</string>
+    <string name="exact_alarm">منبه دقيق</string>
+    <string name="exact_alarm_allowed">مسموح</string>
+    <string name="exact_alarm_denied">غير مسموح</string>
+    <string name="exact_alarm_request">تفعيل</string>
+    <string name="shizuku">Shizuku</string>
+    <string name="shizuku_connected">متصل ومصرح به</string>
+    <string name="shizuku_waiting_permission">بانتظار الإذن</string>
+    <string name="shizuku_not_installed">غير مثبت</string>
+    <string name="shizuku_install">تثبيت Shizuku</string>
+    <string name="shizuku_authorize">منح الإذن</string>
+    <string name="disable_battery_optimization">تعطيل تحسين البطارية</string>
+    <string name="shizuku_activated">Shizuku متصل، حماية الإيقاف نشطة</string>
+
+    <string name="language_title">اللغة</string>
+    <string name="follow_system">متابعة النظام</string>
+    <string name="search_languages">بحث عن لغة</string>
+    <string name="no_languages_found">لم يتم العثور على لغات</string>
+
+    <string name="alarm_set_format">تم ضبط المنبه على %1$02d:%2$02d</string>
+    <string name="alarm_removed">تم حذف المنبه</string>
+    <string name="test_alarm_triggered">تم تشغيل منبه الاختبار</string>
+    <string name="alarm_stopped">تم إيقاف المنبه</string>
+
+    <string name="schedule_one_shot">مرة واحدة</string>
+
+    <string-array name="day_letters">
+        <item></item>
+        <item>ح</item>
+        <item>ن</item>
+        <item>ث</item>
+        <item>أ</item>
+        <item>خ</item>
+        <item>ج</item>
+        <item>س</item>
+    </string-array>
+    <string-array name="day_names_short">
+        <item></item>
+        <item>الأحد</item>
+        <item>الاثنين</item>
+        <item>الثلاثاء</item>
+        <item>الأربعاء</item>
+        <item>الخميس</item>
+        <item>الجمعة</item>
+        <item>السبت</item>
+    </string-array>
+
+    <string name="github">GitHub</string>
+    <string name="github_repo_title">Silent Alarm</string>
+    <string name="github_repo_path">izumisagirii/silent-alarm</string>
+    <string name="checking_updates">جارٍ التحقق من التحديثات…</string>
+    <string name="update_available">يتوفر إصدار جديد!</string>
+    <string name="update_version_format">v%1$s ← v%2$s</string>
+    <string name="up_to_date_format">الإصدار محدث بالفعل (v%1$s)، يرجى إضافة نجمة!</string>
+    <string name="check_repo">عرض المستودع</string>
+    <string name="network_error">لا يوجد اتصال بالشبكة</string>
+    <string name="timeout_error">انتهت مهلة الطلب</string>
+    <string name="api_error_format">خطأ في واجهة GitHub (%1$d)</string>
+    <string name="no_release_tag">لم يتم العثور على وسم إصدار</string>
+    <string name="update_error_format">تعذر التحقق من التحديث: %1$s</string>
+
+    <string name="tile_label">منبه سماعة الرأس</string>
+    <string name="tile_active">المنبهات مفعلة</string>
+    <string name="tile_inactive">جميع المنبهات معطلة</string>
+
+    <string name="notification_channel_alarm">خدمة المنبه</string>
+    <string name="notification_channel_desc">إشعار دائم لخدمة المنبه الأمامية</string>
+    <string name="notification_channel_active">المنبه يعمل</string>
+    <string name="notification_channel_active_desc">يظهر عندما يعمل المنبه</string>
+    <string name="notification_waiting">بانتظار المنبه التالي</string>
+    <string name="notification_alarm_active">المنبه نشط</string>
+    <string name="notification_earphones">الصوت يصدر عبر سماعة الرأس</string>
+    <string name="notification_no_earphones">لم يتم اكتشاف سماعة رأس</string>
+</resources>

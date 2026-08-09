@@ -1,0 +1,109 @@
+<resources>
+    <string name="app_name">SilentAlarm</string>
+
+    <string name="dashboard_title">Sluchátkový budík</string>
+    <string name="dashboard_subtitle">Přehrává se pouze ve sluchátkách. Nebudí ostatní.</string>
+    <string name="test_alarm">Vyzkoušet budík</string>
+    <string name="stop">Zastavit</string>
+    <string name="no_alarms">Žádný budík není nastaven. Klepnutím na + přidáte.</string>
+    <string name="add_alarm">Přidat budík</string>
+    <string name="delete_alarm">Smazat budík</string>
+    <string name="edit_alarm">Upravit budík</string>
+    <string name="new_alarm">Nový budík</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Zrušit</string>
+
+    <string name="volume_settings">Nastavení hlasitosti</string>
+    <string name="earphone">Sluchátka</string>
+    <string name="speaker">Reproduktor</string>
+    <string name="alarm_timeout">Délka budíku</string>
+    <string name="duration">Délka</string>
+    <string name="timeout_description">Všechny režimy (sluchátka, vibrace, reproduktor) používají tuto dobu.</string>
+    <string name="after_earphone_timeout">Po uplynutí času se sluchátky</string>
+    <string name="timeout_fallback_hint">Záložní režim používá nastavení „Bez sluchátek“ níže.</string>
+    <string name="vibrate_only">Pouze vibrace</string>
+    <string name="loudspeaker">Reproduktor</string>
+    <string name="fallback">Použít záložní režim</string>
+    <string name="duration_min">%1$d min</string>
+
+    <string name="no_earphone_title">Bez sluchátek</string>
+
+    <string name="ringtone">Zvuk</string>
+    <string name="custom_ringtone_set">Vlastní zvuk nastaven</string>
+    <string name="system_default_alarm">Systémový výchozí zvuk budíku</string>
+    <string name="pick_ringtone">Vybrat zvuk</string>
+
+    <string name="process_keeping">Udržení procesu</string>
+    <string name="exact_alarm">Přesný budík</string>
+    <string name="exact_alarm_allowed">Povoleno</string>
+    <string name="exact_alarm_denied">Nepovoleno</string>
+    <string name="exact_alarm_request">Povolit</string>
+    <string name="shizuku">Shizuku</string>
+    <string name="shizuku_connected">Připojeno a autorizováno</string>
+    <string name="shizuku_waiting_permission">Čekání na oprávnění</string>
+    <string name="shizuku_not_installed">Není nainstalováno</string>
+    <string name="shizuku_install">Nainstalovat Shizuku</string>
+    <string name="shizuku_authorize">Autorizovat</string>
+    <string name="disable_battery_optimization">Vypnout optimalizaci baterie</string>
+    <string name="shizuku_activated">Shizuku připojeno, ochrana procesu aktivní</string>
+
+    <string name="language_title">Jazyk</string>
+    <string name="follow_system">Podle systému</string>
+    <string name="search_languages">Hledat jazyk</string>
+    <string name="no_languages_found">Nebyly nalezeny žádné jazyky</string>
+
+    <string name="alarm_set_format">Budík nastaven na %1$02d:%2$02d</string>
+    <string name="alarm_removed">Budík odebrán</string>
+    <string name="test_alarm_triggered">Testovací budík spuštěn</string>
+    <string name="alarm_stopped">Budík zastaven</string>
+
+    <string name="schedule_one_shot">Jednorázový</string>
+
+    <string-array name="day_letters">
+        <item></item>
+        <item>N</item>
+        <item>P</item>
+        <item>Ú</item>
+        <item>S</item>
+        <item>Č</item>
+        <item>P</item>
+        <item>S</item>
+    </string-array>
+    <string-array name="day_names_short">
+        <item></item>
+        <item>ne</item>
+        <item>po</item>
+        <item>út</item>
+        <item>st</item>
+        <item>čt</item>
+        <item>pá</item>
+        <item>so</item>
+    </string-array>
+
+    <string name="github">GitHub</string>
+    <string name="github_repo_title">Silent Alarm</string>
+    <string name="github_repo_path">izumisagirii/silent-alarm</string>
+    <string name="checking_updates">Kontrola aktualizací…</string>
+    <string name="update_available">Je dostupná nová verze!</string>
+    <string name="update_version_format">v%1$s → v%2$s</string>
+    <string name="up_to_date_format">Již aktuální (v%1$s). Přidejte hvězdu!</string>
+    <string name="check_repo">Zobrazit úložiště</string>
+    <string name="network_error">Žádné připojení k síti</string>
+    <string name="timeout_error">Vypršel časový limit požadavku</string>
+    <string name="api_error_format">Chyba API GitHubu (%1$d)</string>
+    <string name="no_release_tag">Nebyl nalezen tag vydání</string>
+    <string name="update_error_format">Aktualizaci nelze zkontrolovat: %1$s</string>
+
+    <string name="tile_label">Sluchátkový budík</string>
+    <string name="tile_active">Budíky zapnuty</string>
+    <string name="tile_inactive">Všechny budíky vypnuty</string>
+
+    <string name="notification_channel_alarm">Služba budíku</string>
+    <string name="notification_channel_desc">Trvalé oznámení služby budíku na popředí</string>
+    <string name="notification_channel_active">Budík hraje</string>
+    <string name="notification_channel_active_desc">Zobrazí se, když budík hraje</string>
+    <string name="notification_waiting">Čekání na další budík</string>
+    <string name="notification_alarm_active">Budík aktivní</string>
+    <string name="notification_earphones">Přehrávání ve sluchátkách</string>
+    <string name="notification_no_earphones">Nebyla zjištěna sluchátka</string>
+</resources>

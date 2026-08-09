@@ -1,0 +1,109 @@
+<resources>
+    <string name="app_name">SilentAlarm</string>
+
+    <string name="dashboard_title">Sveglia con cuffie</string>
+    <string name="dashboard_subtitle">Suona solo nelle cuffie. Non sveglia gli altri.</string>
+    <string name="test_alarm">Prova sveglia</string>
+    <string name="stop">Stop</string>
+    <string name="no_alarms">Nessuna sveglia impostata. Tocca + per aggiungerne una.</string>
+    <string name="add_alarm">Aggiungi sveglia</string>
+    <string name="delete_alarm">Elimina sveglia</string>
+    <string name="edit_alarm">Modifica sveglia</string>
+    <string name="new_alarm">Nuova sveglia</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Annulla</string>
+
+    <string name="volume_settings">Impostazioni volume</string>
+    <string name="earphone">Cuffie</string>
+    <string name="speaker">Altoparlante</string>
+    <string name="alarm_timeout">Durata sveglia</string>
+    <string name="duration">Durata</string>
+    <string name="timeout_description">Tutte le modalità (cuffie, vibrazione, altoparlante) usano questa durata.</string>
+    <string name="after_earphone_timeout">Dopo il tempo con le cuffie</string>
+    <string name="timeout_fallback_hint">La modalità di riserva usa l’impostazione “Senza cuffie” qui sotto.</string>
+    <string name="vibrate_only">Solo vibrazione</string>
+    <string name="loudspeaker">Altoparlante</string>
+    <string name="fallback">Usa modalità di riserva</string>
+    <string name="duration_min">%1$d min</string>
+
+    <string name="no_earphone_title">Senza cuffie</string>
+
+    <string name="ringtone">Suoneria</string>
+    <string name="custom_ringtone_set">Suoneria personalizzata impostata</string>
+    <string name="system_default_alarm">Suono sveglia di sistema</string>
+    <string name="pick_ringtone">Scegli suoneria</string>
+
+    <string name="process_keeping">Mantenimento del processo</string>
+    <string name="exact_alarm">Sveglia esatta</string>
+    <string name="exact_alarm_allowed">Consentita</string>
+    <string name="exact_alarm_denied">Non consentita</string>
+    <string name="exact_alarm_request">Attiva</string>
+    <string name="shizuku">Shizuku</string>
+    <string name="shizuku_connected">Connesso e autorizzato</string>
+    <string name="shizuku_waiting_permission">In attesa di autorizzazione</string>
+    <string name="shizuku_not_installed">Non installato</string>
+    <string name="shizuku_install">Installa Shizuku</string>
+    <string name="shizuku_authorize">Autorizza</string>
+    <string name="disable_battery_optimization">Disattiva ottimizzazione batteria</string>
+    <string name="shizuku_activated">Shizuku connesso, protezione anti-kill attiva</string>
+
+    <string name="language_title">Lingua</string>
+    <string name="follow_system">Segui il sistema</string>
+    <string name="search_languages">Cerca lingua</string>
+    <string name="no_languages_found">Nessuna lingua trovata</string>
+
+    <string name="alarm_set_format">Sveglia impostata alle %1$02d:%2$02d</string>
+    <string name="alarm_removed">Sveglia rimossa</string>
+    <string name="test_alarm_triggered">Sveglia di prova attivata</string>
+    <string name="alarm_stopped">Sveglia interrotta</string>
+
+    <string name="schedule_one_shot">Una volta</string>
+
+    <string-array name="day_letters">
+        <item></item>
+        <item>D</item>
+        <item>L</item>
+        <item>M</item>
+        <item>M</item>
+        <item>G</item>
+        <item>V</item>
+        <item>S</item>
+    </string-array>
+    <string-array name="day_names_short">
+        <item></item>
+        <item>dom</item>
+        <item>lun</item>
+        <item>mar</item>
+        <item>mer</item>
+        <item>gio</item>
+        <item>ven</item>
+        <item>sab</item>
+    </string-array>
+
+    <string name="github">GitHub</string>
+    <string name="github_repo_title">Silent Alarm</string>
+    <string name="github_repo_path">izumisagirii/silent-alarm</string>
+    <string name="checking_updates">Controllo aggiornamenti…</string>
+    <string name="update_available">È disponibile una nuova versione!</string>
+    <string name="update_version_format">v%1$s → v%2$s</string>
+    <string name="up_to_date_format">Già aggiornata (v%1$s). Aggiungi una stella!</string>
+    <string name="check_repo">Apri repository</string>
+    <string name="network_error">Nessuna connessione di rete</string>
+    <string name="timeout_error">Richiesta scaduta</string>
+    <string name="api_error_format">Errore API GitHub (%1$d)</string>
+    <string name="no_release_tag">Nessun tag di release trovato</string>
+    <string name="update_error_format">Impossibile verificare: %1$s</string>
+
+    <string name="tile_label">Sveglia con cuffie</string>
+    <string name="tile_active">Sveglie attive</string>
+    <string name="tile_inactive">Tutte le sveglie spente</string>
+
+    <string name="notification_channel_alarm">Servizio sveglia</string>
+    <string name="notification_channel_desc">Notifica persistente per il servizio in primo piano</string>
+    <string name="notification_channel_active">Sveglia in riproduzione</string>
+    <string name="notification_channel_active_desc">Mostrato quando la sveglia sta suonando</string>
+    <string name="notification_waiting">In attesa della prossima sveglia</string>
+    <string name="notification_alarm_active">Sveglia attiva</string>
+    <string name="notification_earphones">Riproduzione nelle cuffie</string>
+    <string name="notification_no_earphones">Nessuna cuffia rilevata</string>
+</resources>

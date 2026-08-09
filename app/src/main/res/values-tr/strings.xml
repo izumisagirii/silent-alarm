@@ -1,0 +1,109 @@
+<resources>
+    <string name="app_name">SilentAlarm</string>
+
+    <string name="dashboard_title">Kulaklık alarmı</string>
+    <string name="dashboard_subtitle">Yalnızca kulaklıktan çalar. Başkalarını uyandırmaz.</string>
+    <string name="test_alarm">Alarmı test et</string>
+    <string name="stop">Durdur</string>
+    <string name="no_alarms">Ayarlı alarm yok. Eklemek için + simgesine dokunun.</string>
+    <string name="add_alarm">Alarm ekle</string>
+    <string name="delete_alarm">Alarmı sil</string>
+    <string name="edit_alarm">Alarmı düzenle</string>
+    <string name="new_alarm">Yeni alarm</string>
+    <string name="ok">Tamam</string>
+    <string name="cancel">İptal</string>
+
+    <string name="volume_settings">Ses ayarları</string>
+    <string name="earphone">Kulaklık</string>
+    <string name="speaker">Hoparlör</string>
+    <string name="alarm_timeout">Alarm süresi</string>
+    <string name="duration">Süre</string>
+    <string name="timeout_description">Tüm modlar (kulaklık, titreşim, hoparlör) bu süreyi kullanır.</string>
+    <string name="after_earphone_timeout">Kulaklık süresi bittikten sonra</string>
+    <string name="timeout_fallback_hint">Yedek mod, aşağıdaki “Kulaklık yok” ayarını kullanır.</string>
+    <string name="vibrate_only">Yalnızca titreşim</string>
+    <string name="loudspeaker">Hoparlör</string>
+    <string name="fallback">Yedek modu kullan</string>
+    <string name="duration_min">%1$d dk</string>
+
+    <string name="no_earphone_title">Kulaklık yok</string>
+
+    <string name="ringtone">Zil sesi</string>
+    <string name="custom_ringtone_set">Özel zil sesi ayarlandı</string>
+    <string name="system_default_alarm">Sistem varsayılan alarm sesi</string>
+    <string name="pick_ringtone">Zil sesi seç</string>
+
+    <string name="process_keeping">İşlemi koru</string>
+    <string name="exact_alarm">Hassas alarm</string>
+    <string name="exact_alarm_allowed">İzinli</string>
+    <string name="exact_alarm_denied">İzin yok</string>
+    <string name="exact_alarm_request">Etkinleştir</string>
+    <string name="shizuku">Shizuku</string>
+    <string name="shizuku_connected">Bağlı ve yetkili</string>
+    <string name="shizuku_waiting_permission">İzin bekleniyor</string>
+    <string name="shizuku_not_installed">Kurulu değil</string>
+    <string name="shizuku_install">Shizuku kur</string>
+    <string name="shizuku_authorize">Yetkilendir</string>
+    <string name="disable_battery_optimization">Pil iyileştirmesini kapat</string>
+    <string name="shizuku_activated">Shizuku bağlı, işlem koruması aktif</string>
+
+    <string name="language_title">Dil</string>
+    <string name="follow_system">Sistemi izle</string>
+    <string name="search_languages">Dil ara</string>
+    <string name="no_languages_found">Dil bulunamadı</string>
+
+    <string name="alarm_set_format">Alarm %1$02d:%2$02d olarak ayarlandı</string>
+    <string name="alarm_removed">Alarm silindi</string>
+    <string name="test_alarm_triggered">Test alarmı tetiklendi</string>
+    <string name="alarm_stopped">Alarm durduruldu</string>
+
+    <string name="schedule_one_shot">Bir kez</string>
+
+    <string-array name="day_letters">
+        <item></item>
+        <item>P</item>
+        <item>P</item>
+        <item>S</item>
+        <item>Ç</item>
+        <item>P</item>
+        <item>C</item>
+        <item>C</item>
+    </string-array>
+    <string-array name="day_names_short">
+        <item></item>
+        <item>Paz</item>
+        <item>Pzt</item>
+        <item>Sal</item>
+        <item>Çar</item>
+        <item>Per</item>
+        <item>Cum</item>
+        <item>Cmt</item>
+    </string-array>
+
+    <string name="github">GitHub</string>
+    <string name="github_repo_title">Silent Alarm</string>
+    <string name="github_repo_path">izumisagirii/silent-alarm</string>
+    <string name="checking_updates">Güncellemeler denetleniyor…</string>
+    <string name="update_available">Yeni bir sürüm var!</string>
+    <string name="update_version_format">v%1$s → v%2$s</string>
+    <string name="up_to_date_format">Zaten güncel (v%1$s). Yıldız ekleyin!</string>
+    <string name="check_repo">Depoyu görüntüle</string>
+    <string name="network_error">Ağ bağlantısı yok</string>
+    <string name="timeout_error">İstek zaman aşımına uğradı</string>
+    <string name="api_error_format">GitHub API hatası (%1$d)</string>
+    <string name="no_release_tag">Sürüm etiketi bulunamadı</string>
+    <string name="update_error_format">Güncelleme denetlenemedi: %1$s</string>
+
+    <string name="tile_label">Kulaklık alarmı</string>
+    <string name="tile_active">Alarmlar açık</string>
+    <string name="tile_inactive">Tüm alarmlar kapalı</string>
+
+    <string name="notification_channel_alarm">Alarm hizmeti</string>
+    <string name="notification_channel_desc">Alarm ön plan hizmeti için kalıcı bildirim</string>
+    <string name="notification_channel_active">Alarm çalıyor</string>
+    <string name="notification_channel_active_desc">Alarm çalarken gösterilir</string>
+    <string name="notification_waiting">Sonraki alarm bekleniyor</string>
+    <string name="notification_alarm_active">Alarm aktif</string>
+    <string name="notification_earphones">Kulaklıktan çalıyor</string>
+    <string name="notification_no_earphones">Kulaklık algılanmadı</string>
+</resources>

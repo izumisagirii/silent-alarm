@@ -1,0 +1,109 @@
+<resources>
+    <string name="app_name">SilentAlarm</string>
+
+    <string name="dashboard_title">Alarm earphone</string>
+    <string name="dashboard_subtitle">Hanya berbunyi melalui earphone. Tidak membangunkan orang lain.</string>
+    <string name="test_alarm">Uji alarm</string>
+    <string name="stop">Berhenti</string>
+    <string name="no_alarms">Belum ada alarm. Ketuk + untuk menambahkan.</string>
+    <string name="add_alarm">Tambah alarm</string>
+    <string name="delete_alarm">Hapus alarm</string>
+    <string name="edit_alarm">Edit alarm</string>
+    <string name="new_alarm">Alarm baru</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Batal</string>
+
+    <string name="volume_settings">Pengaturan volume</string>
+    <string name="earphone">Earphone</string>
+    <string name="speaker">Speaker</string>
+    <string name="alarm_timeout">Durasi alarm</string>
+    <string name="duration">Durasi</string>
+    <string name="timeout_description">Semua mode (earphone, getar, speaker) memakai durasi ini.</string>
+    <string name="after_earphone_timeout">Setelah waktu earphone</string>
+    <string name="timeout_fallback_hint">Mode cadangan memakai pengaturan “Tanpa earphone” di bawah.</string>
+    <string name="vibrate_only">Hanya getar</string>
+    <string name="loudspeaker">Speaker</string>
+    <string name="fallback">Gunakan mode cadangan</string>
+    <string name="duration_min">%1$d mnt</string>
+
+    <string name="no_earphone_title">Tanpa earphone</string>
+
+    <string name="ringtone">Nada dering</string>
+    <string name="custom_ringtone_set">Nada dering kustom disetel</string>
+    <string name="system_default_alarm">Nada alarm default sistem</string>
+    <string name="pick_ringtone">Pilih nada dering</string>
+
+    <string name="process_keeping">Menjaga proses tetap hidup</string>
+    <string name="exact_alarm">Alarm presisi</string>
+    <string name="exact_alarm_allowed">Diizinkan</string>
+    <string name="exact_alarm_denied">Tidak diizinkan</string>
+    <string name="exact_alarm_request">Aktifkan</string>
+    <string name="shizuku">Shizuku</string>
+    <string name="shizuku_connected">Terhubung dan diberi izin</string>
+    <string name="shizuku_waiting_permission">Menunggu izin</string>
+    <string name="shizuku_not_installed">Belum terpasang</string>
+    <string name="shizuku_install">Pasang Shizuku</string>
+    <string name="shizuku_authorize">Beri izin</string>
+    <string name="disable_battery_optimization">Matikan optimasi baterai</string>
+    <string name="shizuku_activated">Shizuku terhubung, perlindungan anti-kill aktif</string>
+
+    <string name="language_title">Bahasa</string>
+    <string name="follow_system">Ikuti sistem</string>
+    <string name="search_languages">Cari bahasa</string>
+    <string name="no_languages_found">Bahasa tidak ditemukan</string>
+
+    <string name="alarm_set_format">Alarm diatur pukul %1$02d:%2$02d</string>
+    <string name="alarm_removed">Alarm dihapus</string>
+    <string name="test_alarm_triggered">Alarm uji dipicu</string>
+    <string name="alarm_stopped">Alarm dihentikan</string>
+
+    <string name="schedule_one_shot">Sekali</string>
+
+    <string-array name="day_letters">
+        <item></item>
+        <item>M</item>
+        <item>S</item>
+        <item>S</item>
+        <item>R</item>
+        <item>K</item>
+        <item>J</item>
+        <item>S</item>
+    </string-array>
+    <string-array name="day_names_short">
+        <item></item>
+        <item>Min</item>
+        <item>Sen</item>
+        <item>Sel</item>
+        <item>Rab</item>
+        <item>Kam</item>
+        <item>Jum</item>
+        <item>Sab</item>
+    </string-array>
+
+    <string name="github">GitHub</string>
+    <string name="github_repo_title">Silent Alarm</string>
+    <string name="github_repo_path">izumisagirii/silent-alarm</string>
+    <string name="checking_updates">Memeriksa pembaruan…</string>
+    <string name="update_available">Versi baru tersedia!</string>
+    <string name="update_version_format">v%1$s → v%2$s</string>
+    <string name="up_to_date_format">Sudah versi terbaru (v%1$s), beri bintang!</string>
+    <string name="check_repo">Lihat repositori</string>
+    <string name="network_error">Tidak ada koneksi jaringan</string>
+    <string name="timeout_error">Permintaan habis waktu</string>
+    <string name="api_error_format">Kesalahan API GitHub (%1$d)</string>
+    <string name="no_release_tag">Tag rilis tidak ditemukan</string>
+    <string name="update_error_format">Tidak dapat memeriksa pembaruan: %1$s</string>
+
+    <string name="tile_label">Alarm earphone</string>
+    <string name="tile_active">Alarm aktif</string>
+    <string name="tile_inactive">Semua alarm mati</string>
+
+    <string name="notification_channel_alarm">Layanan alarm</string>
+    <string name="notification_channel_desc">Notifikasi permanen layanan latar depan alarm</string>
+    <string name="notification_channel_active">Alarm berbunyi</string>
+    <string name="notification_channel_active_desc">Ditampilkan saat alarm sedang berbunyi</string>
+    <string name="notification_waiting">Menunggu alarm berikutnya</string>
+    <string name="notification_alarm_active">Alarm aktif</string>
+    <string name="notification_earphones">Berbunyi melalui earphone</string>
+    <string name="notification_no_earphones">Earphone tidak terdeteksi</string>
+</resources>

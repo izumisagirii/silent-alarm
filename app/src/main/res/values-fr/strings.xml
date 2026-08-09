@@ -1,0 +1,109 @@
+<resources>
+    <string name="app_name">SilentAlarm</string>
+
+    <string name="dashboard_title">Alarme casque</string>
+    <string name="dashboard_subtitle">Son uniquement dans les écouteurs. Ne réveille pas les autres.</string>
+    <string name="test_alarm">Tester l’alarme</string>
+    <string name="stop">Arrêter</string>
+    <string name="no_alarms">Aucune alarme définie. Touchez + pour en ajouter une.</string>
+    <string name="add_alarm">Ajouter une alarme</string>
+    <string name="delete_alarm">Supprimer l’alarme</string>
+    <string name="edit_alarm">Modifier l’alarme</string>
+    <string name="new_alarm">Nouvelle alarme</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Annuler</string>
+
+    <string name="volume_settings">Réglages du volume</string>
+    <string name="earphone">Écouteurs</string>
+    <string name="speaker">Haut-parleur</string>
+    <string name="alarm_timeout">Durée de l’alarme</string>
+    <string name="duration">Durée</string>
+    <string name="timeout_description">Tous les modes (écouteurs, vibration, haut-parleur) partagent cette durée.</string>
+    <string name="after_earphone_timeout">Après l’écoute au casque</string>
+    <string name="timeout_fallback_hint">Le mode de secours utilise le réglage « Sans écouteurs » ci-dessous.</string>
+    <string name="vibrate_only">Vibration uniquement</string>
+    <string name="loudspeaker">Haut-parleur</string>
+    <string name="fallback">Passer au mode de secours</string>
+    <string name="duration_min">%1$d min</string>
+
+    <string name="no_earphone_title">Sans écouteurs</string>
+
+    <string name="ringtone">Sonnerie</string>
+    <string name="custom_ringtone_set">Sonnerie personnalisée définie</string>
+    <string name="system_default_alarm">Sonnerie d’alarme système</string>
+    <string name="pick_ringtone">Choisir une sonnerie</string>
+
+    <string name="process_keeping">Maintien du processus</string>
+    <string name="exact_alarm">Alarme exacte</string>
+    <string name="exact_alarm_allowed">Autorisée</string>
+    <string name="exact_alarm_denied">Non autorisée</string>
+    <string name="exact_alarm_request">Activer</string>
+    <string name="shizuku">Shizuku</string>
+    <string name="shizuku_connected">Connecté et autorisé</string>
+    <string name="shizuku_waiting_permission">En attente d’autorisation</string>
+    <string name="shizuku_not_installed">Non installé</string>
+    <string name="shizuku_install">Installer Shizuku</string>
+    <string name="shizuku_authorize">Autoriser</string>
+    <string name="disable_battery_optimization">Désactiver l’optimisation de la batterie</string>
+    <string name="shizuku_activated">Shizuku connecté, protection anti-kill active</string>
+
+    <string name="language_title">Langue</string>
+    <string name="follow_system">Suivre le système</string>
+    <string name="search_languages">Rechercher une langue</string>
+    <string name="no_languages_found">Aucune langue trouvée</string>
+
+    <string name="alarm_set_format">Alarme définie à %1$02d:%2$02d</string>
+    <string name="alarm_removed">Alarme supprimée</string>
+    <string name="test_alarm_triggered">Alarme de test déclenchée</string>
+    <string name="alarm_stopped">Alarme arrêtée</string>
+
+    <string name="schedule_one_shot">Une seule fois</string>
+
+    <string-array name="day_letters">
+        <item></item>
+        <item>D</item>
+        <item>L</item>
+        <item>M</item>
+        <item>M</item>
+        <item>J</item>
+        <item>V</item>
+        <item>S</item>
+    </string-array>
+    <string-array name="day_names_short">
+        <item></item>
+        <item>dim.</item>
+        <item>lun.</item>
+        <item>mar.</item>
+        <item>mer.</item>
+        <item>jeu.</item>
+        <item>ven.</item>
+        <item>sam.</item>
+    </string-array>
+
+    <string name="github">GitHub</string>
+    <string name="github_repo_title">Silent Alarm</string>
+    <string name="github_repo_path">izumisagirii/silent-alarm</string>
+    <string name="checking_updates">Vérification des mises à jour…</string>
+    <string name="update_available">Une nouvelle version est disponible !</string>
+    <string name="update_version_format">v%1$s → v%2$s</string>
+    <string name="up_to_date_format">Déjà à jour (v%1$s). Ajoutez une étoile !</string>
+    <string name="check_repo">Voir le dépôt</string>
+    <string name="network_error">Pas de connexion réseau</string>
+    <string name="timeout_error">La demande a expiré</string>
+    <string name="api_error_format">Erreur API GitHub (%1$d)</string>
+    <string name="no_release_tag">Aucune étiquette de version trouvée</string>
+    <string name="update_error_format">Impossible de vérifier : %1$s</string>
+
+    <string name="tile_label">Alarme casque</string>
+    <string name="tile_active">Alarmes activées</string>
+    <string name="tile_inactive">Toutes les alarmes désactivées</string>
+
+    <string name="notification_channel_alarm">Service d’alarme</string>
+    <string name="notification_channel_desc">Notification persistante du service d’alarme au premier plan</string>
+    <string name="notification_channel_active">Alarme en cours</string>
+    <string name="notification_channel_active_desc">Affiché lorsque l’alarme est en cours de lecture</string>
+    <string name="notification_waiting">En attente de la prochaine alarme</string>
+    <string name="notification_alarm_active">Alarme active</string>
+    <string name="notification_earphones">Lecture dans les écouteurs</string>
+    <string name="notification_no_earphones">Aucun écouteur détecté</string>
+</resources>

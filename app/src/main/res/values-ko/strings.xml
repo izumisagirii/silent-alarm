@@ -1,0 +1,109 @@
+<resources>
+    <string name="app_name">SilentAlarm</string>
+
+    <string name="dashboard_title">이어폰 알람</string>
+    <string name="dashboard_subtitle">이어폰으로만 재생됩니다. 다른 사람을 깨우지 않습니다.</string>
+    <string name="test_alarm">알람 테스트</string>
+    <string name="stop">중지</string>
+    <string name="no_alarms">설정된 알람이 없습니다. +를 눌러 추가하세요.</string>
+    <string name="add_alarm">알람 추가</string>
+    <string name="delete_alarm">알람 삭제</string>
+    <string name="edit_alarm">알람 편집</string>
+    <string name="new_alarm">새 알람</string>
+    <string name="ok">확인</string>
+    <string name="cancel">취소</string>
+
+    <string name="volume_settings">음량 설정</string>
+    <string name="earphone">이어폰</string>
+    <string name="speaker">스피커</string>
+    <string name="alarm_timeout">알람 길이</string>
+    <string name="duration">시간</string>
+    <string name="timeout_description">모든 모드(이어폰, 진동, 스피커)가 이 시간을 사용합니다.</string>
+    <string name="after_earphone_timeout">이어폰 재생 종료 후</string>
+    <string name="timeout_fallback_hint">예비 모드는 아래의 “이어폰 없음” 설정을 사용합니다.</string>
+    <string name="vibrate_only">진동만</string>
+    <string name="loudspeaker">스피커 재생</string>
+    <string name="fallback">예비 모드로 전환</string>
+    <string name="duration_min">%1$d분</string>
+
+    <string name="no_earphone_title">이어폰 없음</string>
+
+    <string name="ringtone">벨소리</string>
+    <string name="custom_ringtone_set">맞춤 벨소리 설정됨</string>
+    <string name="system_default_alarm">시스템 기본 알람음</string>
+    <string name="pick_ringtone">벨소리 선택</string>
+
+    <string name="process_keeping">프로세스 유지</string>
+    <string name="exact_alarm">정확한 알람</string>
+    <string name="exact_alarm_allowed">허용됨</string>
+    <string name="exact_alarm_denied">허용되지 않음</string>
+    <string name="exact_alarm_request">사용</string>
+    <string name="shizuku">Shizuku</string>
+    <string name="shizuku_connected">연결 및 권한 허용됨</string>
+    <string name="shizuku_waiting_permission">권한 대기 중</string>
+    <string name="shizuku_not_installed">설치되지 않음</string>
+    <string name="shizuku_install">Shizuku 설치</string>
+    <string name="shizuku_authorize">권한 허용</string>
+    <string name="disable_battery_optimization">배터리 최적화 사용 안 함</string>
+    <string name="shizuku_activated">Shizuku 연결됨, 프로세스 보호 활성화됨</string>
+
+    <string name="language_title">언어</string>
+    <string name="follow_system">시스템 설정 따르기</string>
+    <string name="search_languages">언어 검색</string>
+    <string name="no_languages_found">언어를 찾을 수 없음</string>
+
+    <string name="alarm_set_format">%1$02d:%2$02d에 알람이 설정되었습니다</string>
+    <string name="alarm_removed">알람이 삭제되었습니다</string>
+    <string name="test_alarm_triggered">테스트 알람이 실행되었습니다</string>
+    <string name="alarm_stopped">알람이 중지되었습니다</string>
+
+    <string name="schedule_one_shot">한 번</string>
+
+    <string-array name="day_letters">
+        <item></item>
+        <item>일</item>
+        <item>월</item>
+        <item>화</item>
+        <item>수</item>
+        <item>목</item>
+        <item>금</item>
+        <item>토</item>
+    </string-array>
+    <string-array name="day_names_short">
+        <item></item>
+        <item>일</item>
+        <item>월</item>
+        <item>화</item>
+        <item>수</item>
+        <item>목</item>
+        <item>금</item>
+        <item>토</item>
+    </string-array>
+
+    <string name="github">GitHub</string>
+    <string name="github_repo_title">Silent Alarm</string>
+    <string name="github_repo_path">izumisagirii/silent-alarm</string>
+    <string name="checking_updates">업데이트 확인 중…</string>
+    <string name="update_available">새 버전이 있습니다!</string>
+    <string name="update_version_format">v%1$s → v%2$s</string>
+    <string name="up_to_date_format">이미 최신 버전(v%1$s)입니다. 별점을 남겨 주세요!</string>
+    <string name="check_repo">저장소 보기</string>
+    <string name="network_error">네트워크에 연결할 수 없습니다</string>
+    <string name="timeout_error">요청 시간이 초과되었습니다</string>
+    <string name="api_error_format">GitHub API 오류(%1$d)</string>
+    <string name="no_release_tag">릴리스 태그를 찾을 수 없습니다</string>
+    <string name="update_error_format">업데이트를 확인할 수 없습니다: %1$s</string>
+
+    <string name="tile_label">이어폰 알람</string>
+    <string name="tile_active">알람 사용 중</string>
+    <string name="tile_inactive">모든 알람 꺼짐</string>
+
+    <string name="notification_channel_alarm">알람 서비스</string>
+    <string name="notification_channel_desc">알람 포그라운드 서비스 상시 알림</string>
+    <string name="notification_channel_active">알람 재생 중</string>
+    <string name="notification_channel_active_desc">알람이 재생 중일 때 표시됩니다</string>
+    <string name="notification_waiting">다음 알람 대기 중</string>
+    <string name="notification_alarm_active">알람 작동 중</string>
+    <string name="notification_earphones">이어폰으로 재생 중</string>
+    <string name="notification_no_earphones">이어폰이 감지되지 않음</string>
+</resources>

@@ -1,0 +1,109 @@
+<resources>
+    <string name="app_name">SilentAlarm</string>
+
+    <string name="dashboard_title">ஹெட்ஃபோன் அலாரம்</string>
+    <string name="dashboard_subtitle">ஹெட்ஃபோனில் மட்டுமே ஒலிக்கும். மற்றவர்களை எழுப்பாது.</string>
+    <string name="test_alarm">சோதனை</string>
+    <string name="stop">நிறுத்து</string>
+    <string name="no_alarms">அலாரம் அமைக்கப்படவில்லை. சேர்க்க + ஐத் தட்டவும்.</string>
+    <string name="add_alarm">அலாரம் சேர்க்க</string>
+    <string name="delete_alarm">அலாரத்தை நீக்கு</string>
+    <string name="edit_alarm">அலாரத்தை திருத்து</string>
+    <string name="new_alarm">புதிய அலாரம்</string>
+    <string name="ok">சரி</string>
+    <string name="cancel">ரத்து</string>
+
+    <string name="volume_settings">ஒலி அளவு அமைப்புகள்</string>
+    <string name="earphone">ஹெட்ஃபோன்</string>
+    <string name="speaker">ஸ்பீக்கர்</string>
+    <string name="alarm_timeout">அலாரத்தின் காலம்</string>
+    <string name="duration">காலம்</string>
+    <string name="timeout_description">அனைத்து முறைகளும் (ஹெட்ஃபோன், அதிர்வு, ஸ்பீக்கர்) இந்த காலத்தைப் பயன்படுத்துகின்றன.</string>
+    <string name="after_earphone_timeout">ஹெட்ஃபோன் நேரம் முடிந்த பிறகு</string>
+    <string name="timeout_fallback_hint">காப்பு முறை கீழே உள்ள “ஹெட்ஃபோன் இல்லை” அமைப்பைப் பயன்படுத்துகிறது.</string>
+    <string name="vibrate_only">அதிர்வு மட்டும்</string>
+    <string name="loudspeaker">ஸ்பீக்கர்</string>
+    <string name="fallback">காப்பு முறையைப் பயன்படுத்து</string>
+    <string name="duration_min">%1$d நிமிடம்</string>
+
+    <string name="no_earphone_title">ஹெட்ஃபோன் இல்லை</string>
+
+    <string name="ringtone">ரிங்டோன்</string>
+    <string name="custom_ringtone_set">தனிப்பயன் ரிங்டோன் அமைக்கப்பட்டது</string>
+    <string name="system_default_alarm">கணினி இயல்புநிலை அலாரம்</string>
+    <string name="pick_ringtone">ரிங்டோனைத் தேர்வுசெய்</string>
+
+    <string name="process_keeping">செயல்முறை பாதுகாப்பு</string>
+    <string name="exact_alarm">துல்லியமான அலாரம்</string>
+    <string name="exact_alarm_allowed">அனுமதிக்கப்பட்டது</string>
+    <string name="exact_alarm_denied">அனுமதி இல்லை</string>
+    <string name="exact_alarm_request">இயக்கு</string>
+    <string name="shizuku">Shizuku</string>
+    <string name="shizuku_connected">இணைக்கப்பட்டு அங்கீகரிக்கப்பட்டது</string>
+    <string name="shizuku_waiting_permission">அனுமதிக்காக காத்திருக்கிறது</string>
+    <string name="shizuku_not_installed">நிறுவப்படவில்லை</string>
+    <string name="shizuku_install">Shizuku நிறுவு</string>
+    <string name="shizuku_authorize">அங்கீகரி</string>
+    <string name="disable_battery_optimization">பேட்டரி மேம்படுத்தலை முடக்கு</string>
+    <string name="shizuku_activated">Shizuku இணைக்கப்பட்டது, செயல்முறை பாதுகாப்பு செயலில் உள்ளது</string>
+
+    <string name="language_title">மொழி</string>
+    <string name="follow_system">கணினியைப் பின்பற்று</string>
+    <string name="search_languages">மொழியைத் தேடு</string>
+    <string name="no_languages_found">மொழிகள் கிடைக்கவில்லை</string>
+
+    <string name="alarm_set_format">அலாரம் %1$02d:%2$02d க்கு அமைக்கப்பட்டது</string>
+    <string name="alarm_removed">அலாரம் அகற்றப்பட்டது</string>
+    <string name="test_alarm_triggered">சோதனை அலாரம் இயக்கப்பட்டது</string>
+    <string name="alarm_stopped">அலாரம் நிறுத்தப்பட்டது</string>
+
+    <string name="schedule_one_shot">ஒருமுறை</string>
+
+    <string-array name="day_letters">
+        <item></item>
+        <item>ஞ</item>
+        <item>த</item>
+        <item>செ</item>
+        <item>பு</item>
+        <item>வ</item>
+        <item>வெ</item>
+        <item>ச</item>
+    </string-array>
+    <string-array name="day_names_short">
+        <item></item>
+        <item>ஞாயிறு</item>
+        <item>திங்கள்</item>
+        <item>செவ்வாய்</item>
+        <item>புதன்</item>
+        <item>வியாழன்</item>
+        <item>வெள்ளி</item>
+        <item>சனி</item>
+    </string-array>
+
+    <string name="github">GitHub</string>
+    <string name="github_repo_title">Silent Alarm</string>
+    <string name="github_repo_path">izumisagirii/silent-alarm</string>
+    <string name="checking_updates">புதுப்பிப்புகளைச் சரிபார்க்கிறது…</string>
+    <string name="update_available">புதிய பதிப்பு உள்ளது!</string>
+    <string name="update_version_format">v%1$s → v%2$s</string>
+    <string name="up_to_date_format">ஏற்கனவே புதுப்பிக்கப்பட்டது (v%1$s), நட்சத்திரம் சேர்க்கவும்!</string>
+    <string name="check_repo">களஞ்சியத்தைக் காண்க</string>
+    <string name="network_error">நெட்வொர்க் இணைப்பு இல்லை</string>
+    <string name="timeout_error">கோரிக்கை நேரம் முடிந்தது</string>
+    <string name="api_error_format">GitHub API பிழை (%1$d)</string>
+    <string name="no_release_tag">வெளியீட்டு டேக் கிடைக்கவில்லை</string>
+    <string name="update_error_format">புதுப்பிப்பைச் சரிபார்க்க முடியவில்லை: %1$s</string>
+
+    <string name="tile_label">ஹெட்ஃபோன் அலாரம்</string>
+    <string name="tile_active">அலாரங்கள் இயக்கத்தில் உள்ளன</string>
+    <string name="tile_inactive">எல்லா அலாரங்களும் அணைக்கப்பட்டுள்ளன</string>
+
+    <string name="notification_channel_alarm">அலாரம் சேவை</string>
+    <string name="notification_channel_desc">அலார முன்பகுதி சேவைக்கான நிலையான அறிவிப்பு</string>
+    <string name="notification_channel_active">அலாரம் ஒலிக்கிறது</string>
+    <string name="notification_channel_active_desc">அலாரம் ஒலிக்கும்போது காட்டப்படும்</string>
+    <string name="notification_waiting">அடுத்த அலாரத்திற்காக காத்திருக்கிறது</string>
+    <string name="notification_alarm_active">அலாரம் செயலில் உள்ளது</string>
+    <string name="notification_earphones">ஹெட்ஃபோனில் ஒலிக்கிறது</string>
+    <string name="notification_no_earphones">ஹெட்ஃபோன் கண்டறியப்படவில்லை</string>
+</resources>

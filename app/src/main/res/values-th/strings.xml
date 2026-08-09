@@ -1,0 +1,109 @@
+<resources>
+    <string name="app_name">SilentAlarm</string>
+
+    <string name="dashboard_title">นาฬิกาปลุกผ่านหูฟัง</string>
+    <string name="dashboard_subtitle">เล่นผ่านหูฟังเท่านั้น ไม่รบกวนผู้อื่น</string>
+    <string name="test_alarm">ทดสอบนาฬิกาปลุก</string>
+    <string name="stop">หยุด</string>
+    <string name="no_alarms">ยังไม่มีนาฬิกาปลุก แตะ + เพื่อเพิ่ม</string>
+    <string name="add_alarm">เพิ่มนาฬิกาปลุก</string>
+    <string name="delete_alarm">ลบนาฬิกาปลุก</string>
+    <string name="edit_alarm">แก้ไขนาฬิกาปลุก</string>
+    <string name="new_alarm">นาฬิกาปลุกใหม่</string>
+    <string name="ok">ตกลง</string>
+    <string name="cancel">ยกเลิก</string>
+
+    <string name="volume_settings">การตั้งค่าเสียง</string>
+    <string name="earphone">หูฟัง</string>
+    <string name="speaker">ลำโพง</string>
+    <string name="alarm_timeout">ระยะเวลาปลุก</string>
+    <string name="duration">ระยะเวลา</string>
+    <string name="timeout_description">ทุกโหมด (หูฟัง ระบบสั่น ลำโพง) ใช้ระยะเวลานี้ร่วมกัน</string>
+    <string name="after_earphone_timeout">หลังจากเวลาหูฟังสิ้นสุด</string>
+    <string name="timeout_fallback_hint">โหมดสำรองใช้การตั้งค่า “ไม่มีหูฟัง” ด้านล่าง</string>
+    <string name="vibrate_only">สั่นเท่านั้น</string>
+    <string name="loudspeaker">ลำโพง</string>
+    <string name="fallback">ใช้โหมดสำรอง</string>
+    <string name="duration_min">%1$d นาที</string>
+
+    <string name="no_earphone_title">ไม่มีหูฟัง</string>
+
+    <string name="ringtone">เสียงเรียกเข้า</string>
+    <string name="custom_ringtone_set">ตั้งเสียงเรียกเข้าแบบกำหนดเองแล้ว</string>
+    <string name="system_default_alarm">เสียงปลุกเริ่มต้นของระบบ</string>
+    <string name="pick_ringtone">เลือกเสียงเรียกเข้า</string>
+
+    <string name="process_keeping">รักษากระบวนการ</string>
+    <string name="exact_alarm">นาฬิกาปลุกแบบแม่นยำ</string>
+    <string name="exact_alarm_allowed">อนุญาตแล้ว</string>
+    <string name="exact_alarm_denied">ไม่อนุญาต</string>
+    <string name="exact_alarm_request">เปิดใช้</string>
+    <string name="shizuku">Shizuku</string>
+    <string name="shizuku_connected">เชื่อมต่อและได้รับสิทธิ์แล้ว</string>
+    <string name="shizuku_waiting_permission">กำลังรอสิทธิ์</string>
+    <string name="shizuku_not_installed">ยังไม่ได้ติดตั้ง</string>
+    <string name="shizuku_install">ติดตั้ง Shizuku</string>
+    <string name="shizuku_authorize">ให้สิทธิ์</string>
+    <string name="disable_battery_optimization">ปิดการประหยัดแบตเตอรี่</string>
+    <string name="shizuku_activated">เชื่อมต่อ Shizuku แล้ว เปิดการป้องกันกระบวนการ</string>
+
+    <string name="language_title">ภาษา</string>
+    <string name="follow_system">ตามระบบ</string>
+    <string name="search_languages">ค้นหาภาษา</string>
+    <string name="no_languages_found">ไม่พบภาษา</string>
+
+    <string name="alarm_set_format">ตั้งนาฬิกาปลุกเวลา %1$02d:%2$02d</string>
+    <string name="alarm_removed">ลบนาฬิกาปลุกแล้ว</string>
+    <string name="test_alarm_triggered">ทดสอบนาฬิกาปลุกแล้ว</string>
+    <string name="alarm_stopped">หยุดนาฬิกาปลุกแล้ว</string>
+
+    <string name="schedule_one_shot">ครั้งเดียว</string>
+
+    <string-array name="day_letters">
+        <item></item>
+        <item>อ</item>
+        <item>จ</item>
+        <item>อ</item>
+        <item>พ</item>
+        <item>พ</item>
+        <item>ศ</item>
+        <item>ส</item>
+    </string-array>
+    <string-array name="day_names_short">
+        <item></item>
+        <item>อา.</item>
+        <item>จ.</item>
+        <item>อ.</item>
+        <item>พ.</item>
+        <item>พฤ.</item>
+        <item>ศ.</item>
+        <item>ส.</item>
+    </string-array>
+
+    <string name="github">GitHub</string>
+    <string name="github_repo_title">Silent Alarm</string>
+    <string name="github_repo_path">izumisagirii/silent-alarm</string>
+    <string name="checking_updates">กำลังตรวจสอบอัปเดต…</string>
+    <string name="update_available">มีเวอร์ชันใหม่!</string>
+    <string name="update_version_format">v%1$s → v%2$s</string>
+    <string name="up_to_date_format">เป็นเวอร์ชันล่าสุดแล้ว (v%1$s) ช่วยกดดาวด้วย!</string>
+    <string name="check_repo">ดูที่เก็บโค้ด</string>
+    <string name="network_error">ไม่มีการเชื่อมต่อเครือข่าย</string>
+    <string name="timeout_error">คำขอหมดเวลา</string>
+    <string name="api_error_format">ข้อผิดพลาด GitHub API (%1$d)</string>
+    <string name="no_release_tag">ไม่พบแท็กรุ่น</string>
+    <string name="update_error_format">ไม่สามารถตรวจสอบอัปเดต: %1$s</string>
+
+    <string name="tile_label">นาฬิกาปลุกผ่านหูฟัง</string>
+    <string name="tile_active">เปิดนาฬิกาปลุกแล้ว</string>
+    <string name="tile_inactive">ปิดนาฬิกาปลุกทั้งหมด</string>
+
+    <string name="notification_channel_alarm">บริการนาฬิกาปลุก</string>
+    <string name="notification_channel_desc">การแจ้งเตือนถาวรของบริการนาฬิกาปลุกเบื้องหน้า</string>
+    <string name="notification_channel_active">กำลังเล่นนาฬิกาปลุก</string>
+    <string name="notification_channel_active_desc">แสดงเมื่อนาฬิกาปลุกกำลังเล่น</string>
+    <string name="notification_waiting">รอนาฬิกาปลุกครั้งถัดไป</string>
+    <string name="notification_alarm_active">นาฬิกาปลุกทำงานอยู่</string>
+    <string name="notification_earphones">กำลังเล่นผ่านหูฟัง</string>
+    <string name="notification_no_earphones">ตรวจไม่พบหูฟัง</string>
+</resources>

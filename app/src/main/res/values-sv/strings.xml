@@ -1,0 +1,109 @@
+<resources>
+    <string name="app_name">SilentAlarm</string>
+
+    <string name="dashboard_title">Hörlursalarm</string>
+    <string name="dashboard_subtitle">Spelar bara via hörlurar. Väcker ingen annan.</string>
+    <string name="test_alarm">Testa alarm</string>
+    <string name="stop">Stopp</string>
+    <string name="no_alarms">Inga larm inställda. Tryck på + för att lägga till ett.</string>
+    <string name="add_alarm">Lägg till alarm</string>
+    <string name="delete_alarm">Ta bort alarm</string>
+    <string name="edit_alarm">Redigera alarm</string>
+    <string name="new_alarm">Nytt alarm</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Avbryt</string>
+
+    <string name="volume_settings">Volyminställningar</string>
+    <string name="earphone">Hörlurar</string>
+    <string name="speaker">Högtalare</string>
+    <string name="alarm_timeout">Alarmets varaktighet</string>
+    <string name="duration">Varaktighet</string>
+    <string name="timeout_description">Alla lägen (hörlurar, vibration, högtalare) använder samma varaktighet.</string>
+    <string name="after_earphone_timeout">Efter hörlurstiden</string>
+    <string name="timeout_fallback_hint">Reservläget använder inställningen “Inga hörlurar” nedan.</string>
+    <string name="vibrate_only">Endast vibration</string>
+    <string name="loudspeaker">Högtalare</string>
+    <string name="fallback">Använd reservläge</string>
+    <string name="duration_min">%1$d min</string>
+
+    <string name="no_earphone_title">Inga hörlurar</string>
+
+    <string name="ringtone">Ringsignal</string>
+    <string name="custom_ringtone_set">Anpassad ringsignal inställd</string>
+    <string name="system_default_alarm">Systemets standardalarmljud</string>
+    <string name="pick_ringtone">Välj ringsignal</string>
+
+    <string name="process_keeping">Processkydd</string>
+    <string name="exact_alarm">Exakt alarm</string>
+    <string name="exact_alarm_allowed">Tillåtet</string>
+    <string name="exact_alarm_denied">Inte tillåtet</string>
+    <string name="exact_alarm_request">Aktivera</string>
+    <string name="shizuku">Shizuku</string>
+    <string name="shizuku_connected">Ansluten och auktoriserad</string>
+    <string name="shizuku_waiting_permission">Väntar på behörighet</string>
+    <string name="shizuku_not_installed">Inte installerad</string>
+    <string name="shizuku_install">Installera Shizuku</string>
+    <string name="shizuku_authorize">Auktorisera</string>
+    <string name="disable_battery_optimization">Inaktivera batterioptimering</string>
+    <string name="shizuku_activated">Shizuku ansluten, processkydd aktivt</string>
+
+    <string name="language_title">Språk</string>
+    <string name="follow_system">Följ systemet</string>
+    <string name="search_languages">Sök språk</string>
+    <string name="no_languages_found">Inga språk hittades</string>
+
+    <string name="alarm_set_format">Alarm inställt på %1$02d:%2$02d</string>
+    <string name="alarm_removed">Alarm borttaget</string>
+    <string name="test_alarm_triggered">Testalarm utlöst</string>
+    <string name="alarm_stopped">Alarm stoppat</string>
+
+    <string name="schedule_one_shot">En gång</string>
+
+    <string-array name="day_letters">
+        <item></item>
+        <item>S</item>
+        <item>M</item>
+        <item>T</item>
+        <item>O</item>
+        <item>T</item>
+        <item>F</item>
+        <item>L</item>
+    </string-array>
+    <string-array name="day_names_short">
+        <item></item>
+        <item>sön</item>
+        <item>mån</item>
+        <item>tis</item>
+        <item>ons</item>
+        <item>tor</item>
+        <item>fre</item>
+        <item>lör</item>
+    </string-array>
+
+    <string name="github">GitHub</string>
+    <string name="github_repo_title">Silent Alarm</string>
+    <string name="github_repo_path">izumisagirii/silent-alarm</string>
+    <string name="checking_updates">Söker efter uppdateringar…</string>
+    <string name="update_available">En ny version finns!</string>
+    <string name="update_version_format">v%1$s → v%2$s</string>
+    <string name="up_to_date_format">Redan uppdaterad (v%1$s). Lägg till en stjärna!</string>
+    <string name="check_repo">Visa repository</string>
+    <string name="network_error">Ingen nätverksanslutning</string>
+    <string name="timeout_error">Begäran tog för lång tid</string>
+    <string name="api_error_format">GitHub API-fel (%1$d)</string>
+    <string name="no_release_tag">Ingen release-tagg hittades</string>
+    <string name="update_error_format">Kunde inte söka efter uppdateringar: %1$s</string>
+
+    <string name="tile_label">Hörlursalarm</string>
+    <string name="tile_active">Alarm aktiverade</string>
+    <string name="tile_inactive">Alla alarm avaktiverade</string>
+
+    <string name="notification_channel_alarm">Alarmtjänst</string>
+    <string name="notification_channel_desc">Bestående avisering för alarmets förgrundstjänst</string>
+    <string name="notification_channel_active">Alarm spelas</string>
+    <string name="notification_channel_active_desc">Visas när alarmet spelar</string>
+    <string name="notification_waiting">Väntar på nästa alarm</string>
+    <string name="notification_alarm_active">Alarm aktivt</string>
+    <string name="notification_earphones">Spelar via hörlurar</string>
+    <string name="notification_no_earphones">Inga hörlurar upptäckta</string>
+</resources>

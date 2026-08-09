@@ -1,0 +1,109 @@
+<resources>
+    <string name="app_name">SilentAlarm</string>
+
+    <string name="dashboard_title">Alarm pentru căști</string>
+    <string name="dashboard_subtitle">Sună doar prin căști. Nu trezește pe alții.</string>
+    <string name="test_alarm">Testează alarma</string>
+    <string name="stop">Oprește</string>
+    <string name="no_alarms">Nicio alarmă setată. Atinge + pentru a adăuga una.</string>
+    <string name="add_alarm">Adaugă alarmă</string>
+    <string name="delete_alarm">Șterge alarma</string>
+    <string name="edit_alarm">Editează alarma</string>
+    <string name="new_alarm">Alarmă nouă</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Anulează</string>
+
+    <string name="volume_settings">Setări volum</string>
+    <string name="earphone">Căști</string>
+    <string name="speaker">Difuzor</string>
+    <string name="alarm_timeout">Durata alarmei</string>
+    <string name="duration">Durată</string>
+    <string name="timeout_description">Toate modurile (căști, vibrații, difuzor) folosesc această durată.</string>
+    <string name="after_earphone_timeout">După expirarea timpului cu căștile</string>
+    <string name="timeout_fallback_hint">Modul de rezervă folosește setarea „Fără căști” de mai jos.</string>
+    <string name="vibrate_only">Doar vibrații</string>
+    <string name="loudspeaker">Difuzor</string>
+    <string name="fallback">Folosește modul de rezervă</string>
+    <string name="duration_min">%1$d min</string>
+
+    <string name="no_earphone_title">Fără căști</string>
+
+    <string name="ringtone">Ton de apel</string>
+    <string name="custom_ringtone_set">Ton de apel personalizat setat</string>
+    <string name="system_default_alarm">Tonul implicit de alarmă al sistemului</string>
+    <string name="pick_ringtone">Alege tonul de apel</string>
+
+    <string name="process_keeping">Menținerea procesului</string>
+    <string name="exact_alarm">Alarmă exactă</string>
+    <string name="exact_alarm_allowed">Permisă</string>
+    <string name="exact_alarm_denied">Nepermisă</string>
+    <string name="exact_alarm_request">Activează</string>
+    <string name="shizuku">Shizuku</string>
+    <string name="shizuku_connected">Conectat și autorizat</string>
+    <string name="shizuku_waiting_permission">Se așteaptă permisiunea</string>
+    <string name="shizuku_not_installed">Neinstalat</string>
+    <string name="shizuku_install">Instalează Shizuku</string>
+    <string name="shizuku_authorize">Autorizează</string>
+    <string name="disable_battery_optimization">Dezactivează optimizarea bateriei</string>
+    <string name="shizuku_activated">Shizuku conectat, protecția procesului activă</string>
+
+    <string name="language_title">Limbă</string>
+    <string name="follow_system">Urmează sistemul</string>
+    <string name="search_languages">Caută limbă</string>
+    <string name="no_languages_found">Nicio limbă găsită</string>
+
+    <string name="alarm_set_format">Alarmă setată la %1$02d:%2$02d</string>
+    <string name="alarm_removed">Alarmă eliminată</string>
+    <string name="test_alarm_triggered">Alarma de test a fost declanșată</string>
+    <string name="alarm_stopped">Alarma a fost oprită</string>
+
+    <string name="schedule_one_shot">O singură dată</string>
+
+    <string-array name="day_letters">
+        <item></item>
+        <item>D</item>
+        <item>L</item>
+        <item>M</item>
+        <item>M</item>
+        <item>J</item>
+        <item>V</item>
+        <item>S</item>
+    </string-array>
+    <string-array name="day_names_short">
+        <item></item>
+        <item>dum</item>
+        <item>lun</item>
+        <item>mar</item>
+        <item>mie</item>
+        <item>joi</item>
+        <item>vin</item>
+        <item>sâm</item>
+    </string-array>
+
+    <string name="github">GitHub</string>
+    <string name="github_repo_title">Silent Alarm</string>
+    <string name="github_repo_path">izumisagirii/silent-alarm</string>
+    <string name="checking_updates">Se verifică actualizările…</string>
+    <string name="update_available">Este disponibilă o versiune nouă!</string>
+    <string name="update_version_format">v%1$s → v%2$s</string>
+    <string name="up_to_date_format">Deja actualizat (v%1$s). Adaugă o stea!</string>
+    <string name="check_repo">Vezi depozitul</string>
+    <string name="network_error">Fără conexiune la rețea</string>
+    <string name="timeout_error">Solicitarea a expirat</string>
+    <string name="api_error_format">Eroare API GitHub (%1$d)</string>
+    <string name="no_release_tag">Nu s-a găsit nicio etichetă de lansare</string>
+    <string name="update_error_format">Actualizarea nu poate fi verificată: %1$s</string>
+
+    <string name="tile_label">Alarm pentru căști</string>
+    <string name="tile_active">Alarmele sunt activate</string>
+    <string name="tile_inactive">Toate alarmele sunt dezactivate</string>
+
+    <string name="notification_channel_alarm">Serviciul de alarmă</string>
+    <string name="notification_channel_desc">Notificare persistentă pentru serviciul de prim-plan al alarmei</string>
+    <string name="notification_channel_active">Alarma se redă</string>
+    <string name="notification_channel_active_desc">Afișat când alarma se redă</string>
+    <string name="notification_waiting">Se așteaptă următoarea alarmă</string>
+    <string name="notification_alarm_active">Alarmă activă</string>
+    <string name="notification_earphones">Se redă prin căști</string>
+    <string name="notification_no_earphones">Nu s-au detectat căști</string>
+</resources>

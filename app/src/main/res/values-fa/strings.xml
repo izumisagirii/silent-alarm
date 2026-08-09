@@ -1,0 +1,109 @@
+<resources>
+    <string name="app_name">SilentAlarm</string>
+
+    <string name="dashboard_title">زنگ هدست</string>
+    <string name="dashboard_subtitle">فقط از طریق هدست پخش می‌شود و دیگران را بیدار نمی‌کند.</string>
+    <string name="test_alarm">آزمایش زنگ</string>
+    <string name="stop">توقف</string>
+    <string name="no_alarms">هیچ زنگی تنظیم نشده است. برای افزودن روی + ضربه بزنید.</string>
+    <string name="add_alarm">افزودن زنگ</string>
+    <string name="delete_alarm">حذف زنگ</string>
+    <string name="edit_alarm">ویرایش زنگ</string>
+    <string name="new_alarm">زنگ جدید</string>
+    <string name="ok">تأیید</string>
+    <string name="cancel">انصراف</string>
+
+    <string name="volume_settings">تنظیمات صدا</string>
+    <string name="earphone">هدست</string>
+    <string name="speaker">بلندگو</string>
+    <string name="alarm_timeout">مدت زمان زنگ</string>
+    <string name="duration">مدت</string>
+    <string name="timeout_description">همه حالت‌ها (هدست، لرزش، بلندگو) از این مدت استفاده می‌کنند.</string>
+    <string name="after_earphone_timeout">پس از پایان زمان هدست</string>
+    <string name="timeout_fallback_hint">حالت جایگزین از تنظیمات «بدون هدست» پایین استفاده می‌کند.</string>
+    <string name="vibrate_only">فقط لرزش</string>
+    <string name="loudspeaker">بلندگو</string>
+    <string name="fallback">استفاده از حالت جایگزین</string>
+    <string name="duration_min">%1$d دقیقه</string>
+
+    <string name="no_earphone_title">بدون هدست</string>
+
+    <string name="ringtone">آهنگ زنگ</string>
+    <string name="custom_ringtone_set">آهنگ زنگ دلخواه تنظیم شد</string>
+    <string name="system_default_alarm">زنگ پیش‌فرض سیستم</string>
+    <string name="pick_ringtone">انتخاب آهنگ زنگ</string>
+
+    <string name="process_keeping">حفظ فرایند</string>
+    <string name="exact_alarm">زنگ دقیق</string>
+    <string name="exact_alarm_allowed">مجاز</string>
+    <string name="exact_alarm_denied">غیرمجاز</string>
+    <string name="exact_alarm_request">فعال‌سازی</string>
+    <string name="shizuku">Shizuku</string>
+    <string name="shizuku_connected">متصل و مجاز</string>
+    <string name="shizuku_waiting_permission">در انتظار مجوز</string>
+    <string name="shizuku_not_installed">نصب نشده</string>
+    <string name="shizuku_install">نصب Shizuku</string>
+    <string name="shizuku_authorize">مجوز دادن</string>
+    <string name="disable_battery_optimization">غیرفعال‌سازی بهینه‌سازی باتری</string>
+    <string name="shizuku_activated">Shizuku متصل است، محافظت از فرایند فعال است</string>
+
+    <string name="language_title">زبان</string>
+    <string name="follow_system">پیروی از سیستم</string>
+    <string name="search_languages">جستجوی زبان</string>
+    <string name="no_languages_found">زبانی یافت نشد</string>
+
+    <string name="alarm_set_format">زنگ برای ساعت %1$02d:%2$02d تنظیم شد</string>
+    <string name="alarm_removed">زنگ حذف شد</string>
+    <string name="test_alarm_triggered">زنگ آزمایشی فعال شد</string>
+    <string name="alarm_stopped">زنگ متوقف شد</string>
+
+    <string name="schedule_one_shot">یک بار</string>
+
+    <string-array name="day_letters">
+        <item></item>
+        <item>ی</item>
+        <item>د</item>
+        <item>س</item>
+        <item>چ</item>
+        <item>پ</item>
+        <item>ج</item>
+        <item>ش</item>
+    </string-array>
+    <string-array name="day_names_short">
+        <item></item>
+        <item>یکشنبه</item>
+        <item>دوشنبه</item>
+        <item>سه‌شنبه</item>
+        <item>چهارشنبه</item>
+        <item>پنجشنبه</item>
+        <item>جمعه</item>
+        <item>شنبه</item>
+    </string-array>
+
+    <string name="github">GitHub</string>
+    <string name="github_repo_title">Silent Alarm</string>
+    <string name="github_repo_path">izumisagirii/silent-alarm</string>
+    <string name="checking_updates">در حال بررسی به‌روزرسانی…</string>
+    <string name="update_available">نسخه جدید موجود است!</string>
+    <string name="update_version_format">v%1$s ← v%2$s</string>
+    <string name="up_to_date_format">در حال حاضر به‌روز است (v%1$s)، لطفاً یک ستاره اضافه کنید!</string>
+    <string name="check_repo">مشاهده مخزن</string>
+    <string name="network_error">اتصال شبکه وجود ندارد</string>
+    <string name="timeout_error">درخواست منقضی شد</string>
+    <string name="api_error_format">خطای GitHub API (%1$d)</string>
+    <string name="no_release_tag">برچسب انتشار پیدا نشد</string>
+    <string name="update_error_format">بررسی به‌روزرسانی ممکن نیست: %1$s</string>
+
+    <string name="tile_label">زنگ هدست</string>
+    <string name="tile_active">زنگ‌ها فعال هستند</string>
+    <string name="tile_inactive">همه زنگ‌ها غیرفعال هستند</string>
+
+    <string name="notification_channel_alarm">سرویس زنگ</string>
+    <string name="notification_channel_desc">اعلان دائمی برای سرویس پیش‌زمینه زنگ</string>
+    <string name="notification_channel_active">زنگ در حال پخش است</string>
+    <string name="notification_channel_active_desc">زمانی که زنگ در حال پخش است نمایش داده می‌شود</string>
+    <string name="notification_waiting">در انتظار زنگ بعدی</string>
+    <string name="notification_alarm_active">زنگ فعال است</string>
+    <string name="notification_earphones">در حال پخش از طریق هدست</string>
+    <string name="notification_no_earphones">هدست شناسایی نشد</string>
+</resources>
