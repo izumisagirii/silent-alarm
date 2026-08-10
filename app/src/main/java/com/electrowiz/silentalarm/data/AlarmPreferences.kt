@@ -177,6 +177,19 @@ class AlarmPreferences(private val context: Context) {
         }
     }
 
+    /**
+     * Enable or disable all alarms in a single atomic write.
+     * Used by the QS tile master switch.
+     */
+    suspend fun setAllEnabled(enabled: Boolean) {
+        context.dataStore.edit { prefs ->
+            val alarms = parseAlarms(prefs[Keys.ALARMS_JSON] ?: "[]").map {
+                it.copy(enabled = enabled)
+            }
+            prefs[Keys.ALARMS_JSON] = serializeAlarms(alarms)
+        }
+    }
+
     // ── Global Setting Writers ───────────────────────────────────────────
 
     suspend fun setEarphoneVolume(volume: Int) {

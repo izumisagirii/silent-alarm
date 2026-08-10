@@ -18,7 +18,11 @@ android {
         versionCode = 1
         versionName = "1.4"
 
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        // 64-bit ABIs only. The sole native library (Compose graphics path)
+        // doesn't need 32-bit support; armeabi-v7a / x86 devices can't install.
+        ndk {
+            abiFilters += listOf("arm64-v8a", "x86_64")
+        }
     }
 
     buildTypes {
@@ -60,11 +64,5 @@ dependencies {
     implementation(libs.shizuku.api)
     implementation(libs.shizuku.provider)
     implementation(libs.kotlinx.coroutines.android)
-    testImplementation(libs.junit)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
-    androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(libs.androidx.junit)
-    debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.compose.ui.tooling)
 }

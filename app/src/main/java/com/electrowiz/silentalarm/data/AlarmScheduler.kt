@@ -127,9 +127,6 @@ class AlarmScheduler(private val context: Context) {
         }
     }
 
-    /**
-     * Cancel the alarm identified by [alarmId].
-     */
     fun cancelAlarm(alarmId: String) {
         val pi = buildPendingIntentById(alarmId, ACTION_ALARM_TRIGGER)
         alarmManager.cancel(pi)
@@ -137,11 +134,8 @@ class AlarmScheduler(private val context: Context) {
         Log.d(TAG, "Cancelled alarm $alarmId")
     }
 
-    /**
-     * Cancel every alarm currently scheduled by this app.
-     * Used before re-scheduling or on user request.
-     */
-    fun cancelAll(alarms: List<AlarmItem>) {
+    /** Used before re-scheduling from [reconcile]. */
+    private fun cancelAll(alarms: List<AlarmItem>) {
         alarms.forEach { cancelAlarm(it.id) }
         Log.i(TAG, "Cancelled all ${alarms.size} alarms")
     }
@@ -150,7 +144,7 @@ class AlarmScheduler(private val context: Context) {
      * Start [AlarmAudioService] in idle mode (no alarm playback).
      * Used whenever at least one alarm is enabled.
      */
-    fun startIdleService() {
+    private fun startIdleService() {
         val intent = Intent(context, AlarmAudioService::class.java)
         try {
             context.startForegroundService(intent)
@@ -180,7 +174,6 @@ class AlarmScheduler(private val context: Context) {
         }
     }
 
-    /** Cancel the keep-alive exact alarm. */
     fun cancelKeepAlive() {
         val pi = buildKeepAlivePendingIntent()
         alarmManager.cancel(pi)
@@ -201,9 +194,6 @@ class AlarmScheduler(private val context: Context) {
         Log.i(TAG, "Test alarm triggered")
     }
 
-    /**
-     * Send a stop intent to [AlarmAudioService] to halt any active alarm.
-     */
     fun stopAlarm() {
         val intent = Intent(context, AlarmAudioService::class.java).apply {
             action = ACTION_STOP_ALARM
@@ -218,9 +208,16 @@ class AlarmScheduler(private val context: Context) {
 
     // ── Internals ────────────────────────────────────────────────────────
 
-    /** Derive a stable, unique request code from the alarm's UUID. */
+    /**
+     * Derive a stable, unique request code from the alarm's UUID.
+     *
+     * PendingIntent identity ignores extras, so two alarms with the same
+     * request code would share one PendingIntent and silently overwrite each
+     * other's schedule. Use the full 30-bit hash to keep collisions
+     * practically impossible.
+     */
     private fun requestCodeFor(alarmId: String): Int {
-        return REQUEST_CODE_BASE + (alarmId.hashCode() and 0x7FFF) // keep positive & bounded
+        return REQUEST_CODE_BASE + (alarmId.hashCode() and 0x3FFFFFFF)
     }
 
     /** Build a [PendingIntent] for a specific alarm id. */

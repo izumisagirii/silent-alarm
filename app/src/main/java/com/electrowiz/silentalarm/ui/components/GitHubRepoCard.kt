@@ -2,7 +2,6 @@ package com.electrowiz.silentalarm.ui.components
 
 import android.content.Context
 import android.content.Intent
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -113,7 +112,6 @@ fun GitHubRepoCard(modifier: Modifier = Modifier) {
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // check update
             when (val s = releaseStatus) {
                 is ReleaseStatus.Loading ->
                     Text(
@@ -148,19 +146,14 @@ fun GitHubRepoCard(modifier: Modifier = Modifier) {
             }
 
             Spacer(modifier = Modifier.height(12.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            Button(
+                onClick = {
+                    val i = Intent(Intent.ACTION_VIEW, repoUrl.toUri())
+                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    ctx.startActivity(i)
+                },
             ) {
-                Button(
-                    onClick = {
-                        val i = Intent(Intent.ACTION_VIEW, repoUrl.toUri())
-                            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                        ctx.startActivity(i)
-                    },
-                ) {
-                    Text(stringResource(R.string.check_repo))
-                }
+                Text(stringResource(R.string.check_repo))
             }
         }
     }
@@ -170,7 +163,6 @@ fun GitHubRepoCard(modifier: Modifier = Modifier) {
 
 private fun fetchLatestRelease(context: Context, apiUrl: String): ReleaseStatus {
     return try {
-        // 将整个网络请求的配置和执行都放在 IO 线程中
         val connection = URL(apiUrl).openConnection() as HttpURLConnection
         connection.apply {
             setRequestProperty("Accept", "application/vnd.github.v3+json")
@@ -180,7 +172,6 @@ private fun fetchLatestRelease(context: Context, apiUrl: String): ReleaseStatus 
             requestMethod = "GET"
         }
 
-        // get code
         val code = connection.responseCode
         if (code != 200) {
             connection.disconnect()
@@ -189,7 +180,6 @@ private fun fetchLatestRelease(context: Context, apiUrl: String): ReleaseStatus 
             )
         }
 
-        // read data
         val body = connection.inputStream.bufferedReader().use { it.readText() }
         connection.disconnect()
 
@@ -213,7 +203,6 @@ private fun fetchLatestRelease(context: Context, apiUrl: String): ReleaseStatus 
     } catch (e: java.net.SocketTimeoutException) {
         ReleaseStatus.Error(context.getString(R.string.timeout_error))
     } catch (e: CancellationException) {
-        // 向上抛出异常
         throw e
     } catch (e: Exception) {
         e.printStackTrace()

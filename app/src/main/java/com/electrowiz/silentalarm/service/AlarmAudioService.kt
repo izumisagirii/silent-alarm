@@ -78,6 +78,14 @@ class AlarmAudioService : Service() {
     private var audioFocusRequest: AudioFocusRequest? = null
     private var autoStopJob: Job? = null
     private var alarmActive = false
+
+    /**
+     * Set when the alarm should stop and cleared when a new alarm starts.
+     * Guards against a STOP intent being processed between the TRIGGER's
+     * start and its (suspendable) preference reads — without it, playback
+     * could resume after the user pressed stop.
+     */
+    private var stopRequested = false
     private val defaultAlarmUri = android.provider.Settings.System.DEFAULT_ALARM_ALERT_URI
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
@@ -109,11 +117,31 @@ class AlarmAudioService : Service() {
                             action == AlarmScheduler.ACTION_TEST_ALARM
 
         if (isAlarmAction) {
-            alarmActive = true
+            stopRequested = false
             // MUST call startForeground() within 5s of startForegroundService().
-            startForeground(NOTIFICATION_ID, buildActiveNotification())
-            acquireWakeLock()
+            startForeground(NOTIFICATION_ID, buildIdleNotification())
             serviceScope.launch {
+                // The alarm may have been deleted or disabled since it was
+                // armed (e.g. process died between the delete write and the
+                // cancel). Verify before ringing; cancel the stale schedule
+                // and stay silent instead of playing a ghost alarm.
+                if (action == AlarmScheduler.ACTION_ALARM_TRIGGER && alarmId != null &&
+                    !preferences.getAlarms().first().any { it.id == alarmId && it.enabled }
+                ) {
+                    Log.w(TAG, "Stale trigger for '$alarmId' — alarm no longer exists or is disabled")
+                    scheduler.cancelAlarm(alarmId)
+                    if (alarmActive) {
+                        // Another alarm is already ringing — restore its
+                        // notification but leave the playback untouched.
+                        startForeground(NOTIFICATION_ID, buildActiveNotification())
+                    } else {
+                        stopAlarm()
+                    }
+                    return@launch
+                }
+                alarmActive = true
+                startForeground(NOTIFICATION_ID, buildActiveNotification())
+                acquireWakeLock()
                 executeAlarmRoutine()
                 handlePostAlarm(alarmId)
             }
@@ -173,12 +201,17 @@ class AlarmAudioService : Service() {
 
         Log.i(TAG, "Routing: output=$outputType action=$action earVol=$earphoneVol spkVol=$speakerVol timeout=$timeoutSeconds s")
 
+        // A STOP may have been processed while we were reading preferences —
+        // don't resume playback after the user asked to stop.
+        if (stopRequested) {
+            Log.i(TAG, "Stop requested during setup — aborting alarm routine")
+            return
+        }
+
         when (action) {
             AudioRouter.ResolvedAction.PLAY_VIA_EARPHONES -> {
                 playAudio(uri, earphoneVol, audioRouter.findEarphoneDevice())
-                autoStopJob?.cancel()
-                autoStopJob = serviceScope.launch {
-                    delay(timeoutSeconds * 1000L)
+                armAutoStop(timeoutSeconds) {
                     Log.i(TAG, "Earphone timeout reached: $timeoutSeconds s, action=$timeoutAction")
                     when (timeoutAction) {
                         TimeoutAction.STOP -> stopAlarm()
@@ -191,22 +224,27 @@ class AlarmAudioService : Service() {
             }
             AudioRouter.ResolvedAction.PLAY_VIA_SPEAKER -> {
                 playAudio(uri, speakerVol, audioRouter.findSpeakerDevice())
-                autoStopJob?.cancel()
-                autoStopJob = serviceScope.launch {
-                    delay(timeoutSeconds * 1000L)
+                armAutoStop(timeoutSeconds) {
                     Log.i(TAG, "Speaker auto-stop after $timeoutSeconds s")
                     stopAlarm()
                 }
             }
             AudioRouter.ResolvedAction.VIBRATE_ONLY -> {
                 startRepeatingVibration()
-                autoStopJob?.cancel()
-                autoStopJob = serviceScope.launch {
-                    delay(timeoutSeconds * 1000L)
+                armAutoStop(timeoutSeconds) {
                     Log.i(TAG, "Vibrate auto-stop after $timeoutSeconds s")
                     stopAlarm()
                 }
             }
+        }
+    }
+
+    /** Cancel any pending auto-stop and arm a new one for [timeoutSeconds]. */
+    private fun armAutoStop(timeoutSeconds: Int, onTimeout: () -> Unit) {
+        autoStopJob?.cancel()
+        autoStopJob = serviceScope.launch {
+            delay(timeoutSeconds * 1000L)
+            onTimeout()
         }
     }
 
@@ -227,9 +265,7 @@ class AlarmAudioService : Service() {
             NoEarphoneAction.LOUDSPEAKER ->
                 playAudio(uri, speakerVol, audioRouter.findSpeakerDevice())
         }
-        autoStopJob?.cancel()
-        autoStopJob = serviceScope.launch {
-            delay(timeoutSeconds * 1000L)
+        armAutoStop(timeoutSeconds) {
             Log.i(TAG, "No-earphone fallback auto-stop after $timeoutSeconds s")
             stopAlarm()
         }
@@ -246,6 +282,10 @@ class AlarmAudioService : Service() {
      *    default alarm sound if the custom source cannot be played.
      */
     private fun playAudio(ringtoneUri: Uri, volumePercent: Int, preferredDevice: AudioDeviceInfo?) {
+        if (stopRequested) {
+            Log.i(TAG, "Stop requested — skipping playback")
+            return
+        }
         val max = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
         audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, (max * volumePercent / 100).coerceIn(0, max), 0)
         requestAudioFocus()
@@ -341,6 +381,10 @@ class AlarmAudioService : Service() {
 
     /** Start a repeating vibration pattern (500ms on, 300ms off). */
     private fun startRepeatingVibration() {
+        if (stopRequested) {
+            Log.i(TAG, "Stop requested — skipping vibration")
+            return
+        }
         vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             (getSystemService(VIBRATOR_MANAGER_SERVICE) as VibratorManager).defaultVibrator
         } else {
@@ -467,6 +511,9 @@ class AlarmAudioService : Service() {
 
         val alarms = preferences.getAlarms().first()
         val alarm = alarms.find { it.id == alarmId } ?: return
+        // The alarm may have been disabled while it was ringing — never
+        // re-schedule a disabled alarm.
+        if (!alarm.enabled) return
 
         if (alarm.daysOfWeek.isEmpty()) {
             // One-shot: auto-disable so it doesn't fire again tomorrow
@@ -488,6 +535,7 @@ class AlarmAudioService : Service() {
      */
     private fun stopAlarm() {
         Log.i(TAG, "Alarm stopped — transitioning to idle keep-alive")
+        stopRequested = true
         autoStopJob?.cancel(); autoStopJob = null
         alarmActive = false
         releaseMediaPlayer()

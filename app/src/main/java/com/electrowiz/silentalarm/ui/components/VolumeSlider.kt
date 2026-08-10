@@ -24,7 +24,6 @@ fun VolumeSlider(
     value: Int,
     onValueChange: (Int) -> Unit,
     modifier: Modifier = Modifier,
-    enabled: Boolean = true,
     valueRange: ClosedFloatingPointRange<Float> = 0f..100f,
     displayText: String = "${value}%"
 ) {
@@ -43,7 +42,6 @@ fun VolumeSlider(
             onValueChange = { onValueChange(it.roundToInt()) },
             valueRange = valueRange,
             steps = 0,
-            enabled = enabled,
             modifier = Modifier.fillMaxWidth()
         )
     }

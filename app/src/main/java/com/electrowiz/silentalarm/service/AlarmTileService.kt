@@ -84,7 +84,7 @@ class AlarmTileService : TileService() {
                     return@launch
                 }
                 val newState = !alarms.any { it.enabled }
-                alarms.forEach { preferences.toggleAlarm(it.id, newState) }
+                preferences.setAllEnabled(newState)
                 val updated = alarms.map { it.copy(enabled = newState) }
                 AlarmScheduler(this@AlarmTileService).reconcile(updated)
                 setTileState(newState)

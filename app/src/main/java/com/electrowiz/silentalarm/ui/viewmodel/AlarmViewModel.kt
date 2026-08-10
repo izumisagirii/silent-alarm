@@ -136,13 +136,16 @@ class AlarmViewModel(application: Application) : AndroidViewModel(application) {
                     shizukuManager.applyAntiKillingTweaks()
                     shizukuManager.startWatchdogDaemon()
                 }
-                _snackbarMessage.value = getApplication<Application>()
-                    .getString(R.string.shizuku_activated)
+                _snackbarMessage.value = msg(R.string.shizuku_activated)
             }
         }
     }
 
     fun clearSnackbar() { _snackbarMessage.value = null }
+
+    /** Shorthand for a localized snackbar message. */
+    private fun msg(id: Int, vararg args: Any): String =
+        getApplication<Application>().getString(id, *args)
 
     /** Push current alarm state to the QS tile. */
     private fun syncTile() {
@@ -156,14 +159,14 @@ class AlarmViewModel(application: Application) : AndroidViewModel(application) {
             val item = AlarmItem(hour = hour, minute = minute, label = label)
             preferences.addAlarm(item)
             scheduler.reconcile(preferences.getAlarms().first())
-            _snackbarMessage.value = getApplication<Application>()
-                .getString(R.string.alarm_set_format, hour, minute)
+            _snackbarMessage.value = msg(R.string.alarm_set_format, hour, minute)
             syncTile()
         }
     }
 
     fun updateAlarm(updated: AlarmItem) {
         viewModelScope.launch {
+            scheduler.cancelAlarm(updated.id)
             preferences.updateAlarm(updated)
             scheduler.reconcile(preferences.getAlarms().first())
             syncTile()
@@ -172,15 +175,23 @@ class AlarmViewModel(application: Application) : AndroidViewModel(application) {
 
     fun deleteAlarm(alarmId: String) {
         viewModelScope.launch {
+            // Cancel the AlarmManager entry BEFORE removing the alarm from
+            // storage: reconcile() only cancels alarms still present in the
+            // list, so a deleted alarm would otherwise keep its schedule and
+            // ring later despite being gone from the app.
+            scheduler.cancelAlarm(alarmId)
             preferences.deleteAlarm(alarmId)
             scheduler.reconcile(preferences.getAlarms().first())
-            _snackbarMessage.value = getApplication<Application>().getString(R.string.alarm_removed)
+            _snackbarMessage.value = msg(R.string.alarm_removed)
             syncTile()
         }
     }
 
     fun toggleAlarm(alarmId: String, enabled: Boolean) {
         viewModelScope.launch {
+            // Cancel first too: if the alarm is disabled close to its fire
+            // time, an in-flight trigger must not start playback afterwards.
+            scheduler.cancelAlarm(alarmId)
             preferences.toggleAlarm(alarmId, enabled)
             scheduler.reconcile(preferences.getAlarms().first())
             syncTile()
@@ -206,13 +217,12 @@ class AlarmViewModel(application: Application) : AndroidViewModel(application) {
 
     fun testAlarm() {
         scheduler.scheduleTestAlarm()
-        _snackbarMessage.value = getApplication<Application>()
-            .getString(R.string.test_alarm_triggered)
+        _snackbarMessage.value = msg(R.string.test_alarm_triggered)
     }
 
     fun stopAlarm() {
         scheduler.stopAlarm()
-        _snackbarMessage.value = getApplication<Application>().getString(R.string.alarm_stopped)
+        _snackbarMessage.value = msg(R.string.alarm_stopped)
     }
 
     // ── Battery Optimization ─────────────────────────────────────────────

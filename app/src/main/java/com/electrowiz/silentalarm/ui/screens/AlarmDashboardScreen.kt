@@ -96,10 +96,6 @@ fun AlarmDashboardScreen(
 
     val snackbarHostState = remember { SnackbarHostState() }
 
-    // Auto-refresh system status every time the screen recomposes (e.g. on resume)
-    LaunchedEffect(Unit) { viewModel.refreshStatus() }
-
-    // Show snackbar when message changes
     LaunchedEffect(snackbarMessage) {
         snackbarMessage?.let {
             snackbarHostState.showSnackbar(it)
@@ -409,7 +405,6 @@ fun AlarmDashboardScreen(
             // ── GitHub Repo ─────────────────────────────────────────
             item { GitHubRepoCard() }
 
-            // Bottom spacing
             item { Spacer(modifier = Modifier.height(80.dp)) }
         }
     }
@@ -625,7 +620,6 @@ private fun AlarmCard(
                 }
             }
 
-            // Circular day-of-week picker
             DayCircleRow(
                 selectedDays = alarm.daysOfWeek,
                 onToggleDay = onToggleDay,

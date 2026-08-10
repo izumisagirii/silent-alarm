@@ -1,7 +1,6 @@
 package com.electrowiz.silentalarm.ui.components
 
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -141,20 +140,18 @@ fun LanguageSettingsCard(modifier: Modifier = Modifier) {
                 title = stringResource(R.string.language_title)
             )
             Spacer(modifier = Modifier.height(8.dp))
-            Box(modifier = Modifier.fillMaxWidth()) {
-                OutlinedButton(
-                    onClick = {
-                        searchQuery = ""
-                        showSheet = true
-                    },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        text = selectedLabel,
-                        modifier = Modifier.weight(1f)
-                    )
-                    Icon(Icons.Default.ArrowDropDown, contentDescription = null)
-                }
+            OutlinedButton(
+                onClick = {
+                    searchQuery = ""
+                    showSheet = true
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = selectedLabel,
+                    modifier = Modifier.weight(1f)
+                )
+                Icon(Icons.Default.ArrowDropDown, contentDescription = null)
             }
         }
     }
