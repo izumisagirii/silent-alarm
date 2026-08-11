@@ -85,6 +85,7 @@ class AlarmAudioService : Service() {
      * start and its (suspendable) preference reads — without it, playback
      * could resume after the user pressed stop.
      */
+    @Volatile
     private var stopRequested = false
     private val defaultAlarmUri = android.provider.Settings.System.DEFAULT_ALARM_ALERT_URI
 
@@ -278,8 +279,8 @@ class AlarmAudioService : Service() {
      *
      * Two-phase playback:
      * 1. 500ms silent WAV wakes the Bluetooth/DAC pipeline (prevents truncation).
-     * 2. On completion, loop the user's ringtone; fall back to the system
-     *    default alarm sound if the custom source cannot be played.
+     * 2. On completion, reuse the same MediaPlayer to loop the user's ringtone;
+     *    fall back to the system default alarm sound if needed.
      */
     private fun playAudio(ringtoneUri: Uri, volumePercent: Int, preferredDevice: AudioDeviceInfo?) {
         if (stopRequested) {
@@ -291,68 +292,82 @@ class AlarmAudioService : Service() {
         requestAudioFocus()
 
         val silentUri = "android.resource://${packageName}/${R.raw.silent_500ms}".toUri()
-        val warmUpPlayer = try {
-            prepareMediaPlayer(silentUri, preferredDevice)
-        } catch (e: Exception) {
-            Log.e(TAG, "Silent warm-up failed, using default alarm directly", e)
-            mediaPlayer = startLoopingPlayer(defaultAlarmUri, preferredDevice, allowDefaultFallback = false)
-            return
+        val player = mediaPlayer ?: createMediaPlayer(preferredDevice)
+        mediaPlayer = player
+
+        player.setOnCompletionListener { completed ->
+            if (stopRequested || mediaPlayer !== completed) {
+                releaseMediaPlayer()
+                return@setOnCompletionListener
+            }
+            playLoopingOnPlayer(completed, ringtoneUri, preferredDevice, allowDefaultFallback = true)
         }
 
-        mediaPlayer = warmUpPlayer
-        warmUpPlayer.setOnCompletionListener { completed ->
-            completed.release()
-            mediaPlayer = startLoopingPlayer(ringtoneUri, preferredDevice, allowDefaultFallback = true)
-        }
         try {
-            warmUpPlayer.start()
+            player.reset()
+            configurePlayer(player, preferredDevice)
+            player.setDataSource(this, silentUri)
+            player.prepare()
+            player.start()
         } catch (e: Exception) {
-            Log.e(TAG, "Silent warm-up start failed, using default alarm directly", e)
-            warmUpPlayer.release()
-            mediaPlayer = startLoopingPlayer(defaultAlarmUri, preferredDevice, allowDefaultFallback = false)
+            Log.e(TAG, "Silent warm-up failed, using default alarm directly", e)
+            playLoopingOnPlayer(player, defaultAlarmUri, preferredDevice, allowDefaultFallback = false)
         }
     }
 
     /**
-     * Build a fully configured MediaPlayer and leave it Prepared. Audio
-     * attributes, wake mode, and the preferred routing device are applied
-     * before [MediaPlayer.prepare], per the MediaPlayer state machine.
+     * Build one reusable MediaPlayer. The same instance is used for the
+     * 500ms warm-up and the looping ringtone, so stop/release only needs to
+     * track [mediaPlayer].
      */
-    private fun prepareMediaPlayer(uri: Uri, preferredDevice: AudioDeviceInfo?): MediaPlayer =
-        MediaPlayer().apply {
-            setAudioAttributes(AudioAttributes.Builder()
-                .setUsage(AudioAttributes.USAGE_MEDIA)
-                .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                .build())
-            if (preferredDevice != null) {
-                setPreferredDevice(preferredDevice)
-            }
-            setWakeMode(this@AlarmAudioService, PowerManager.PARTIAL_WAKE_LOCK)
-            setDataSource(this@AlarmAudioService, uri)
-            prepare()
-        }
+    private fun createMediaPlayer(preferredDevice: AudioDeviceInfo?): MediaPlayer =
+        MediaPlayer().apply { configurePlayer(this, preferredDevice) }
 
     /**
-     * Prepare, loop, and start [uri]. If [uri] is a custom ringtone and it
+     * Re-apply attributes and routing after [MediaPlayer.reset]. These must be
+     * set before [MediaPlayer.prepare] and are not preserved across reset().
+     */
+    private fun configurePlayer(player: MediaPlayer, preferredDevice: AudioDeviceInfo?) {
+        player.setAudioAttributes(AudioAttributes.Builder()
+            .setUsage(AudioAttributes.USAGE_MEDIA)
+            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+            .build())
+        if (preferredDevice != null) {
+            player.setPreferredDevice(preferredDevice)
+        }
+        player.setWakeMode(this@AlarmAudioService, PowerManager.PARTIAL_WAKE_LOCK)
+    }
+
+    /**
+     * Reuse [player] for looping playback. If [uri] is a custom ringtone and it
      * cannot be prepared, fall back to the system default alarm sound.
      */
-    private fun startLoopingPlayer(
+    private fun playLoopingOnPlayer(
+        player: MediaPlayer,
         uri: Uri,
         preferredDevice: AudioDeviceInfo?,
         allowDefaultFallback: Boolean
-    ): MediaPlayer? {
+    ) {
+        if (stopRequested || mediaPlayer !== player) {
+            releaseMediaPlayer()
+            return
+        }
+
         try {
-            return prepareMediaPlayer(uri, preferredDevice).apply {
-                isLooping = true
-                start()
-            }
+            player.reset()
+            configurePlayer(player, preferredDevice)
+            player.setDataSource(this, uri)
+            player.prepare()
+            player.isLooping = true
+            player.start()
         } catch (e: Exception) {
             Log.e(TAG, "Failed to play ${if (uri == defaultAlarmUri) "default alarm" else "custom ringtone"}", e)
             if (allowDefaultFallback && uri != defaultAlarmUri) {
                 Log.w(TAG, "Custom ringtone unavailable, using default alarm")
-                return startLoopingPlayer(defaultAlarmUri, preferredDevice, allowDefaultFallback = false)
+                playLoopingOnPlayer(player, defaultAlarmUri, preferredDevice, allowDefaultFallback = false)
+            } else {
+                releaseMediaPlayer()
             }
-            return null
         }
     }
 
@@ -407,8 +422,13 @@ class AlarmAudioService : Service() {
     }
 
     private fun releaseMediaPlayer() {
-        mediaPlayer?.apply { if (isPlaying) stop(); reset(); release() }
+        val player = mediaPlayer
         mediaPlayer = null
+        if (player != null) {
+            runCatching { player.stop() }
+            runCatching { player.reset() }
+            runCatching { player.release() }
+        }
     }
 
     private fun releaseVibrator() { vibrator?.cancel(); vibrator = null }
