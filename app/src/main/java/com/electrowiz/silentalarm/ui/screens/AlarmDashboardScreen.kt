@@ -21,11 +21,13 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.foundation.layout.Box
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
@@ -54,9 +56,12 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.electrowiz.silentalarm.R
 import com.electrowiz.silentalarm.ui.components.GitHubRepoCard
 import com.electrowiz.silentalarm.ui.components.LanguageSettingsCard
-import com.electrowiz.silentalarm.ui.components.TimezoneSettingsCard
+import com.electrowiz.silentalarm.ui.components.SearchableSelectSheet
+import com.electrowiz.silentalarm.ui.components.SelectOption
 import com.electrowiz.silentalarm.ui.viewmodel.AlarmViewModel
+import com.electrowiz.silentalarm.util.TimezoneFormatter
 import java.util.Calendar
+import java.util.TimeZone
 import kotlinx.coroutines.launch
 
 /**
@@ -67,7 +72,7 @@ import kotlinx.coroutines.launch
 fun AlarmDashboardScreen(
     viewModel: AlarmViewModel,
     onPickRingtone: () -> Unit,
-    onRequestExactAlarmPermission: () -> Unit,
+    onRequestNotificationPermission: () -> Unit,
     onRequestBatteryExemption: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -78,8 +83,6 @@ fun AlarmDashboardScreen(
     val globalRingtoneUri by viewModel.globalRingtoneUri.collectAsStateWithLifecycle()
     val timeoutSeconds by viewModel.timeoutSeconds.collectAsStateWithLifecycle()
     val timeoutAction by viewModel.timeoutAction.collectAsStateWithLifecycle()
-    val timezoneMode by viewModel.timezoneMode.collectAsStateWithLifecycle()
-    val timezoneId by viewModel.timezoneId.collectAsStateWithLifecycle()
     val showTimePicker by viewModel.showTimePicker.collectAsStateWithLifecycle()
     val snackbarMessage by viewModel.snackbarMessage.collectAsStateWithLifecycle()
     var pendingDeleteId by remember { mutableStateOf<String?>(null) }
@@ -119,6 +122,7 @@ fun AlarmDashboardScreen(
     val shizukuPermissionNeeded by viewModel.shizukuPermissionNeeded.collectAsStateWithLifecycle()
     val exactAlarmAllowed by viewModel.exactAlarmAllowed.collectAsStateWithLifecycle()
     val batteryOptimizationIgnored by viewModel.batteryOptimizationIgnored.collectAsStateWithLifecycle()
+    val notificationsAllowed by viewModel.notificationsAllowed.collectAsStateWithLifecycle()
     val alarmActive by viewModel.alarmActive.collectAsStateWithLifecycle()
 
     val snackbarHostState = remember { SnackbarHostState() }
@@ -303,8 +307,11 @@ fun AlarmDashboardScreen(
 
             item(key = "process-keeping") {
                 ProcessKeepingCard(
+                    notificationsAllowed = notificationsAllowed,
+                    onRequestNotificationPermission = onRequestNotificationPermission,
                     exactAlarmAllowed = exactAlarmAllowed,
                     batteryOptimizationIgnored = batteryOptimizationIgnored,
+                    onRequestBatteryExemption = onRequestBatteryExemption,
                     keepAliveEnabled = keepAliveEnabled,
                     onKeepAliveChange = viewModel::setKeepAliveEnabled,
                     privilegedEnabled = privilegedEnabled,
@@ -312,23 +319,11 @@ fun AlarmDashboardScreen(
                     shellReady = shellReady,
                     shizukuPermissionNeeded = shizukuPermissionNeeded,
                     onRequestPrivilegedPermission = viewModel::requestPrivilegedPermission,
-                    onRequestExactAlarmPermission = onRequestExactAlarmPermission,
-                    onRequestBatteryExemption = onRequestBatteryExemption,
                     modifier = itemAnim()
                 )
             }
 
             item(key = "language") { LanguageSettingsCard(modifier = itemAnim()) }
-
-            item(key = "timezone") {
-                TimezoneSettingsCard(
-                    mode = timezoneMode,
-                    selectedId = timezoneId,
-                    onModeChange = { viewModel.setTimezoneMode(it) },
-                    onSelect = { viewModel.setTimezoneId(it) },
-                    modifier = itemAnim()
-                )
-            }
 
             item(key = "github") { GitHubRepoCard(modifier = itemAnim()) }
 
@@ -361,6 +356,11 @@ fun AlarmDashboardScreen(
         // as their absolute trigger time converted to the current timezone.
         val editingTime = editing?.let { viewModel.alarmPickerHourMinute(it) }
         var label by remember(editing?.id) { mutableStateOf(editing?.label.orEmpty()) }
+        var timeZoneId by remember(editing?.id) {
+            mutableStateOf(
+                editing?.timeZoneId?.takeIf { it.isNotBlank() } ?: TimeZone.getDefault().id
+            )
+        }
         val nextHour = remember { (Calendar.getInstance().get(Calendar.HOUR_OF_DAY) + 1) % 24 }
         val pickerState = rememberTimePickerState(
             initialHour = editingTime?.first ?: nextHour,
@@ -387,11 +387,18 @@ fun AlarmDashboardScreen(
                         singleLine = true,
                         label = { Text(stringResource(R.string.alarm_label)) }
                     )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    TimezoneSelector(selectedId = timeZoneId, onSelect = { timeZoneId = it })
                 }
             },
             confirmButton = {
                 TextButton(onClick = {
-                    viewModel.onTimeSelected(pickerState.hour, pickerState.minute, label.trim())
+                    viewModel.onTimeSelected(
+                        pickerState.hour,
+                        pickerState.minute,
+                        label.trim(),
+                        timeZoneId
+                    )
                 }) { Text(stringResource(R.string.ok)) }
             },
             dismissButton = {
@@ -424,4 +431,61 @@ fun AlarmDashboardScreen(
             }
         )
     }
+}
+
+/**
+ * Timezone picker row shown inside the add/edit alarm dialog. The selected
+ * zone is stamped onto the alarm at save time; a new alarm defaults to the
+ * system timezone.
+ */
+@Composable
+private fun TimezoneSelector(selectedId: String, onSelect: (String) -> Unit) {
+    var showSheet by remember { mutableStateOf(false) }
+    val zones = remember(showSheet) {
+        if (showSheet) {
+            TimeZone.getAvailableIDs()
+                .map { TimeZone.getTimeZone(it) }
+                .sortedWith(compareBy({ it.rawOffset }, { it.id }))
+        } else {
+            emptyList()
+        }
+    }
+    val options = remember(zones) {
+        zones.map { zone ->
+            SelectOption(id = zone.id, label = zone.id, subtitle = TimezoneFormatter.offsetLabel(zone))
+        }
+    }
+
+    OutlinedButton(
+        onClick = { showSheet = true },
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Text(
+            text = timezoneDisplayLabel(selectedId),
+            modifier = Modifier.weight(1f),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+        Icon(Icons.Default.ArrowDropDown, contentDescription = null)
+    }
+
+    if (showSheet) {
+        SearchableSelectSheet(
+            title = stringResource(R.string.timezone_title),
+            searchPlaceholder = stringResource(R.string.timezone_search),
+            noResultsText = stringResource(R.string.timezone_no_results),
+            items = options,
+            selectedId = selectedId,
+            onSelect = { id ->
+                showSheet = false
+                onSelect(id)
+            },
+            onDismiss = { showSheet = false }
+        )
+    }
+}
+
+private fun timezoneDisplayLabel(id: String): String {
+    val zone = TimeZone.getTimeZone(id.takeIf { it.isNotBlank() } ?: TimeZone.getDefault().id)
+    return "${zone.id} (${TimezoneFormatter.offsetLabel(zone)})"
 }

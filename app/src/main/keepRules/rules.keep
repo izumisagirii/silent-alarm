@@ -1,23 +1,17 @@
 # ── SilentAlarm R8 / ProGuard Keep Rules ──────────────────────────────
-# Prevents R8 from stripping or obfuscating classes that are loaded
-# reflectively (services, receivers, Shizuku provider).
+# Manifest-registered components (Activity / Service / Receiver / Provider)
+# are kept automatically by AGP's generated aapt_rules.txt, so they are not
+# re-listed here.
 
-# Keep all declared Android components (Manifest-registered)
--keep class com.electrowiz.silentalarm.service.** { *; }
--keep class com.electrowiz.silentalarm.receiver.** { *; }
--keep class com.electrowiz.silentalarm.daemon.** { *; }
+# Shizuku UserService — instantiated reflectively by Shizuku via ComponentName,
+# so its class name and members must survive obfuscation.
+-keep class com.electrowiz.silentalarm.daemon.ShellService { *; }
 
-# Keep Shizuku provider (loaded reflectively by Shizuku framework)
--keep class rikka.shizuku.ShizukuProvider { *; }
+# Shizuku client API crosses a Binder boundary and relies on internal
+# reflection/AIDL dispatch; keep it intact to avoid cross-process breakage.
 -keep class rikka.shizuku.** { *; }
 
-# Keep DataStore serialization classes
--keep class com.electrowiz.silentalarm.data.NoEarphoneAction { *; }
-
-# Keep AudioRouter enum values (may be referenced by ordinal)
--keep class com.electrowiz.silentalarm.util.AudioRouter$* { *; }
-
-# General Android keep rules
+# Generic Kotlin / Android keep attributes.
 -keepattributes *Annotation*
 -keepattributes Signature
 -keepattributes InnerClasses

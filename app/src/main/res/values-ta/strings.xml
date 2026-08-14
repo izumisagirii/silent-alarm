@@ -119,8 +119,6 @@
     <string name="retry">மீண்டும் முயற்சி</string>
     <string name="battery_already_exempt">பேட்டரி மேம்படுத்தல் ஏற்கனவே முடக்கப்பட்டுள்ளது</string>
     <string name="timezone_title">நேர மண்டலம்</string>
-    <string name="timezone_auto">கணினி நேர மண்டலம்</string>
-    <string name="timezone_selected">தேர்ந்தெடுத்த நேர மண்டலம்</string>
     <string name="timezone_search">நேர மண்டலங்களைத் தேடு</string>
     <string name="timezone_no_results">நேர மண்டலங்கள் இல்லை</string>
 
@@ -136,4 +134,5 @@
     <string name="keep_alive_desc">நிரந்தர அறிவிப்பு, மூடப்பட்ட பிறகு தானியங்கி மீட்பு</string>
     <string name="shizuku_desc">வலுவான பாதுகாப்பிற்கு Shizuku அனுமதியைப் பயன்படுத்தவும்</string>
     <string name="battery_not_exempt">விலக்கு இல்லை</string>
+    <string name="notifications_title">அறிவிப்புகள்</string>
 </resources>

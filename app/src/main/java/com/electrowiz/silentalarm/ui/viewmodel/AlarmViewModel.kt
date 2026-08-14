@@ -5,6 +5,7 @@ import android.content.Context
 import android.net.Uri
 import android.os.PowerManager
 import android.util.Log
+import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.electrowiz.silentalarm.data.AlarmItem
@@ -12,7 +13,6 @@ import com.electrowiz.silentalarm.data.AlarmPreferences
 import com.electrowiz.silentalarm.data.AlarmScheduler
 import com.electrowiz.silentalarm.data.NoEarphoneAction
 import com.electrowiz.silentalarm.data.TimeoutAction
-import com.electrowiz.silentalarm.data.TimezoneMode
 import com.electrowiz.silentalarm.R
 import com.electrowiz.silentalarm.daemon.ShellManager
 import com.electrowiz.silentalarm.keepalive.KeepAliveController
@@ -64,10 +64,10 @@ class AlarmViewModel(application: Application) : AndroidViewModel(application) {
     // ── Global Settings ──────────────────────────────────────────────────
 
     val earphoneVolume: StateFlow<Int> = preferences.earphoneVolume
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 80)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), AlarmPreferences.DEFAULT_EARPHONE_VOLUME)
 
     val speakerVolume: StateFlow<Int> = preferences.speakerVolume
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 60)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), AlarmPreferences.DEFAULT_SPEAKER_VOLUME)
 
     val noEarphoneAction: StateFlow<NoEarphoneAction> = preferences.noEarphoneAction
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), NoEarphoneAction.VIBRATE_ONLY)
@@ -78,16 +78,10 @@ class AlarmViewModel(application: Application) : AndroidViewModel(application) {
     // ── Timeout Settings ──────────────────────────────────────────────
 
     val timeoutSeconds: StateFlow<Int> = preferences.timeoutSeconds
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 300)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), AlarmPreferences.DEFAULT_TIMEOUT_SECONDS)
 
     val timeoutAction: StateFlow<TimeoutAction> = preferences.timeoutAction
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), TimeoutAction.STOP)
-
-    val timezoneMode: StateFlow<TimezoneMode> = preferences.timezoneMode
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), TimezoneMode.SYSTEM)
-
-    val timezoneId: StateFlow<String> = preferences.timezoneId
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "")
 
     // ── Optional Keep-Alive Toggles ─────────────────────────────────────
 
@@ -112,6 +106,10 @@ class AlarmViewModel(application: Application) : AndroidViewModel(application) {
     /** Shizuku is up but needs the user's authorization (no root fallback). */
     private val _shizukuPermissionNeeded = MutableStateFlow(false)
     val shizukuPermissionNeeded: StateFlow<Boolean> = _shizukuPermissionNeeded.asStateFlow()
+
+    /** Whether notifications can be posted (POST_NOTIFICATIONS on 13+, always true before). */
+    private val _notificationsAllowed = MutableStateFlow(notificationsAllowed())
+    val notificationsAllowed: StateFlow<Boolean> = _notificationsAllowed.asStateFlow()
 
     // ── UI State ─────────────────────────────────────────────────────────
 
@@ -153,6 +151,7 @@ class AlarmViewModel(application: Application) : AndroidViewModel(application) {
         val wasExactAlarmAllowed = _exactAlarmAllowed.value
         _exactAlarmAllowed.value = scheduler.canScheduleExactAlarms()
         _batteryOptimizationIgnored.value = isIgnoringBatteryOptimizations()
+        _notificationsAllowed.value = notificationsAllowed()
 
         viewModelScope.launch {
             val status = withContext(Dispatchers.IO) { shellManager.refresh() }
@@ -224,13 +223,13 @@ class AlarmViewModel(application: Application) : AndroidViewModel(application) {
 
     // ── Alarm CRUD ───────────────────────────────────────────────────────
 
-    fun addAlarm(hour: Int, minute: Int, label: String = "") {
+    fun addAlarm(hour: Int, minute: Int, label: String = "", timeZoneId: String = "") {
         viewModelScope.launch {
             val item = AlarmItem(
                 hour = hour,
                 minute = minute,
                 label = label,
-                timeZoneId = preferredTimeZoneId()
+                timeZoneId = timeZoneId
             )
             applyAlarmChange { preferences.addAlarm(item) }
             _snackbarMessage.value = SnackbarEvent(msg(R.string.alarm_set_format, hour, minute))
@@ -293,17 +292,6 @@ class AlarmViewModel(application: Application) : AndroidViewModel(application) {
 
     fun setTimeoutSeconds(v: Int) { viewModelScope.launch { preferences.setTimeoutSeconds(v) } }
     fun setTimeoutAction(a: TimeoutAction) { viewModelScope.launch { preferences.setTimeoutAction(a) } }
-    fun setTimezoneMode(mode: TimezoneMode) {
-        viewModelScope.launch {
-            preferences.setTimezoneMode(mode)
-        }
-    }
-
-    fun setTimezoneId(id: String) {
-        viewModelScope.launch {
-            preferences.setTimezoneId(id)
-        }
-    }
 
     // ── Optional Keep-Alive Toggles ──────────────────────────────────────
 
@@ -380,29 +368,38 @@ class AlarmViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    private fun notificationsAllowed(): Boolean =
+        NotificationManagerCompat.from(getApplication()).areNotificationsEnabled()
+
     // ── Time Picker ──────────────────────────────────────────────────────
 
     fun showAddTimePicker() { editingAlarmId = null; _showTimePicker.value = true }
     fun showEditTimePicker(alarmId: String) { editingAlarmId = alarmId; _showTimePicker.value = true }
     fun hideTimePicker() { _showTimePicker.value = false }
 
-    fun onTimeSelected(hour: Int, minute: Int, label: String = "") {
+    fun onTimeSelected(hour: Int, minute: Int, label: String = "", timeZoneId: String = "") {
         val editing = editingAlarmId
         if (editing != null) {
             val alarm = alarms.value.find { it.id == editing } ?: return
-            updateAlarmTime(alarm.id, hour, minute, label)
+            updateAlarmTime(alarm.id, hour, minute, label, timeZoneId)
         } else {
-            addAlarm(hour, minute, label)
+            addAlarm(hour, minute, label, timeZoneId)
         }
         hideTimePicker()
     }
 
     /**
-     * Update the time of an existing alarm and capture the preferred timezone
+     * Update the time of an existing alarm and capture the chosen timezone
      * at this save point. Existing alarms are not rescheduled merely because
      * the system timezone changed; only an explicit edit changes their zone.
      */
-    private fun updateAlarmTime(alarmId: String, hour: Int, minute: Int, label: String) {
+    private fun updateAlarmTime(
+        alarmId: String,
+        hour: Int,
+        minute: Int,
+        label: String,
+        timeZoneId: String
+    ) {
         viewModelScope.launch {
             val existing = alarms.value.find { it.id == alarmId } ?: return@launch
             updateAlarm(
@@ -410,7 +407,7 @@ class AlarmViewModel(application: Application) : AndroidViewModel(application) {
                     hour = hour,
                     minute = minute,
                     label = label,
-                    timeZoneId = preferredTimeZoneId()
+                    timeZoneId = timeZoneId
                 )
             )
         }
@@ -429,14 +426,9 @@ class AlarmViewModel(application: Application) : AndroidViewModel(application) {
 
     // ── Formatting ───────────────────────────────────────────────────────
 
-    /** Display the alarm's wall-clock time in the timezone captured when it was saved. */
-    fun formatAlarmTime(item: AlarmItem): String {
-        val epoch = scheduler.nextFireEpoch(item)
-        val zone = TimeZone.getTimeZone(
-            item.timeZoneId.takeIf { it.isNotBlank() } ?: TimeZone.getDefault().id
-        )
-        return formatEpochInZone(epoch, zone)
-    }
+    /** Display the alarm's wall-clock time as configured (own-zone hour/minute). */
+    fun formatAlarmTime(item: AlarmItem): String =
+        "%02d:%02d".format(item.hour, item.minute)
 
     /** The same alarm instant shown in the system's current timezone. */
     fun formatAlarmLocalTime(item: AlarmItem): String =
@@ -448,6 +440,7 @@ class AlarmViewModel(application: Application) : AndroidViewModel(application) {
      * The "本地时间 / Local time" prefix is the user-facing hint.
      */
     fun localTimeCaption(item: AlarmItem): String? {
+        if (!item.enabled) return null
         val own = formatAlarmTime(item)
         val local = formatAlarmLocalTime(item)
         return if (own != local) {
@@ -472,16 +465,6 @@ class AlarmViewModel(application: Application) : AndroidViewModel(application) {
         val dayNames = context.resources.getStringArray(R.array.day_names_short)
         return item.daysOfWeek.sorted()
             .joinToString(", ") { dayNames.getOrElse(it) { "?" } }
-    }
-
-    private suspend fun preferredTimeZoneId(): String {
-        val mode = preferences.timezoneMode.first()
-        val selectedId = preferences.timezoneId.first()
-        return when (mode) {
-            TimezoneMode.SYSTEM -> TimeZone.getDefault().id
-            TimezoneMode.SELECTED -> selectedId.takeIf { it.isNotBlank() }
-                ?: TimeZone.getDefault().id
-        }
     }
 
     /** Compact label for the timezone captured on an individual alarm. */

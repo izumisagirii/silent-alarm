@@ -119,8 +119,6 @@
     <string name="retry">Riprova</string>
     <string name="battery_already_exempt">L’ottimizzazione della batteria è già disattivata</string>
     <string name="timezone_title">Fuso orario</string>
-    <string name="timezone_auto">Fuso orario di sistema</string>
-    <string name="timezone_selected">Fuso orario selezionato</string>
     <string name="timezone_search">Cerca fusi orari</string>
     <string name="timezone_no_results">Nessun fuso orario trovato</string>
 
@@ -136,4 +134,5 @@
     <string name="keep_alive_desc">Notifica persistente, ripristino automatico dopo la chiusura</string>
     <string name="shizuku_desc">Usa il permesso Shizuku per una protezione più forte</string>
     <string name="battery_not_exempt">Non esentata</string>
+    <string name="notifications_title">Notifiche</string>
 </resources>

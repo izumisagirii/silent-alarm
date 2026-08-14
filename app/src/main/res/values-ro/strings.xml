@@ -119,8 +119,6 @@
     <string name="retry">Reîncearcă</string>
     <string name="battery_already_exempt">Optimizarea bateriei este deja dezactivată</string>
     <string name="timezone_title">Fus orar</string>
-    <string name="timezone_auto">Fus orar sistem</string>
-    <string name="timezone_selected">Fus orar selectat</string>
     <string name="timezone_search">Caută fusuri orare</string>
     <string name="timezone_no_results">Nu s-a găsit niciun fus orar</string>
 
@@ -136,4 +134,5 @@
     <string name="keep_alive_desc">Notificare permanentă, restaurare automată după închidere</string>
     <string name="shizuku_desc">Folosiți permisiunea Shizuku pentru o protecție mai puternică</string>
     <string name="battery_not_exempt">Nu este scutită</string>
+    <string name="notifications_title">Notificări</string>
 </resources>

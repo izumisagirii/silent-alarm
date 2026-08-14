@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.util.Log
+import com.electrowiz.silentalarm.MainActivity
 import com.electrowiz.silentalarm.service.AlarmAudioService
 import java.util.Calendar
 import java.util.TimeZone
@@ -51,6 +52,9 @@ class AlarmScheduler(private val context: Context) {
         const val SNOOZE_DURATION_MS = 5 * 60 * 1000L
 
         private const val SNOOZE_EXPIRY_REQUEST_CODE = 8002
+
+        /** Request code for the lock-screen "next alarm" tap target. */
+        private const val SHOW_INTENT_REQUEST_CODE = 8003
     }
 
     private val alarmManager: AlarmManager =
@@ -106,7 +110,7 @@ class AlarmScheduler(private val context: Context) {
         }
 
         val pendingIntent = buildPendingIntentById(item.id, ACTION_ALARM_TRIGGER)
-        val info = AlarmManager.AlarmClockInfo(triggerEpoch, null)
+        val info = AlarmManager.AlarmClockInfo(triggerEpoch, buildShowIntent())
 
         try {
             alarmManager.setAlarmClock(info, pendingIntent)
@@ -229,6 +233,16 @@ class AlarmScheduler(private val context: Context) {
         }
         val flags = PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         return PendingIntent.getForegroundService(context, requestCodeFor(alarmId), intent, flags)
+    }
+
+    /**
+     * Build the tap target shown with the system's "next alarm" indicator on
+     * the lock screen and status bar. Tapping it opens the app dashboard.
+     */
+    private fun buildShowIntent(): PendingIntent {
+        val intent = Intent(context, MainActivity::class.java)
+        val flags = PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        return PendingIntent.getActivity(context, SHOW_INTENT_REQUEST_CODE, intent, flags)
     }
 
     /**

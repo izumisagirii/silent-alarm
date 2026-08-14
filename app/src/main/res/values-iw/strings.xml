@@ -119,8 +119,6 @@
     <string name="retry">נסה שוב</string>
     <string name="battery_already_exempt">אופטימיזציית הסוללה כבר מושבתת</string>
     <string name="timezone_title">אזור זמן</string>
-    <string name="timezone_auto">אזור זמן של המערכת</string>
-    <string name="timezone_selected">אזור זמן נבחר</string>
     <string name="timezone_search">חיפוש אזורי זמן</string>
     <string name="timezone_no_results">לא נמצאו אזורי זמן</string>
 
@@ -136,4 +134,5 @@
     <string name="keep_alive_desc">התראה קבועה, שחזור אוטומטי לאחר סגירה</string>
     <string name="shizuku_desc">השתמש בהרשאת Shizuku להגנה חזקה יותר</string>
     <string name="battery_not_exempt">לא פטור</string>
+    <string name="notifications_title">התראות</string>
 </resources>

@@ -119,8 +119,6 @@
     <string name="retry">다시 시도</string>
     <string name="battery_already_exempt">배터리 최적화가 이미 해제되어 있습니다</string>
     <string name="timezone_title">시간대</string>
-    <string name="timezone_auto">시스템 시간대</string>
-    <string name="timezone_selected">선택한 시간대</string>
     <string name="timezone_search">시간대 검색</string>
     <string name="timezone_no_results">시간대를 찾을 수 없음</string>
 
@@ -136,4 +134,5 @@
     <string name="keep_alive_desc">상시 알림, 종료 후 자동 복원</string>
     <string name="shizuku_desc">Shizuku 권한으로 더 강한 보호를 제공</string>
     <string name="battery_not_exempt">예외 아님</string>
+    <string name="notifications_title">알림</string>
 </resources>

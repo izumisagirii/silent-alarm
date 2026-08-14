@@ -57,6 +57,7 @@
     <string name="keep_alive_desc">通知常驻，被杀后自动恢复</string>
     <string name="shizuku_desc">使用 Shizuku 权限增强保活</string>
     <string name="battery_not_exempt">未豁免</string>
+    <string name="notifications_title">通知权限</string>
 
     <!-- Language -->
     <string name="language_title">语言</string>
@@ -138,8 +139,6 @@
     <string name="retry">重试</string>
     <string name="battery_already_exempt">已关闭电池优化</string>
     <string name="timezone_title">时区</string>
-    <string name="timezone_auto">系统时区</string>
-    <string name="timezone_selected">指定时区</string>
     <string name="timezone_search">搜索时区</string>
     <string name="timezone_no_results">未找到时区</string>
 

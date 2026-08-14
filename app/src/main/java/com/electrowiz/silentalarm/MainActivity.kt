@@ -82,7 +82,7 @@ class MainActivity : AppCompatActivity() {
                     AlarmDashboardScreen(
                         viewModel = viewModel,
                         onPickRingtone = { launchRingtonePicker() },
-                        onRequestExactAlarmPermission = ::requestExactAlarmPermission,
+                        onRequestNotificationPermission = ::requestNotificationPermission,
                         onRequestBatteryExemption = ::launchBatteryExemption
                     )
                 }
@@ -116,16 +116,35 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun requestExactAlarmPermission() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return
+    private fun requestNotificationPermission() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            // No runtime permission before 13; notifications are toggled in app settings.
+            openAppNotificationSettings()
+            return
+        }
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+            == PackageManager.PERMISSION_GRANTED
+        ) {
+            return
+        }
+        // The dialog only reappears after a plain "deny". Once the permission
+        // is revoked via Settings (or "don't ask again"), launch() silently
+        // returns without showing anything — open the settings page instead.
+        if (shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS)) {
+            notificationPermLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        } else {
+            openAppNotificationSettings()
+        }
+    }
+
+    private fun openAppNotificationSettings() {
         try {
             startActivity(
-                Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM).apply {
-                    data = "package:$packageName".toUri()
-                }
+                Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+                    .putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
             )
         } catch (e: Exception) {
-            Log.e(TAG, "Exact alarm settings unavailable", e)
+            Log.e(TAG, "App notification settings unavailable", e)
         }
     }
 

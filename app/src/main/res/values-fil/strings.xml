@@ -119,8 +119,6 @@
     <string name="retry">Subukan muli</string>
     <string name="battery_already_exempt">Naka-disable na ang pag-optimize ng baterya</string>
     <string name="timezone_title">Time zone</string>
-    <string name="timezone_auto">System time zone</string>
-    <string name="timezone_selected">Napiling time zone</string>
     <string name="timezone_search">Maghanap ng time zone</string>
     <string name="timezone_no_results">Walang nakitang time zone</string>
 
@@ -136,4 +134,5 @@
     <string name="keep_alive_desc">Permanenteng notification, awtomatikong ibabalik pagkatapos isara</string>
     <string name="shizuku_desc">Gamitin ang Shizuku permission para sa mas malakas na proteksyon</string>
     <string name="battery_not_exempt">Hindi exempted</string>
+    <string name="notifications_title">Mga notification</string>
 </resources>

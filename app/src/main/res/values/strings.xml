@@ -59,6 +59,7 @@
     <string name="keep_alive_desc">Persistent notification, auto-restore after being killed</string>
     <string name="shizuku_desc">Use Shizuku permission for stronger keep-alive</string>
     <string name="battery_not_exempt">Not exempt</string>
+    <string name="notifications_title">Notifications</string>
 
     <!-- Language -->
     <string name="language_title">Language</string>
@@ -68,8 +69,6 @@
 
     <!-- Timezone -->
     <string name="timezone_title">Timezone</string>
-    <string name="timezone_auto">System timezone</string>
-    <string name="timezone_selected">Selected timezone</string>
     <string name="timezone_search">Search timezones</string>
     <string name="timezone_no_results">No timezones found</string>
 

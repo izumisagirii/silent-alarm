@@ -245,6 +245,11 @@ class AlarmAudioService : Service() {
         idleRefreshJob?.cancel(); idleRefreshJob = null
         snoozeJob?.cancel(); snoozeJob = null
         postAlarmJob?.cancel(); postAlarmJob = null
+        // Cancel the scope before tearing down so no queued listener callback
+        // (completion / error / audio-focus) can run during release. All
+        // playback mutations run on the main dispatcher, so this release
+        // sequence is atomic with respect to the playback mutex holders.
+        serviceScope.cancel()
         serviceAlive.value = false
         updatePlaybackState(PlaybackState.Idle)
         releaseMediaPlayer()
@@ -252,7 +257,6 @@ class AlarmAudioService : Service() {
         releaseWakeLock()
         releaseAudioFocus()
         restoreVolume()
-        serviceScope.cancel()
         Log.i(TAG, "Service destroyed — all resources released")
         super.onDestroy()
     }

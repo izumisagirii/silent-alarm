@@ -119,8 +119,6 @@
     <string name="retry">Yritä uudelleen</string>
     <string name="battery_already_exempt">Akun optimointi on jo poistettu käytöstä</string>
     <string name="timezone_title">Aikavyöhyke</string>
-    <string name="timezone_auto">Järjestelmän aikavyöhyke</string>
-    <string name="timezone_selected">Valittu aikavyöhyke</string>
     <string name="timezone_search">Hae aikavyöhykkeitä</string>
     <string name="timezone_no_results">Aikavyöhykkeitä ei löytynyt</string>
 
@@ -136,4 +134,5 @@
     <string name="keep_alive_desc">Pysyvä ilmoitus, automaattinen palautus sulkemisen jälkeen</string>
     <string name="shizuku_desc">Käytä Shizuku-oikeutta vahvempaan suojaan</string>
     <string name="battery_not_exempt">Ei vapautettu</string>
+    <string name="notifications_title">Ilmoitukset</string>
 </resources>
