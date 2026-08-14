@@ -8,6 +8,7 @@
     <string name="no_alarms">Chưa có báo thức nào. Chạm + để thêm.</string>
     <string name="add_alarm">Thêm báo thức</string>
     <string name="delete_alarm">Xóa báo thức</string>
+    <string name="delete_alarm_confirm">Xóa báo thức?</string>
     <string name="edit_alarm">Sửa báo thức</string>
     <string name="new_alarm">Báo thức mới</string>
     <string name="ok">OK</string>
@@ -58,6 +59,7 @@
     <string name="alarm_stopped">Đã dừng báo thức</string>
 
     <string name="schedule_one_shot">Một lần</string>
+    <string name="alarm_local_time_format">Giờ địa phương %1$s</string>
 
     <string-array name="day_letters">
         <item></item>
@@ -103,7 +105,35 @@
     <string name="notification_channel_active">Báo thức đang phát</string>
     <string name="notification_channel_active_desc">Hiển thị khi báo thức đang phát</string>
     <string name="notification_waiting">Đang chờ báo thức tiếp theo</string>
+    <string name="notification_next_alarm_format">Báo thức tiếp theo: %1$s</string>
     <string name="notification_alarm_active">Báo thức đang hoạt động</string>
     <string name="notification_earphones">Đang phát qua tai nghe</string>
     <string name="notification_no_earphones">Không phát hiện tai nghe</string>
+    <string name="notification_speaker">Đang phát qua loa</string>
+    <string name="notification_vibrate">Đang rung</string>
+    <string name="snooze_5min">Báo lại 5 phút</string>
+    <string name="notification_snoozing">Báo thức đang tạm dừng</string>
+    <string name="notification_snooze_resume">Sẽ đổ chuông lại sau 5 phút</string>
+    <string name="no_alarm_ringing">Hiện không có báo thức nào đang đổ chuông</string>
+    <string name="undo">Hoàn tác</string>
+    <string name="retry">Thử lại</string>
+    <string name="battery_already_exempt">Tối ưu hóa pin đã bị tắt</string>
+    <string name="timezone_title">Múi giờ</string>
+    <string name="timezone_auto">Múi giờ hệ thống</string>
+    <string name="timezone_selected">Múi giờ đã chọn</string>
+    <string name="timezone_search">Tìm múi giờ</string>
+    <string name="timezone_no_results">Không tìm thấy múi giờ</string>
+
+    <string name="alarm_label">Nhãn</string>
+    <string name="notification_channel_stopped">Nhắc nhở báo thức</string>
+    <string name="notification_channel_stopped_desc">Thông báo im lặng một lần hiển thị thời gian đổ chuông cuối cùng sau khi bỏ lỡ báo thức</string>
+    <string name="notification_missed_alarm">Đã bỏ lỡ báo thức</string>
+    <string name="notification_last_rang_time_format">Thời gian đổ chuông cuối cùng: %1$s</string>
+
+    <string name="search_alarms">Tìm kiếm báo thức</string>
+    <string name="no_alarms_found">Không có báo thức khớp</string>
+    <string name="keep_alive_title">Giữ thông báo</string>
+    <string name="keep_alive_desc">Thông báo thường trực, tự khôi phục sau khi bị đóng</string>
+    <string name="shizuku_desc">Dùng quyền Shizuku để tăng cường bảo vệ</string>
+    <string name="battery_not_exempt">Không được miễn</string>
 </resources>

@@ -8,6 +8,7 @@
     <string name="no_alarms">Brak ustawionych alarmów. Dotknij +, aby dodać.</string>
     <string name="add_alarm">Dodaj alarm</string>
     <string name="delete_alarm">Usuń alarm</string>
+    <string name="delete_alarm_confirm">Usuń alarm?</string>
     <string name="edit_alarm">Edytuj alarm</string>
     <string name="new_alarm">Nowy alarm</string>
     <string name="ok">OK</string>
@@ -58,6 +59,7 @@
     <string name="alarm_stopped">Alarm zatrzymano</string>
 
     <string name="schedule_one_shot">Jednorazowy</string>
+    <string name="alarm_local_time_format">Czas lokalny %1$s</string>
 
     <string-array name="day_letters">
         <item></item>
@@ -103,7 +105,35 @@
     <string name="notification_channel_active">Alarm gra</string>
     <string name="notification_channel_active_desc">Wyświetlane, gdy alarm gra</string>
     <string name="notification_waiting">Oczekiwanie na następny alarm</string>
+    <string name="notification_next_alarm_format">Następny alarm: %1$s</string>
     <string name="notification_alarm_active">Alarm aktywny</string>
     <string name="notification_earphones">Odtwarzanie przez słuchawki</string>
     <string name="notification_no_earphones">Nie wykryto słuchawek</string>
+    <string name="notification_speaker">Odtwarzanie przez głośnik</string>
+    <string name="notification_vibrate">Wibruje</string>
+    <string name="snooze_5min">Drzemka 5 min</string>
+    <string name="notification_snoozing">Alarm wstrzymany</string>
+    <string name="notification_snooze_resume">Zadzwoni ponownie za 5 minut</string>
+    <string name="no_alarm_ringing">Żaden alarm nie dzwoni</string>
+    <string name="undo">Cofnij</string>
+    <string name="retry">Spróbuj ponownie</string>
+    <string name="battery_already_exempt">Optymalizacja baterii jest już wyłączona</string>
+    <string name="timezone_title">Strefa czasowa</string>
+    <string name="timezone_auto">Systemowa strefa czasowa</string>
+    <string name="timezone_selected">Wybrana strefa czasowa</string>
+    <string name="timezone_search">Szukaj stref czasowych</string>
+    <string name="timezone_no_results">Nie znaleziono stref czasowych</string>
+
+    <string name="alarm_label">Etykieta</string>
+    <string name="notification_channel_stopped">Przypomnienie alarmu</string>
+    <string name="notification_channel_stopped_desc">Jednorazowe ciche powiadomienie pokazujące czas ostatniego dzwonka po pominiętym alarmie</string>
+    <string name="notification_missed_alarm">Pominięty alarm</string>
+    <string name="notification_last_rang_time_format">Ostatni dzwonek: %1$s</string>
+
+    <string name="search_alarms">Szukaj alarmów</string>
+    <string name="no_alarms_found">Brak pasujących alarmów</string>
+    <string name="keep_alive_title">Zachowaj powiadomienie</string>
+    <string name="keep_alive_desc">Stałe powiadomienie, automatyczne przywracanie po zamknięciu</string>
+    <string name="shizuku_desc">Użyj uprawnień Shizuku, aby wzmocnić ochronę</string>
+    <string name="battery_not_exempt">Nie wyłączone</string>
 </resources>

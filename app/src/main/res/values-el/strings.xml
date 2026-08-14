@@ -8,6 +8,7 @@
     <string name="no_alarms">Δεν έχει οριστεί ξυπνητήρι. Πατήστε + για προσθήκη.</string>
     <string name="add_alarm">Προσθήκη ξυπνητηριού</string>
     <string name="delete_alarm">Διαγραφή ξυπνητηριού</string>
+    <string name="delete_alarm_confirm">Διαγραφή ξυπνητηριού?</string>
     <string name="edit_alarm">Επεξεργασία ξυπνητηριού</string>
     <string name="new_alarm">Νέο ξυπνητήρι</string>
     <string name="ok">ΟΚ</string>
@@ -58,6 +59,7 @@
     <string name="alarm_stopped">Το ξυπνητήρι σταμάτησε</string>
 
     <string name="schedule_one_shot">Μία φορά</string>
+    <string name="alarm_local_time_format">Τοπική ώρα %1$s</string>
 
     <string-array name="day_letters">
         <item></item>
@@ -103,7 +105,35 @@
     <string name="notification_channel_active">Το ξυπνητήρι παίζει</string>
     <string name="notification_channel_active_desc">Εμφανίζεται όταν παίζει το ξυπνητήρι</string>
     <string name="notification_waiting">Αναμονή για το επόμενο ξυπνητήρι</string>
+    <string name="notification_next_alarm_format">Επόμενο ξυπνητήρι: %1$s</string>
     <string name="notification_alarm_active">Το ξυπνητήρι είναι ενεργό</string>
     <string name="notification_earphones">Αναπαραγωγή μέσω ακουστικών</string>
     <string name="notification_no_earphones">Δεν εντοπίστηκαν ακουστικά</string>
+    <string name="notification_speaker">Αναπαραγωγή μέσω ηχείου</string>
+    <string name="notification_vibrate">Δόνηση</string>
+    <string name="snooze_5min">Αναβολή 5 λεπτά</string>
+    <string name="notification_snoozing">Το ξυπνητήρι τέθηκε σε παύση</string>
+    <string name="notification_snooze_resume">Θα χτυπήσει ξανά σε 5 λεπτά</string>
+    <string name="no_alarm_ringing">Δεν χτυπάει κανένα ξυπνητήρι αυτήν τη στιγμή</string>
+    <string name="undo">Αναίρεση</string>
+    <string name="retry">Δοκιμάστε ξανά</string>
+    <string name="battery_already_exempt">Η βελτιστοποίηση μπαταρίας είναι ήδη απενεργοποιημένη</string>
+    <string name="timezone_title">Ζώνη ώρας</string>
+    <string name="timezone_auto">Ζώνη ώρας συστήματος</string>
+    <string name="timezone_selected">Επιλεγμένη ζώνη ώρας</string>
+    <string name="timezone_search">Αναζήτηση ζωνών ώρας</string>
+    <string name="timezone_no_results">Δεν βρέθηκαν ζώνες ώρας</string>
+
+    <string name="alarm_label">Ετικέτα</string>
+    <string name="notification_channel_stopped">Υπενθύμιση ξυπνητηριού</string>
+    <string name="notification_channel_stopped_desc">Εφάπαξ αθόρυβη ειδοποίηση που δείχνει την ώρα τελευταίας κλήσης μετά από χαμένο ξυπνητήρι</string>
+    <string name="notification_missed_alarm">Χαμένο ξυπνητήρι</string>
+    <string name="notification_last_rang_time_format">Τελευταία ώρα κλήσης: %1$s</string>
+
+    <string name="search_alarms">Αναζήτηση ξυπνητηριών</string>
+    <string name="no_alarms_found">Δεν βρέθηκαν αντίστοιχα ξυπνητήρια</string>
+    <string name="keep_alive_title">Διατήρηση ειδοποίησης</string>
+    <string name="keep_alive_desc">Μόνιμη ειδοποίηση, αυτόματη επαναφορά μετά το κλείσιμο</string>
+    <string name="shizuku_desc">Χρησιμοποιήστε την άδεια Shizuku για ισχυρότερη προστασία</string>
+    <string name="battery_not_exempt">Δεν εξαιρείται</string>
 </resources>

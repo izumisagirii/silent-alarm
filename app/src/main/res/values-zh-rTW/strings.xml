@@ -8,6 +8,7 @@
     <string name="no_alarms">尚未設定鬧鐘，點擊 + 新增一個。</string>
     <string name="add_alarm">新增鬧鐘</string>
     <string name="delete_alarm">刪除鬧鐘</string>
+    <string name="delete_alarm_confirm">刪除鬧鐘?</string>
     <string name="edit_alarm">編輯鬧鐘</string>
     <string name="new_alarm">新增鬧鐘</string>
     <string name="ok">確定</string>
@@ -58,6 +59,7 @@
     <string name="alarm_stopped">鬧鐘已停止</string>
 
     <string name="schedule_one_shot">單次</string>
+    <string name="alarm_local_time_format">本地時間 %1$s</string>
 
     <string-array name="day_letters">
         <item></item>
@@ -103,7 +105,35 @@
     <string name="notification_channel_active">鬧鐘播放中</string>
     <string name="notification_channel_active_desc">鬧鐘播放時顯示</string>
     <string name="notification_waiting">等待下一個鬧鐘</string>
+    <string name="notification_next_alarm_format">下一個鬧鐘：%1$s</string>
     <string name="notification_alarm_active">鬧鐘啟動中</string>
     <string name="notification_earphones">正在透過耳機播放</string>
     <string name="notification_no_earphones">未偵測到耳機</string>
+    <string name="notification_speaker">正在透過揚聲器播放</string>
+    <string name="notification_vibrate">正在振動</string>
+    <string name="snooze_5min">貪睡 5 分鐘</string>
+    <string name="notification_snoozing">鬧鐘已暫停</string>
+    <string name="notification_snooze_resume">5 分鐘後再次響起</string>
+    <string name="no_alarm_ringing">目前沒有正在響鈴的鬧鐘</string>
+    <string name="undo">復原</string>
+    <string name="retry">重試</string>
+    <string name="battery_already_exempt">已關閉電池最佳化</string>
+    <string name="timezone_title">時區</string>
+    <string name="timezone_auto">系統時區</string>
+    <string name="timezone_selected">指定時區</string>
+    <string name="timezone_search">搜尋時區</string>
+    <string name="timezone_no_results">找不到時區</string>
+
+    <string name="alarm_label">標籤</string>
+    <string name="notification_channel_stopped">鬧鐘提醒</string>
+    <string name="notification_channel_stopped_desc">錯過鬧鐘後顯示上次響鈴時間的一次性靜音通知</string>
+    <string name="notification_missed_alarm">錯過的鬧鐘</string>
+    <string name="notification_last_rang_time_format">上次響鈴時間：%1$s</string>
+
+    <string name="search_alarms">搜尋鬧鐘</string>
+    <string name="no_alarms_found">沒有相符的鬧鐘</string>
+    <string name="keep_alive_title">通知保活</string>
+    <string name="keep_alive_desc">通知常駐，被終止後自動恢復</string>
+    <string name="shizuku_desc">使用 Shizuku 權限增強保活</string>
+    <string name="battery_not_exempt">未豁免</string>
 </resources>

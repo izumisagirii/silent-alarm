@@ -8,6 +8,7 @@
     <string name="no_alarms">אין שעון מעורר מוגדר. הקש + כדי להוסיף.</string>
     <string name="add_alarm">הוסף שעון מעורר</string>
     <string name="delete_alarm">מחק שעון מעורר</string>
+    <string name="delete_alarm_confirm">מחק שעון מעורר?</string>
     <string name="edit_alarm">ערוך שעון מעורר</string>
     <string name="new_alarm">שעון מעורר חדש</string>
     <string name="ok">אישור</string>
@@ -58,6 +59,7 @@
     <string name="alarm_stopped">השעון המעורר הופסק</string>
 
     <string name="schedule_one_shot">פעם אחת</string>
+    <string name="alarm_local_time_format">שעה מקומית %1$s</string>
 
     <string-array name="day_letters">
         <item></item>
@@ -103,7 +105,35 @@
     <string name="notification_channel_active">השעון המעורר מנגן</string>
     <string name="notification_channel_active_desc">מוצג כשהשעון המעורר מנגן</string>
     <string name="notification_waiting">ממתין לשעון המעורר הבא</string>
+    <string name="notification_next_alarm_format">השעון המעורר הבא: %1$s</string>
     <string name="notification_alarm_active">שעון מעורר פעיל</string>
     <string name="notification_earphones">מנגן דרך אוזניות</string>
     <string name="notification_no_earphones">לא זוהו אוזניות</string>
+    <string name="notification_speaker">מנגן דרך הרמקול</string>
+    <string name="notification_vibrate">רוטט</string>
+    <string name="snooze_5min">נודניק 5 דק׳</string>
+    <string name="notification_snoozing">השעון המעורר הושהה</string>
+    <string name="notification_snooze_resume">יצלצל שוב בעוד 5 דקות</string>
+    <string name="no_alarm_ringing">אין שעון מעורר מצלצל כרגע</string>
+    <string name="undo">ביטול</string>
+    <string name="retry">נסה שוב</string>
+    <string name="battery_already_exempt">אופטימיזציית הסוללה כבר מושבתת</string>
+    <string name="timezone_title">אזור זמן</string>
+    <string name="timezone_auto">אזור זמן של המערכת</string>
+    <string name="timezone_selected">אזור זמן נבחר</string>
+    <string name="timezone_search">חיפוש אזורי זמן</string>
+    <string name="timezone_no_results">לא נמצאו אזורי זמן</string>
+
+    <string name="alarm_label">תווית</string>
+    <string name="notification_channel_stopped">תזכורת שעון מעורר</string>
+    <string name="notification_channel_stopped_desc">התראה שקטה חד-פעמית המציגה את שעת הצלצול האחרונה לאחר שעון מעורר שהוחמץ</string>
+    <string name="notification_missed_alarm">שעון מעורר שהוחמץ</string>
+    <string name="notification_last_rang_time_format">שעת צלצול אחרונה: %1$s</string>
+
+    <string name="search_alarms">חיפוש שעונים מעוררים</string>
+    <string name="no_alarms_found">אין שעון מעורר תואם</string>
+    <string name="keep_alive_title">שמירת ההתראה</string>
+    <string name="keep_alive_desc">התראה קבועה, שחזור אוטומטי לאחר סגירה</string>
+    <string name="shizuku_desc">השתמש בהרשאת Shizuku להגנה חזקה יותר</string>
+    <string name="battery_not_exempt">לא פטור</string>
 </resources>

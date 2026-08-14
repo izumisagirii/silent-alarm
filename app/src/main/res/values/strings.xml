@@ -4,13 +4,17 @@
     <!-- Dashboard -->
     <string name="dashboard_title">Earphone Alarm</string>
     <string name="dashboard_subtitle">Plays through earphones only. Never wakes others.</string>
+    <string name="search_alarms">Search alarms</string>
+    <string name="no_alarms_found">No matching alarms</string>
     <string name="test_alarm">Test Alarm</string>
     <string name="stop">Stop</string>
     <string name="no_alarms">No alarms set. Tap + to add one.</string>
     <string name="add_alarm">Add alarm</string>
     <string name="delete_alarm">Delete alarm</string>
+    <string name="delete_alarm_confirm">Delete this alarm?</string>
     <string name="edit_alarm">Edit Alarm</string>
     <string name="new_alarm">New Alarm</string>
+    <string name="alarm_label">Label</string>
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
 
@@ -51,12 +55,23 @@
     <string name="shizuku_authorize">Authorize</string>
     <string name="disable_battery_optimization">Disable Battery Optimization</string>
     <string name="shizuku_activated">Shizuku connected — anti-kill protection active</string>
+    <string name="keep_alive_title">Notification keep-alive</string>
+    <string name="keep_alive_desc">Persistent notification, auto-restore after being killed</string>
+    <string name="shizuku_desc">Use Shizuku permission for stronger keep-alive</string>
+    <string name="battery_not_exempt">Not exempt</string>
 
     <!-- Language -->
     <string name="language_title">Language</string>
     <string name="follow_system">Follow System</string>
     <string name="search_languages">Search languages</string>
     <string name="no_languages_found">No languages found</string>
+
+    <!-- Timezone -->
+    <string name="timezone_title">Timezone</string>
+    <string name="timezone_auto">System timezone</string>
+    <string name="timezone_selected">Selected timezone</string>
+    <string name="timezone_search">Search timezones</string>
+    <string name="timezone_no_results">No timezones found</string>
 
     <!-- Feedback -->
     <string name="alarm_set_format">Alarm set for %1$02d:%2$02d</string>
@@ -66,6 +81,7 @@
 
     <!-- Schedule -->
     <string name="schedule_one_shot">One-shot</string>
+    <string name="alarm_local_time_format">Local time %1$s</string>
     <string-array name="day_letters">
         <item></item>
         <item>S</item>
@@ -112,8 +128,22 @@
     <string name="notification_channel_desc">Persistent notification for the alarm foreground service</string>
     <string name="notification_channel_active">Alarm Playing</string>
     <string name="notification_channel_active_desc">Shown when the alarm is actively playing</string>
+    <string name="notification_channel_stopped">Alarm Reminder</string>
+    <string name="notification_channel_stopped_desc">One-shot silent notification showing the last ring time after a missed alarm</string>
+    <string name="notification_missed_alarm">Missed alarm</string>
+    <string name="notification_last_rang_time_format">Last ring time: %1$s</string>
     <string name="notification_waiting">Waiting for next alarm</string>
+    <string name="notification_next_alarm_format">Next alarm: %1$s</string>
     <string name="notification_alarm_active">Alarm Active</string>
     <string name="notification_earphones">Playing through earphones</string>
     <string name="notification_no_earphones">Earphones not detected</string>
+    <string name="notification_speaker">Playing through speaker</string>
+    <string name="notification_vibrate">Vibrating</string>
+    <string name="snooze_5min">Snooze 5 min</string>
+    <string name="notification_snoozing">Alarm paused</string>
+    <string name="notification_snooze_resume">Will ring again in 5 minutes</string>
+    <string name="no_alarm_ringing">No alarm is currently ringing</string>
+    <string name="undo">Undo</string>
+    <string name="retry">Retry</string>
+    <string name="battery_already_exempt">Battery optimization already disabled</string>
 </resources>

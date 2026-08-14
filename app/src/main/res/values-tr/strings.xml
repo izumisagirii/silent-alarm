@@ -8,6 +8,7 @@
     <string name="no_alarms">Ayarlı alarm yok. Eklemek için + simgesine dokunun.</string>
     <string name="add_alarm">Alarm ekle</string>
     <string name="delete_alarm">Alarmı sil</string>
+    <string name="delete_alarm_confirm">Alarmı sil?</string>
     <string name="edit_alarm">Alarmı düzenle</string>
     <string name="new_alarm">Yeni alarm</string>
     <string name="ok">Tamam</string>
@@ -58,6 +59,7 @@
     <string name="alarm_stopped">Alarm durduruldu</string>
 
     <string name="schedule_one_shot">Bir kez</string>
+    <string name="alarm_local_time_format">Yerel saat %1$s</string>
 
     <string-array name="day_letters">
         <item></item>
@@ -103,7 +105,35 @@
     <string name="notification_channel_active">Alarm çalıyor</string>
     <string name="notification_channel_active_desc">Alarm çalarken gösterilir</string>
     <string name="notification_waiting">Sonraki alarm bekleniyor</string>
+    <string name="notification_next_alarm_format">Sonraki alarm: %1$s</string>
     <string name="notification_alarm_active">Alarm aktif</string>
     <string name="notification_earphones">Kulaklıktan çalıyor</string>
     <string name="notification_no_earphones">Kulaklık algılanmadı</string>
+    <string name="notification_speaker">Hoparlörden çalıyor</string>
+    <string name="notification_vibrate">Titriyor</string>
+    <string name="snooze_5min">Ertele 5 dk</string>
+    <string name="notification_snoozing">Alarm duraklatıldı</string>
+    <string name="notification_snooze_resume">5 dakika sonra tekrar çalacak</string>
+    <string name="no_alarm_ringing">Şu anda çalan alarm yok</string>
+    <string name="undo">Geri al</string>
+    <string name="retry">Yeniden dene</string>
+    <string name="battery_already_exempt">Pil optimizasyonu zaten devre dışı</string>
+    <string name="timezone_title">Saat dilimi</string>
+    <string name="timezone_auto">Sistem saat dilimi</string>
+    <string name="timezone_selected">Seçilen saat dilimi</string>
+    <string name="timezone_search">Saat dilimi ara</string>
+    <string name="timezone_no_results">Saat dilimi bulunamadı</string>
+
+    <string name="alarm_label">Etiket</string>
+    <string name="notification_channel_stopped">Alarm Hatırlatıcı</string>
+    <string name="notification_channel_stopped_desc">Kaçırılan alarmdan sonra son çalma zamanını gösteren tek seferlik sessiz bildirim</string>
+    <string name="notification_missed_alarm">Kaçırılan alarm</string>
+    <string name="notification_last_rang_time_format">Son çalma zamanı: %1$s</string>
+
+    <string name="search_alarms">Alarm ara</string>
+    <string name="no_alarms_found">Eşleşen alarm yok</string>
+    <string name="keep_alive_title">Bildirimi koru</string>
+    <string name="keep_alive_desc">Kalıcı bildirim, kapatıldıktan sonra otomatik geri yükleme</string>
+    <string name="shizuku_desc">Daha güçlü koruma için Shizuku iznini kullanın</string>
+    <string name="battery_not_exempt">Muaf değil</string>
 </resources>

@@ -8,6 +8,7 @@
     <string name="no_alarms">No hay alarmas. Toca + para añadir una.</string>
     <string name="add_alarm">Añadir alarma</string>
     <string name="delete_alarm">Eliminar alarma</string>
+    <string name="delete_alarm_confirm">Eliminar alarma?</string>
     <string name="edit_alarm">Editar alarma</string>
     <string name="new_alarm">Nueva alarma</string>
     <string name="ok">Aceptar</string>
@@ -58,6 +59,7 @@
     <string name="alarm_stopped">Alarma detenida</string>
 
     <string name="schedule_one_shot">Una sola vez</string>
+    <string name="alarm_local_time_format">Hora local %1$s</string>
 
     <string-array name="day_letters">
         <item></item>
@@ -103,7 +105,35 @@
     <string name="notification_channel_active">Alarma sonando</string>
     <string name="notification_channel_active_desc">Se muestra cuando la alarma está sonando</string>
     <string name="notification_waiting">Esperando la próxima alarma</string>
+    <string name="notification_next_alarm_format">Próxima alarma: %1$s</string>
     <string name="notification_alarm_active">Alarma activa</string>
     <string name="notification_earphones">Sonando por auriculares</string>
     <string name="notification_no_earphones">No se detectaron auriculares</string>
+    <string name="notification_speaker">Reproduciendo por el altavoz</string>
+    <string name="notification_vibrate">Vibrando</string>
+    <string name="snooze_5min">Posponer 5 min</string>
+    <string name="notification_snoozing">Alarma en pausa</string>
+    <string name="notification_snooze_resume">Sonará de nuevo en 5 minutos</string>
+    <string name="no_alarm_ringing">No hay ninguna alarma sonando ahora mismo</string>
+    <string name="undo">Deshacer</string>
+    <string name="retry">Reintentar</string>
+    <string name="battery_already_exempt">La optimización de batería ya está desactivada</string>
+    <string name="timezone_title">Zona horaria</string>
+    <string name="timezone_auto">Zona horaria del sistema</string>
+    <string name="timezone_selected">Zona horaria seleccionada</string>
+    <string name="timezone_search">Buscar zonas horarias</string>
+    <string name="timezone_no_results">No se encontraron zonas horarias</string>
+
+    <string name="alarm_label">Etiqueta</string>
+    <string name="notification_channel_stopped">Recordatorio de alarma</string>
+    <string name="notification_channel_stopped_desc">Notificación silenciosa de una sola vez que muestra la última hora de sonido tras una alarma perdida</string>
+    <string name="notification_missed_alarm">Alarma perdida</string>
+    <string name="notification_last_rang_time_format">Última hora de sonido: %1$s</string>
+
+    <string name="search_alarms">Buscar alarmas</string>
+    <string name="no_alarms_found">No hay alarmas coincidentes</string>
+    <string name="keep_alive_title">Mantener la notificación</string>
+    <string name="keep_alive_desc">Notificación persistente, restauración automática al cerrarse</string>
+    <string name="shizuku_desc">Usa el permiso de Shizuku para una protección más fuerte</string>
+    <string name="battery_not_exempt">No exenta</string>
 </resources>

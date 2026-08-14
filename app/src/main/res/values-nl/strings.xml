@@ -8,6 +8,7 @@
     <string name="no_alarms">Geen alarm ingesteld. Tik op + om er een toe te voegen.</string>
     <string name="add_alarm">Alarm toevoegen</string>
     <string name="delete_alarm">Alarm verwijderen</string>
+    <string name="delete_alarm_confirm">Alarm verwijderen?</string>
     <string name="edit_alarm">Alarm bewerken</string>
     <string name="new_alarm">Nieuw alarm</string>
     <string name="ok">OK</string>
@@ -58,6 +59,7 @@
     <string name="alarm_stopped">Alarm gestopt</string>
 
     <string name="schedule_one_shot">Eenmalig</string>
+    <string name="alarm_local_time_format">Lokale tijd %1$s</string>
 
     <string-array name="day_letters">
         <item></item>
@@ -103,7 +105,35 @@
     <string name="notification_channel_active">Alarm speelt</string>
     <string name="notification_channel_active_desc">Getoond terwijl het alarm speelt</string>
     <string name="notification_waiting">Wachten op volgend alarm</string>
+    <string name="notification_next_alarm_format">Volgende alarm: %1$s</string>
     <string name="notification_alarm_active">Alarm actief</string>
     <string name="notification_earphones">Speelt via koptelefoon</string>
     <string name="notification_no_earphones">Geen koptelefoon gedetecteerd</string>
+    <string name="notification_speaker">Afspelen via luidspreker</string>
+    <string name="notification_vibrate">Trilt</string>
+    <string name="snooze_5min">Sluimeren 5 min</string>
+    <string name="notification_snoozing">Alarm gepauzeerd</string>
+    <string name="notification_snooze_resume">Gaat over 5 minuten opnieuw af</string>
+    <string name="no_alarm_ringing">Er gaat momenteel geen alarm af</string>
+    <string name="undo">Ongedaan maken</string>
+    <string name="retry">Opnieuw proberen</string>
+    <string name="battery_already_exempt">Batterijoptimalisatie is al uitgeschakeld</string>
+    <string name="timezone_title">Tijdzone</string>
+    <string name="timezone_auto">Systeemtijdzone</string>
+    <string name="timezone_selected">Geselecteerde tijdzone</string>
+    <string name="timezone_search">Tijdzones zoeken</string>
+    <string name="timezone_no_results">Geen tijdzones gevonden</string>
+
+    <string name="alarm_label">Label</string>
+    <string name="notification_channel_stopped">Alarmherinnering</string>
+    <string name="notification_channel_stopped_desc">Eenmalige stille melding met de laatste beltijd na een gemiste alarm</string>
+    <string name="notification_missed_alarm">Gemiste alarm</string>
+    <string name="notification_last_rang_time_format">Laatste beltijd: %1$s</string>
+
+    <string name="search_alarms">Alarmen zoeken</string>
+    <string name="no_alarms_found">Geen overeenkomende alarmen</string>
+    <string name="keep_alive_title">Melding behouden</string>
+    <string name="keep_alive_desc">Blijvende melding, automatisch herstel na afsluiten</string>
+    <string name="shizuku_desc">Gebruik de Shizuku-machtiging voor sterkere bescherming</string>
+    <string name="battery_not_exempt">Niet vrijgesteld</string>
 </resources>

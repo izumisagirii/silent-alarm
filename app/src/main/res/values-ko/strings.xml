@@ -8,6 +8,7 @@
     <string name="no_alarms">설정된 알람이 없습니다. +를 눌러 추가하세요.</string>
     <string name="add_alarm">알람 추가</string>
     <string name="delete_alarm">알람 삭제</string>
+    <string name="delete_alarm_confirm">알람 삭제?</string>
     <string name="edit_alarm">알람 편집</string>
     <string name="new_alarm">새 알람</string>
     <string name="ok">확인</string>
@@ -58,6 +59,7 @@
     <string name="alarm_stopped">알람이 중지되었습니다</string>
 
     <string name="schedule_one_shot">한 번</string>
+    <string name="alarm_local_time_format">현지 시간 %1$s</string>
 
     <string-array name="day_letters">
         <item></item>
@@ -103,7 +105,35 @@
     <string name="notification_channel_active">알람 재생 중</string>
     <string name="notification_channel_active_desc">알람이 재생 중일 때 표시됩니다</string>
     <string name="notification_waiting">다음 알람 대기 중</string>
+    <string name="notification_next_alarm_format">다음 알람: %1$s</string>
     <string name="notification_alarm_active">알람 작동 중</string>
     <string name="notification_earphones">이어폰으로 재생 중</string>
     <string name="notification_no_earphones">이어폰이 감지되지 않음</string>
+    <string name="notification_speaker">스피커로 재생 중</string>
+    <string name="notification_vibrate">진동 중</string>
+    <string name="snooze_5min">다시 알림 5분</string>
+    <string name="notification_snoozing">알람이 일시중지되었습니다</string>
+    <string name="notification_snooze_resume">5분 후 다시 울립니다</string>
+    <string name="no_alarm_ringing">현재 울리는 알람이 없습니다</string>
+    <string name="undo">실행 취소</string>
+    <string name="retry">다시 시도</string>
+    <string name="battery_already_exempt">배터리 최적화가 이미 해제되어 있습니다</string>
+    <string name="timezone_title">시간대</string>
+    <string name="timezone_auto">시스템 시간대</string>
+    <string name="timezone_selected">선택한 시간대</string>
+    <string name="timezone_search">시간대 검색</string>
+    <string name="timezone_no_results">시간대를 찾을 수 없음</string>
+
+    <string name="alarm_label">라벨</string>
+    <string name="notification_channel_stopped">알람 알림</string>
+    <string name="notification_channel_stopped_desc">놓친 알람 이후 마지막 울림 시간을 표시하는 일회성 무음 알림</string>
+    <string name="notification_missed_alarm">놓친 알람</string>
+    <string name="notification_last_rang_time_format">마지막 울림 시간: %1$s</string>
+
+    <string name="search_alarms">알람 검색</string>
+    <string name="no_alarms_found">일치하는 알람 없음</string>
+    <string name="keep_alive_title">알림 유지</string>
+    <string name="keep_alive_desc">상시 알림, 종료 후 자동 복원</string>
+    <string name="shizuku_desc">Shizuku 권한으로 더 강한 보호를 제공</string>
+    <string name="battery_not_exempt">예외 아님</string>
 </resources>

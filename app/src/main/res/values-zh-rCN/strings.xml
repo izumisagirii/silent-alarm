@@ -9,6 +9,7 @@
     <string name="no_alarms">还没有闹钟，点击 + 添加一个。</string>
     <string name="add_alarm">添加闹钟</string>
     <string name="delete_alarm">删除闹钟</string>
+    <string name="delete_alarm_confirm">删除闹钟?</string>
     <string name="edit_alarm">编辑闹钟</string>
     <string name="new_alarm">新建闹钟</string>
     <string name="ok">确定</string>
@@ -52,6 +53,11 @@
     <string name="disable_battery_optimization">关闭电池优化</string>
     <string name="shizuku_activated">Shizuku 已连接 — 防杀保护已启用</string>
 
+    <string name="keep_alive_title">通知保活</string>
+    <string name="keep_alive_desc">通知常驻，被杀后自动恢复</string>
+    <string name="shizuku_desc">使用 Shizuku 权限增强保活</string>
+    <string name="battery_not_exempt">未豁免</string>
+
     <!-- Language -->
     <string name="language_title">语言</string>
     <string name="follow_system">跟随系统</string>
@@ -66,6 +72,7 @@
 
     <!-- Schedule -->
     <string name="schedule_one_shot">单次</string>
+    <string name="alarm_local_time_format">本地时间 %1$s</string>
     <string-array name="day_letters">
         <item></item>
         <item>日</item>
@@ -112,8 +119,32 @@
     <string name="notification_channel_desc">闹钟前台服务的常驻通知</string>
     <string name="notification_channel_active">闹钟播放中</string>
     <string name="notification_channel_active_desc">闹钟正在播放时显示</string>
+    <string name="notification_channel_stopped">闹钟提醒</string>
+    <string name="notification_channel_stopped_desc">错过闹钟后显示上次响铃时间的一次性静音通知</string>
+    <string name="notification_missed_alarm">闹钟已错过</string>
+    <string name="notification_last_rang_time_format">上次响铃时间：%1$s</string>
     <string name="notification_waiting">等待下一个闹钟</string>
+    <string name="notification_next_alarm_format">下一个闹钟：%1$s</string>
     <string name="notification_alarm_active">闹钟播放中</string>
     <string name="notification_earphones">正在通过耳机播放</string>
     <string name="notification_no_earphones">未检测到耳机</string>
+    <string name="notification_speaker">正在通过扬声器播放</string>
+    <string name="notification_vibrate">正在振动</string>
+    <string name="snooze_5min">贪睡 5 分钟</string>
+    <string name="notification_snoozing">闹钟已暂停</string>
+    <string name="notification_snooze_resume">5 分钟后再次响铃</string>
+    <string name="no_alarm_ringing">当前没有正在响铃的闹钟</string>
+    <string name="undo">撤销</string>
+    <string name="retry">重试</string>
+    <string name="battery_already_exempt">已关闭电池优化</string>
+    <string name="timezone_title">时区</string>
+    <string name="timezone_auto">系统时区</string>
+    <string name="timezone_selected">指定时区</string>
+    <string name="timezone_search">搜索时区</string>
+    <string name="timezone_no_results">未找到时区</string>
+
+    <string name="alarm_label">标签</string>
+
+    <string name="search_alarms">搜索闹钟</string>
+    <string name="no_alarms_found">没有匹配的闹钟</string>
 </resources>

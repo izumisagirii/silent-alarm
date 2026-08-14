@@ -8,6 +8,7 @@
     <string name="no_alarms">Tiada alarm ditetapkan. Ketik + untuk menambah.</string>
     <string name="add_alarm">Tambah alarm</string>
     <string name="delete_alarm">Padam alarm</string>
+    <string name="delete_alarm_confirm">Padam alarm?</string>
     <string name="edit_alarm">Edit alarm</string>
     <string name="new_alarm">Alarm baharu</string>
     <string name="ok">OK</string>
@@ -58,6 +59,7 @@
     <string name="alarm_stopped">Alarm dihentikan</string>
 
     <string name="schedule_one_shot">Sekali</string>
+    <string name="alarm_local_time_format">Masa tempatan %1$s</string>
 
     <string-array name="day_letters">
         <item></item>
@@ -103,7 +105,35 @@
     <string name="notification_channel_active">Alarm berbunyi</string>
     <string name="notification_channel_active_desc">Ditunjukkan semasa alarm berbunyi</string>
     <string name="notification_waiting">Menunggu alarm seterusnya</string>
+    <string name="notification_next_alarm_format">Alarm seterusnya: %1$s</string>
     <string name="notification_alarm_active">Alarm aktif</string>
     <string name="notification_earphones">Berbunyi melalui fon kepala</string>
     <string name="notification_no_earphones">Tiada fon kepala dikesan</string>
+    <string name="notification_speaker">Memainkan melalui pembesar suara</string>
+    <string name="notification_vibrate">Bergetar</string>
+    <string name="snooze_5min">Tunda 5 min</string>
+    <string name="notification_snoozing">Alarm dijeda</string>
+    <string name="notification_snooze_resume">Akan berbunyi semula dalam 5 minit</string>
+    <string name="no_alarm_ringing">Tiada alarm berbunyi sekarang</string>
+    <string name="undo">Buat asal</string>
+    <string name="retry">Cuba lagi</string>
+    <string name="battery_already_exempt">Pengoptimuman bateri sudah dinyahdayakan</string>
+    <string name="timezone_title">Zon waktu</string>
+    <string name="timezone_auto">Zon waktu sistem</string>
+    <string name="timezone_selected">Zon waktu dipilih</string>
+    <string name="timezone_search">Cari zon waktu</string>
+    <string name="timezone_no_results">Tiada zon waktu ditemui</string>
+
+    <string name="alarm_label">Label</string>
+    <string name="notification_channel_stopped">Peringatan Penggera</string>
+    <string name="notification_channel_stopped_desc">Pemberitahuan senyap sekali sahaja yang menunjukkan masa dering terakhir selepas penggera terlepas</string>
+    <string name="notification_missed_alarm">Penggera terlepas</string>
+    <string name="notification_last_rang_time_format">Masa dering terakhir: %1$s</string>
+
+    <string name="search_alarms">Cari penggera</string>
+    <string name="no_alarms_found">Tiada penggera sepadan</string>
+    <string name="keep_alive_title">Kekalkan pemberitahuan</string>
+    <string name="keep_alive_desc">Pemberitahuan kekal, pulih automatik selepas ditutup</string>
+    <string name="shizuku_desc">Gunakan kebenaran Shizuku untuk perlindungan yang lebih kukuh</string>
+    <string name="battery_not_exempt">Tidak dikecualikan</string>
 </resources>

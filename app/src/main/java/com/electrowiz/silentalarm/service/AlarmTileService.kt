@@ -8,6 +8,7 @@ import android.util.Log
 import com.electrowiz.silentalarm.R
 import com.electrowiz.silentalarm.data.AlarmScheduler
 import com.electrowiz.silentalarm.data.AlarmPreferences
+import com.electrowiz.silentalarm.keepalive.KeepAliveController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -38,10 +39,14 @@ class AlarmTileService : TileService() {
          * any alarm mutation.
          */
         fun requestTileUpdate(context: Context) {
-            requestListeningState(
-                context,
-                ComponentName(context, AlarmTileService::class.java)
-            )
+            runCatching {
+                requestListeningState(
+                    context,
+                    ComponentName(context, AlarmTileService::class.java)
+                )
+            }.onFailure { e ->
+                Log.w(TAG, "Failed to request tile update", e)
+            }
         }
     }
 
@@ -87,6 +92,8 @@ class AlarmTileService : TileService() {
                 preferences.setAllEnabled(newState)
                 val updated = alarms.map { it.copy(enabled = newState) }
                 AlarmScheduler(this@AlarmTileService).reconcile(updated)
+                KeepAliveController.get(this@AlarmTileService)
+                    .syncAsync(updated.any { it.enabled })
                 setTileState(newState)
                 Log.i(TAG, "Master toggle: all alarms ${if (newState) "ON" else "OFF"}")
             } catch (e: Exception) {

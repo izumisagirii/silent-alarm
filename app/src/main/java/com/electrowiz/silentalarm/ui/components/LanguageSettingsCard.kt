@@ -2,43 +2,25 @@ package com.electrowiz.silentalarm.ui.components
 
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Translate
 import androidx.compose.material3.Card
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.os.LocaleListCompat
 import com.electrowiz.silentalarm.R
@@ -87,14 +69,19 @@ private val supportedLanguages = listOf(
 )
 
 private fun displayNameFor(tag: String): String? {
-    val normalized = when (tag.lowercase()) {
-        "id" -> "in"
-        "he" -> "iw"
-        "zh-hans" -> "zh-CN"
-        "zh-hant" -> "zh-TW"
-        else -> tag
+    val normalized = tag.lowercase()
+    val base = normalized.substringBefore('-').substringBefore('_')
+    val languageTag = when {
+        base == "id" -> "in"
+        base == "he" -> "iw"
+        base == "zh" -> if (normalized.contains("hant") || normalized.contains("tw")) {
+            "zh-TW"
+        } else {
+            "zh-CN"
+        }
+        else -> base
     }
-    return supportedLanguages.find { it.tag == normalized }?.displayName
+    return supportedLanguages.find { it.tag == languageTag }?.displayName
 }
 
 private fun applyLanguage(tag: String) {
@@ -110,28 +97,16 @@ private fun applyLanguage(tag: String) {
  * Language selector card. Opens an MD3 bottom sheet with search and a
  * scrollable list so a large number of supported languages stays manageable.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LanguageSettingsCard(modifier: Modifier = Modifier) {
     val followSystemLabel = stringResource(R.string.follow_system)
     val searchLabel = stringResource(R.string.search_languages)
     val noResultsLabel = stringResource(R.string.no_languages_found)
-    val currentTag = AppCompatDelegate.getApplicationLocales()
-        .get(0)?.toLanguageTag() ?: ""
+    val currentTag = runCatching {
+        AppCompatDelegate.getApplicationLocales().get(0)?.toLanguageTag()
+    }.getOrNull() ?: ""
     val selectedLabel = displayNameFor(currentTag) ?: followSystemLabel
     var showSheet by remember { mutableStateOf(false) }
-    var searchQuery by remember { mutableStateOf("") }
-
-    val filteredLanguages = remember(searchQuery) {
-        val query = searchQuery.trim()
-        if (query.isEmpty()) {
-            supportedLanguages
-        } else {
-            supportedLanguages.filter {
-                it.displayName.contains(query, ignoreCase = true)
-            }
-        }
-    }
 
     Card(modifier = modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(16.dp)) {
@@ -142,7 +117,6 @@ fun LanguageSettingsCard(modifier: Modifier = Modifier) {
             Spacer(modifier = Modifier.height(8.dp))
             OutlinedButton(
                 onClick = {
-                    searchQuery = ""
                     showSheet = true
                 },
                 modifier = Modifier.fillMaxWidth()
@@ -157,120 +131,18 @@ fun LanguageSettingsCard(modifier: Modifier = Modifier) {
     }
 
     if (showSheet) {
-        ModalBottomSheet(
-            onDismissRequest = { showSheet = false },
-            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .fillMaxHeight(0.85f)
-                    .navigationBarsPadding()
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
-            ) {
-                Text(
-                    stringResource(R.string.language_title),
-                    style = MaterialTheme.typography.titleLarge
-                )
-                Spacer(modifier = Modifier.height(12.dp))
-                OutlinedTextField(
-                    value = searchQuery,
-                    onValueChange = { searchQuery = it },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    leadingIcon = {
-                        Icon(Icons.Default.Search, contentDescription = null)
-                    },
-                    trailingIcon = if (searchQuery.isNotEmpty()) {
-                        {
-                            IconButton(onClick = { searchQuery = "" }) {
-                                Icon(
-                                    Icons.Default.Close,
-                                    contentDescription = stringResource(R.string.cancel)
-                                )
-                            }
-                        }
-                    } else {
-                        null
-                    },
-                    placeholder = { Text(searchLabel) }
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f)
-                ) {
-                    item(key = "follow-system") {
-                        LanguageSheetRow(
-                            label = followSystemLabel,
-                            selected = currentTag.isEmpty(),
-                            onClick = {
-                                showSheet = false
-                                applyLanguage("")
-                            }
-                        )
-                    }
-                    items(filteredLanguages, key = { it.tag }) { option ->
-                        LanguageSheetRow(
-                            label = option.displayName,
-                            selected = option.tag == currentTag,
-                            onClick = {
-                                showSheet = false
-                                applyLanguage(option.tag)
-                            }
-                        )
-                    }
-                    if (filteredLanguages.isEmpty()) {
-                        item(key = "no-results") {
-                            Text(
-                                text = noResultsLabel,
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.padding(16.dp)
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun LanguageSheetRow(
-    label: String,
-    selected: Boolean,
-    onClick: () -> Unit
-) {
-    Surface(
-        onClick = onClick,
-        shape = RoundedCornerShape(12.dp),
-        color = if (selected) {
-            MaterialTheme.colorScheme.secondaryContainer
-        } else {
-            Color.Transparent
-        },
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = label,
-                style = MaterialTheme.typography.bodyLarge,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.weight(1f)
-            )
-            if (selected) {
-                Icon(
-                    Icons.Default.Check,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary
-                )
-            }
-        }
+        SearchableSelectSheet(
+            title = stringResource(R.string.language_title),
+            searchPlaceholder = searchLabel,
+            noResultsText = noResultsLabel,
+            items = listOf(SelectOption("", followSystemLabel)) +
+                supportedLanguages.map { SelectOption(it.tag, it.displayName) },
+            selectedId = currentTag,
+            onSelect = { tag ->
+                showSheet = false
+                applyLanguage(tag)
+            },
+            onDismiss = { showSheet = false }
+        )
     }
 }

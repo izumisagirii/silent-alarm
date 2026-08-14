@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.PowerManager
 import android.provider.Settings
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
@@ -54,6 +55,17 @@ class MainActivity : AppCompatActivity() {
         Log.i(TAG, "Notification permission: ${if (granted) "granted" else "denied"}")
     }
 
+    /**
+     * Battery-exemption request. The callback fires when the user returns
+     * from the system page, so the status refresh does not depend on the ROM
+     * returning focus to the activity.
+     */
+    private val batteryExemptionLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) {
+        viewModel.refreshStatus()
+    }
+
     // ── Lifecycle ────────────────────────────────────────────────────────
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -70,7 +82,8 @@ class MainActivity : AppCompatActivity() {
                     AlarmDashboardScreen(
                         viewModel = viewModel,
                         onPickRingtone = { launchRingtonePicker() },
-                        onRequestExactAlarmPermission = ::requestExactAlarmPermission
+                        onRequestExactAlarmPermission = ::requestExactAlarmPermission,
+                        onRequestBatteryExemption = ::launchBatteryExemption
                     )
                 }
             }
@@ -113,6 +126,28 @@ class MainActivity : AppCompatActivity() {
             )
         } catch (e: Exception) {
             Log.e(TAG, "Exact alarm settings unavailable", e)
+        }
+    }
+
+    private fun launchBatteryExemption() {
+        val pm = getSystemService(POWER_SERVICE) as PowerManager
+        if (pm.isIgnoringBatteryOptimizations(packageName)) {
+            viewModel.showBatteryAlreadyExempt()
+            return
+        }
+        val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
+            .apply { data = "package:$packageName".toUri() }
+        try {
+            batteryExemptionLauncher.launch(intent)
+        } catch (e: Exception) {
+            Log.w(TAG, "Exemption request unavailable — opening settings list", e)
+            try {
+                batteryExemptionLauncher.launch(
+                    Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)
+                )
+            } catch (e2: Exception) {
+                Log.e(TAG, "Battery optimization settings unavailable", e2)
+            }
         }
     }
 

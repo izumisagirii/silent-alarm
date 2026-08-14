@@ -8,6 +8,7 @@
     <string name="no_alarms">Aucune alarme définie. Touchez + pour en ajouter une.</string>
     <string name="add_alarm">Ajouter une alarme</string>
     <string name="delete_alarm">Supprimer l’alarme</string>
+    <string name="delete_alarm_confirm">Supprimer l’alarme?</string>
     <string name="edit_alarm">Modifier l’alarme</string>
     <string name="new_alarm">Nouvelle alarme</string>
     <string name="ok">OK</string>
@@ -58,6 +59,7 @@
     <string name="alarm_stopped">Alarme arrêtée</string>
 
     <string name="schedule_one_shot">Une seule fois</string>
+    <string name="alarm_local_time_format">Heure locale %1$s</string>
 
     <string-array name="day_letters">
         <item></item>
@@ -71,13 +73,13 @@
     </string-array>
     <string-array name="day_names_short">
         <item></item>
-        <item>dim.</item>
-        <item>lun.</item>
-        <item>mar.</item>
-        <item>mer.</item>
-        <item>jeu.</item>
-        <item>ven.</item>
-        <item>sam.</item>
+        <item>dim</item>
+        <item>lun</item>
+        <item>mar</item>
+        <item>mer</item>
+        <item>jeu</item>
+        <item>ven</item>
+        <item>sam</item>
     </string-array>
 
     <string name="github">GitHub</string>
@@ -103,7 +105,35 @@
     <string name="notification_channel_active">Alarme en cours</string>
     <string name="notification_channel_active_desc">Affiché lorsque l’alarme est en cours de lecture</string>
     <string name="notification_waiting">En attente de la prochaine alarme</string>
+    <string name="notification_next_alarm_format">Prochaine alarme : %1$s</string>
     <string name="notification_alarm_active">Alarme active</string>
     <string name="notification_earphones">Lecture dans les écouteurs</string>
     <string name="notification_no_earphones">Aucun écouteur détecté</string>
+    <string name="notification_speaker">Lecture via le haut-parleur</string>
+    <string name="notification_vibrate">Vibration en cours</string>
+    <string name="snooze_5min">Répéter 5 min</string>
+    <string name="notification_snoozing">Alarme en pause</string>
+    <string name="notification_snooze_resume">Sonnera de nouveau dans 5 minutes</string>
+    <string name="no_alarm_ringing">Aucune alarme ne sonne actuellement</string>
+    <string name="undo">Annuler</string>
+    <string name="retry">Réessayer</string>
+    <string name="battery_already_exempt">L’optimisation de la batterie est déjà désactivée</string>
+    <string name="timezone_title">Fuseau horaire</string>
+    <string name="timezone_auto">Fuseau système</string>
+    <string name="timezone_selected">Fuseau sélectionné</string>
+    <string name="timezone_search">Rechercher un fuseau</string>
+    <string name="timezone_no_results">Aucun fuseau trouvé</string>
+
+    <string name="alarm_label">Libellé</string>
+    <string name="notification_channel_stopped">Rappel d’alarme</string>
+    <string name="notification_channel_stopped_desc">Notification silencieuse ponctuelle indiquant l’heure de la dernière sonnerie après une alarme manquée</string>
+    <string name="notification_missed_alarm">Alarme manquée</string>
+    <string name="notification_last_rang_time_format">Dernière sonnerie : %1$s</string>
+
+    <string name="search_alarms">Rechercher des alarmes</string>
+    <string name="no_alarms_found">Aucune alarme correspondante</string>
+    <string name="keep_alive_title">Conserver la notification</string>
+    <string name="keep_alive_desc">Notification persistante, restauration automatique après fermeture</string>
+    <string name="shizuku_desc">Utilisez la permission Shizuku pour une protection renforcée</string>
+    <string name="battery_not_exempt">Non exempté</string>
 </resources>

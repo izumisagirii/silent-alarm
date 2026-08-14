@@ -8,6 +8,7 @@
     <string name="no_alarms">Belum ada alarm. Ketuk + untuk menambahkan.</string>
     <string name="add_alarm">Tambah alarm</string>
     <string name="delete_alarm">Hapus alarm</string>
+    <string name="delete_alarm_confirm">Hapus alarm?</string>
     <string name="edit_alarm">Edit alarm</string>
     <string name="new_alarm">Alarm baru</string>
     <string name="ok">OK</string>
@@ -58,6 +59,7 @@
     <string name="alarm_stopped">Alarm dihentikan</string>
 
     <string name="schedule_one_shot">Sekali</string>
+    <string name="alarm_local_time_format">Waktu setempat %1$s</string>
 
     <string-array name="day_letters">
         <item></item>
@@ -103,7 +105,35 @@
     <string name="notification_channel_active">Alarm berbunyi</string>
     <string name="notification_channel_active_desc">Ditampilkan saat alarm sedang berbunyi</string>
     <string name="notification_waiting">Menunggu alarm berikutnya</string>
+    <string name="notification_next_alarm_format">Alarm berikutnya: %1$s</string>
     <string name="notification_alarm_active">Alarm aktif</string>
     <string name="notification_earphones">Berbunyi melalui earphone</string>
     <string name="notification_no_earphones">Earphone tidak terdeteksi</string>
+    <string name="notification_speaker">Memutar melalui speaker</string>
+    <string name="notification_vibrate">Bergetar</string>
+    <string name="snooze_5min">Tunda 5 mnt</string>
+    <string name="notification_snoozing">Alarm dijeda</string>
+    <string name="notification_snooze_resume">Akan berbunyi lagi dalam 5 menit</string>
+    <string name="no_alarm_ringing">Tidak ada alarm yang berdering saat ini</string>
+    <string name="undo">Urungkan</string>
+    <string name="retry">Coba lagi</string>
+    <string name="battery_already_exempt">Optimasi baterai sudah dinonaktifkan</string>
+    <string name="timezone_title">Zona waktu</string>
+    <string name="timezone_auto">Zona waktu sistem</string>
+    <string name="timezone_selected">Zona waktu dipilih</string>
+    <string name="timezone_search">Cari zona waktu</string>
+    <string name="timezone_no_results">Zona waktu tidak ditemukan</string>
+
+    <string name="alarm_label">Label</string>
+    <string name="notification_channel_stopped">Pengingat Alarm</string>
+    <string name="notification_channel_stopped_desc">Notifikasi senyap sekali pakai yang menampilkan waktu terakhir berdering setelah alarm terlewat</string>
+    <string name="notification_missed_alarm">Alarm terlewat</string>
+    <string name="notification_last_rang_time_format">Waktu berdering terakhir: %1$s</string>
+
+    <string name="search_alarms">Cari alarm</string>
+    <string name="no_alarms_found">Tidak ada alarm yang cocok</string>
+    <string name="keep_alive_title">Pertahankan notifikasi</string>
+    <string name="keep_alive_desc">Notifikasi permanen, pulih otomatis setelah ditutup</string>
+    <string name="shizuku_desc">Gunakan izin Shizuku untuk perlindungan yang lebih kuat</string>
+    <string name="battery_not_exempt">Tidak dikecualikan</string>
 </resources>

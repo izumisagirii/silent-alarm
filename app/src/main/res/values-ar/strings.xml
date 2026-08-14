@@ -8,6 +8,7 @@
     <string name="no_alarms">لا توجد منبهات مضبوطة. اضغط + لإضافة منبه.</string>
     <string name="add_alarm">إضافة منبه</string>
     <string name="delete_alarm">حذف المنبه</string>
+    <string name="delete_alarm_confirm">حذف المنبه?</string>
     <string name="edit_alarm">تعديل المنبه</string>
     <string name="new_alarm">منبه جديد</string>
     <string name="ok">موافق</string>
@@ -58,6 +59,7 @@
     <string name="alarm_stopped">تم إيقاف المنبه</string>
 
     <string name="schedule_one_shot">مرة واحدة</string>
+    <string name="alarm_local_time_format">الوقت المحلي %1$s</string>
 
     <string-array name="day_letters">
         <item></item>
@@ -103,7 +105,35 @@
     <string name="notification_channel_active">المنبه يعمل</string>
     <string name="notification_channel_active_desc">يظهر عندما يعمل المنبه</string>
     <string name="notification_waiting">بانتظار المنبه التالي</string>
+    <string name="notification_next_alarm_format">المنبه التالي: %1$s</string>
     <string name="notification_alarm_active">المنبه نشط</string>
     <string name="notification_earphones">الصوت يصدر عبر سماعة الرأس</string>
     <string name="notification_no_earphones">لم يتم اكتشاف سماعة رأس</string>
+    <string name="notification_speaker">التشغيل عبر مكبر الصوت</string>
+    <string name="notification_vibrate">يهتز</string>
+    <string name="snooze_5min">غفوة ٥ دقائق</string>
+    <string name="notification_snoozing">تم إيقاف المنبه مؤقتًا</string>
+    <string name="notification_snooze_resume">سيرن مرة أخرى خلال ٥ دقائق</string>
+    <string name="no_alarm_ringing">لا يوجد منبه يرن حاليًا</string>
+    <string name="undo">تراجع</string>
+    <string name="retry">إعادة المحاولة</string>
+    <string name="battery_already_exempt">تم تعطيل تحسين البطارية بالفعل</string>
+    <string name="timezone_title">المنطقة الزمنية</string>
+    <string name="timezone_auto">المنطقة الزمنية للنظام</string>
+    <string name="timezone_selected">المنطقة الزمنية المحددة</string>
+    <string name="timezone_search">البحث عن المناطق الزمنية</string>
+    <string name="timezone_no_results">لم يتم العثور على مناطق زمنية</string>
+
+    <string name="alarm_label">التسمية</string>
+    <string name="notification_channel_stopped">تذكير المنبه</string>
+    <string name="notification_channel_stopped_desc">إشعار صامت لمرة واحدة يعرض وقت آخر رنين بعد تفويت المنبه</string>
+    <string name="notification_missed_alarm">فاتك المنبه</string>
+    <string name="notification_last_rang_time_format">آخر وقت رنين: %1$s</string>
+
+    <string name="search_alarms">البحث في المنبهات</string>
+    <string name="no_alarms_found">لا توجد منبهات مطابقة</string>
+    <string name="keep_alive_title">الاحتفاظ بالإشعار</string>
+    <string name="keep_alive_desc">إشعار دائم، استعادة تلقائية بعد الإغلاق</string>
+    <string name="shizuku_desc">استخدم إذن Shizuku لتقوية الحماية</string>
+    <string name="battery_not_exempt">غير مستثنى</string>
 </resources>

@@ -2,6 +2,7 @@ package com.electrowiz.silentalarm.ui.components
 
 import android.content.Context
 import android.content.Intent
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -18,6 +20,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -61,6 +64,12 @@ private object ReleaseCheckManager {
         pendingCheck?.let { return it }
         return scope.async { fetch() }.also { pendingCheck = it }
     }
+
+    /** Forget the cached result so the next composition starts a fresh check. */
+    @Synchronized
+    fun reset() {
+        pendingCheck = null
+    }
 }
 
 /**
@@ -73,7 +82,10 @@ fun GitHubRepoCard(modifier: Modifier = Modifier) {
     val repoUrl = "https://github.com/izumisagirii/silent-alarm"
     val apiUrl = "https://api.github.com/repos/izumisagirii/silent-alarm/releases/latest"
 
-    val releaseCheck = remember {
+    // Bumping the key after reset() starts a fresh check; recomposition
+    // alone must keep reusing the cached result.
+    var retryKey by remember { mutableIntStateOf(0) }
+    val releaseCheck = remember(retryKey) {
         ReleaseCheckManager.checkOnce {
             fetchLatestRelease(ctx, apiUrl)
         }
@@ -81,7 +93,18 @@ fun GitHubRepoCard(modifier: Modifier = Modifier) {
     var releaseStatus by remember { mutableStateOf<ReleaseStatus>(ReleaseStatus.Loading) }
 
     LaunchedEffect(releaseCheck) {
+        releaseStatus = ReleaseStatus.Loading
         releaseStatus = releaseCheck.await()
+    }
+
+    val openRepo: () -> Unit = {
+        val i = Intent(Intent.ACTION_VIEW, repoUrl.toUri())
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        try {
+            ctx.startActivity(i)
+        } catch (_: android.content.ActivityNotFoundException) {
+            // No browser is available; the card remains usable.
+        }
     }
 
     Card(
@@ -137,23 +160,43 @@ fun GitHubRepoCard(modifier: Modifier = Modifier) {
                         style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                is ReleaseStatus.Error ->
+                is ReleaseStatus.Error -> {
                     Text(
                         s.message,
                         style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.error
                     )
+                }
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
-            Button(
-                onClick = {
-                    val i = Intent(Intent.ACTION_VIEW, repoUrl.toUri())
-                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    ctx.startActivity(i)
-                },
-            ) {
-                Text(stringResource(R.string.check_repo))
+            if (releaseStatus is ReleaseStatus.Error) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Button(
+                        onClick = openRepo
+                    ) {
+                        Text(stringResource(R.string.check_repo))
+                    }
+                    Button(
+                        onClick = {
+                            ReleaseCheckManager.reset()
+                            retryKey++
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary
+                        )
+                    ) {
+                        Text(stringResource(R.string.retry))
+                    }
+                }
+            } else {
+                Spacer(modifier = Modifier.height(12.dp))
+                Button(
+                    onClick = openRepo
+                ) {
+                    Text(stringResource(R.string.check_repo))
+                }
             }
         }
     }
@@ -162,8 +205,8 @@ fun GitHubRepoCard(modifier: Modifier = Modifier) {
 // ── Network helper ──────────────────────────────────────────────────────────
 
 private fun fetchLatestRelease(context: Context, apiUrl: String): ReleaseStatus {
+    val connection = URL(apiUrl).openConnection() as HttpURLConnection
     return try {
-        val connection = URL(apiUrl).openConnection() as HttpURLConnection
         connection.apply {
             setRequestProperty("Accept", "application/vnd.github.v3+json")
             setRequestProperty("User-Agent", "SilentAlarm-App/1.0")
@@ -174,14 +217,12 @@ private fun fetchLatestRelease(context: Context, apiUrl: String): ReleaseStatus 
 
         val code = connection.responseCode
         if (code != 200) {
-            connection.disconnect()
             return ReleaseStatus.Error(
                 context.getString(R.string.api_error_format, code)
             )
         }
 
         val body = connection.inputStream.bufferedReader().use { it.readText() }
-        connection.disconnect()
 
         val json = JSONObject(body)
         val tagName = json.optString("tag_name", "")
@@ -209,6 +250,8 @@ private fun fetchLatestRelease(context: Context, apiUrl: String): ReleaseStatus 
         ReleaseStatus.Error(
             context.getString(R.string.update_error_format, e.message ?: "")
         )
+    } finally {
+        runCatching { connection.disconnect() }
     }
 }
 // ── Version helpers ─────────────────────────────────────────────────────────

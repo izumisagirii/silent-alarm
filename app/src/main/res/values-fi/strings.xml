@@ -8,6 +8,7 @@
     <string name="no_alarms">Ei hälytyksiä. Lisää napauttamalla +.</string>
     <string name="add_alarm">Lisää hälytys</string>
     <string name="delete_alarm">Poista hälytys</string>
+    <string name="delete_alarm_confirm">Poista hälytys?</string>
     <string name="edit_alarm">Muokkaa hälytystä</string>
     <string name="new_alarm">Uusi hälytys</string>
     <string name="ok">OK</string>
@@ -58,6 +59,7 @@
     <string name="alarm_stopped">Hälytys pysäytetty</string>
 
     <string name="schedule_one_shot">Kerran</string>
+    <string name="alarm_local_time_format">Paikallinen aika %1$s</string>
 
     <string-array name="day_letters">
         <item></item>
@@ -103,7 +105,35 @@
     <string name="notification_channel_active">Hälytys soi</string>
     <string name="notification_channel_active_desc">Näytetään, kun hälytys soi</string>
     <string name="notification_waiting">Odotetaan seuraavaa hälytystä</string>
+    <string name="notification_next_alarm_format">Seuraava hälytys: %1$s</string>
     <string name="notification_alarm_active">Hälytys aktiivinen</string>
     <string name="notification_earphones">Soi kuulokkeista</string>
     <string name="notification_no_earphones">Kuulokkeita ei havaittu</string>
+    <string name="notification_speaker">Toistetaan kaiuttimen kautta</string>
+    <string name="notification_vibrate">Tärisee</string>
+    <string name="snooze_5min">Torkku 5 min</string>
+    <string name="notification_snoozing">Hälytys tauolla</string>
+    <string name="notification_snooze_resume">Soi uudelleen 5 minuutin kuluttua</string>
+    <string name="no_alarm_ringing">Mikään hälytys ei soi parhaillaan</string>
+    <string name="undo">Kumoa</string>
+    <string name="retry">Yritä uudelleen</string>
+    <string name="battery_already_exempt">Akun optimointi on jo poistettu käytöstä</string>
+    <string name="timezone_title">Aikavyöhyke</string>
+    <string name="timezone_auto">Järjestelmän aikavyöhyke</string>
+    <string name="timezone_selected">Valittu aikavyöhyke</string>
+    <string name="timezone_search">Hae aikavyöhykkeitä</string>
+    <string name="timezone_no_results">Aikavyöhykkeitä ei löytynyt</string>
+
+    <string name="alarm_label">Nimi</string>
+    <string name="notification_channel_stopped">Hälytysmuistutus</string>
+    <string name="notification_channel_stopped_desc">Kertaluonteinen äänetön ilmoitus, joka näyttää viimeisen soittoajan ohitetun hälytyksen jälkeen</string>
+    <string name="notification_missed_alarm">Ohitettu hälytys</string>
+    <string name="notification_last_rang_time_format">Viimeinen soittoaika: %1$s</string>
+
+    <string name="search_alarms">Hae hälytyksiä</string>
+    <string name="no_alarms_found">Ei vastaavia hälytyksiä</string>
+    <string name="keep_alive_title">Säilytä ilmoitus</string>
+    <string name="keep_alive_desc">Pysyvä ilmoitus, automaattinen palautus sulkemisen jälkeen</string>
+    <string name="shizuku_desc">Käytä Shizuku-oikeutta vahvempaan suojaan</string>
+    <string name="battery_not_exempt">Ei vapautettu</string>
 </resources>

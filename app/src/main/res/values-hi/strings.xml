@@ -8,6 +8,7 @@
     <string name="no_alarms">कोई अलार्म सेट नहीं है। जोड़ने के लिए + पर टैप करें।</string>
     <string name="add_alarm">अलार्म जोड़ें</string>
     <string name="delete_alarm">अलार्म हटाएं</string>
+    <string name="delete_alarm_confirm">अलार्म हटाएं?</string>
     <string name="edit_alarm">अलार्म संपादित करें</string>
     <string name="new_alarm">नया अलार्म</string>
     <string name="ok">ठीक है</string>
@@ -58,6 +59,7 @@
     <string name="alarm_stopped">अलार्म रोक दिया गया</string>
 
     <string name="schedule_one_shot">एक बार</string>
+    <string name="alarm_local_time_format">स्थानीय समय %1$s</string>
 
     <string-array name="day_letters">
         <item></item>
@@ -103,7 +105,35 @@
     <string name="notification_channel_active">अलार्म बज रहा है</string>
     <string name="notification_channel_active_desc">अलार्म बजने पर दिखाई देती है</string>
     <string name="notification_waiting">अगले अलार्म की प्रतीक्षा</string>
+    <string name="notification_next_alarm_format">अगला अलार्म: %1$s</string>
     <string name="notification_alarm_active">अलार्म सक्रिय</string>
     <string name="notification_earphones">इयरफ़ोन से बज रहा है</string>
     <string name="notification_no_earphones">इयरफ़ोन नहीं मिला</string>
+    <string name="notification_speaker">स्पीकर से बज रहा है</string>
+    <string name="notification_vibrate">कंपन हो रहा है</string>
+    <string name="snooze_5min">स्नूज़ 5 मिनट</string>
+    <string name="notification_snoozing">अलार्म रुका हुआ है</string>
+    <string name="notification_snooze_resume">5 मिनट बाद फिर बजेगा</string>
+    <string name="no_alarm_ringing">अभी कोई अलार्म नहीं बज रहा है</string>
+    <string name="undo">पूर्ववत करें</string>
+    <string name="retry">फिर से कोशिश करें</string>
+    <string name="battery_already_exempt">बैटरी अनुकूलन पहले से बंद है</string>
+    <string name="timezone_title">समय क्षेत्र</string>
+    <string name="timezone_auto">सिस्टम समय क्षेत्र</string>
+    <string name="timezone_selected">चयनित समय क्षेत्र</string>
+    <string name="timezone_search">समय क्षेत्र खोजें</string>
+    <string name="timezone_no_results">कोई समय क्षेत्र नहीं मिला</string>
+
+    <string name="alarm_label">लेबल</string>
+    <string name="notification_channel_stopped">अलार्म रिमाइंडर</string>
+    <string name="notification_channel_stopped_desc">मिस हुए अलार्म के बाद अंतिम रिंग समय दिखाने वाली एक बार की मूक सूचना</string>
+    <string name="notification_missed_alarm">छूटा हुआ अलार्म</string>
+    <string name="notification_last_rang_time_format">अंतिम रिंग समय: %1$s</string>
+
+    <string name="search_alarms">अलार्म खोजें</string>
+    <string name="no_alarms_found">कोई मेल खाता अलार्म नहीं</string>
+    <string name="keep_alive_title">सूचना बनाए रखें</string>
+    <string name="keep_alive_desc">स्थायी सूचना, बंद होने पर स्वतः बहाली</string>
+    <string name="shizuku_desc">मजबूत सुरक्षा के लिए Shizuku अनुमति का उपयोग करें</string>
+    <string name="battery_not_exempt">छूट नहीं</string>
 </resources>

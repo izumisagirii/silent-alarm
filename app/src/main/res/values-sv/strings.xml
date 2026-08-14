@@ -8,6 +8,7 @@
     <string name="no_alarms">Inga larm inställda. Tryck på + för att lägga till ett.</string>
     <string name="add_alarm">Lägg till alarm</string>
     <string name="delete_alarm">Ta bort alarm</string>
+    <string name="delete_alarm_confirm">Ta bort alarm?</string>
     <string name="edit_alarm">Redigera alarm</string>
     <string name="new_alarm">Nytt alarm</string>
     <string name="ok">OK</string>
@@ -58,6 +59,7 @@
     <string name="alarm_stopped">Alarm stoppat</string>
 
     <string name="schedule_one_shot">En gång</string>
+    <string name="alarm_local_time_format">Lokal tid %1$s</string>
 
     <string-array name="day_letters">
         <item></item>
@@ -103,7 +105,35 @@
     <string name="notification_channel_active">Alarm spelas</string>
     <string name="notification_channel_active_desc">Visas när alarmet spelar</string>
     <string name="notification_waiting">Väntar på nästa alarm</string>
+    <string name="notification_next_alarm_format">Nästa alarm: %1$s</string>
     <string name="notification_alarm_active">Alarm aktivt</string>
     <string name="notification_earphones">Spelar via hörlurar</string>
     <string name="notification_no_earphones">Inga hörlurar upptäckta</string>
+    <string name="notification_speaker">Spelar genom högtalare</string>
+    <string name="notification_vibrate">Vibrerar</string>
+    <string name="snooze_5min">Snooze 5 min</string>
+    <string name="notification_snoozing">Alarm pausad</string>
+    <string name="notification_snooze_resume">Ringer igen om 5 minuter</string>
+    <string name="no_alarm_ringing">Ingen alarm ringer just nu</string>
+    <string name="undo">Ångra</string>
+    <string name="retry">Försök igen</string>
+    <string name="battery_already_exempt">Batterioptimering är redan avstängd</string>
+    <string name="timezone_title">Tidszon</string>
+    <string name="timezone_auto">Systemets tidszon</string>
+    <string name="timezone_selected">Vald tidszon</string>
+    <string name="timezone_search">Sök tidszoner</string>
+    <string name="timezone_no_results">Inga tidszoner hittades</string>
+
+    <string name="alarm_label">Etikett</string>
+    <string name="notification_channel_stopped">Alarmpåminnelse</string>
+    <string name="notification_channel_stopped_desc">Engångs tyst avisering som visar senaste ringtid efter ett missat alarm</string>
+    <string name="notification_missed_alarm">Missat alarm</string>
+    <string name="notification_last_rang_time_format">Senaste ringtid: %1$s</string>
+
+    <string name="search_alarms">Sök alarm</string>
+    <string name="no_alarms_found">Inga matchande alarm</string>
+    <string name="keep_alive_title">Behåll aviseringen</string>
+    <string name="keep_alive_desc">Bestående avisering, automatisk återställning efter avslut</string>
+    <string name="shizuku_desc">Använd Shizuku-behörigheten för starkare skydd</string>
+    <string name="battery_not_exempt">Inte undantagen</string>
 </resources>

@@ -8,6 +8,7 @@
     <string name="no_alarms">Žádný budík není nastaven. Klepnutím na + přidáte.</string>
     <string name="add_alarm">Přidat budík</string>
     <string name="delete_alarm">Smazat budík</string>
+    <string name="delete_alarm_confirm">Smazat budík?</string>
     <string name="edit_alarm">Upravit budík</string>
     <string name="new_alarm">Nový budík</string>
     <string name="ok">OK</string>
@@ -58,6 +59,7 @@
     <string name="alarm_stopped">Budík zastaven</string>
 
     <string name="schedule_one_shot">Jednorázový</string>
+    <string name="alarm_local_time_format">Místní čas %1$s</string>
 
     <string-array name="day_letters">
         <item></item>
@@ -103,7 +105,35 @@
     <string name="notification_channel_active">Budík hraje</string>
     <string name="notification_channel_active_desc">Zobrazí se, když budík hraje</string>
     <string name="notification_waiting">Čekání na další budík</string>
+    <string name="notification_next_alarm_format">Další budík: %1$s</string>
     <string name="notification_alarm_active">Budík aktivní</string>
     <string name="notification_earphones">Přehrávání ve sluchátkách</string>
     <string name="notification_no_earphones">Nebyla zjištěna sluchátka</string>
+    <string name="notification_speaker">Přehrávání přes reproduktor</string>
+    <string name="notification_vibrate">Vibruje</string>
+    <string name="snooze_5min">Odložit o 5 min</string>
+    <string name="notification_snoozing">Budík pozastaven</string>
+    <string name="notification_snooze_resume">Zazvoní znovu za 5 minut</string>
+    <string name="no_alarm_ringing">Právě nezní žádný budík</string>
+    <string name="undo">Zpět</string>
+    <string name="retry">Zkusit znovu</string>
+    <string name="battery_already_exempt">Optimalizace baterie je již vypnutá</string>
+    <string name="timezone_title">Časové pásmo</string>
+    <string name="timezone_auto">Systémové časové pásmo</string>
+    <string name="timezone_selected">Vybrané časové pásmo</string>
+    <string name="timezone_search">Hledat časová pásma</string>
+    <string name="timezone_no_results">Nebyla nalezena žádná časová pásma</string>
+
+    <string name="alarm_label">Štítek</string>
+    <string name="notification_channel_stopped">Připomenutí budíku</string>
+    <string name="notification_channel_stopped_desc">Jednorázové tiché oznámení zobrazující čas posledního zvonění po zmeškaném budíku</string>
+    <string name="notification_missed_alarm">Zmeškaný budík</string>
+    <string name="notification_last_rang_time_format">Poslední zvonění: %1$s</string>
+
+    <string name="search_alarms">Hledat budíky</string>
+    <string name="no_alarms_found">Žádné odpovídající budíky</string>
+    <string name="keep_alive_title">Zachovat oznámení</string>
+    <string name="keep_alive_desc">Trvalé oznámení, automatické obnovení po ukončení</string>
+    <string name="shizuku_desc">Využijte oprávnění Shizuku pro silnější ochranu</string>
+    <string name="battery_not_exempt">Není výjimka</string>
 </resources>

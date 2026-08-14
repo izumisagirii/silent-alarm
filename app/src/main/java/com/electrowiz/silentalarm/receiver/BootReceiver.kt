@@ -4,9 +4,10 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.util.Log
-import com.electrowiz.silentalarm.daemon.ShizukuDaemonManager
 import com.electrowiz.silentalarm.data.AlarmPreferences
 import com.electrowiz.silentalarm.data.AlarmScheduler
+import com.electrowiz.silentalarm.daemon.ShellManager
+import com.electrowiz.silentalarm.keepalive.KeepAliveController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -15,7 +16,9 @@ import kotlinx.coroutines.launch
 
 /**
  * Re-schedules all enabled alarms on boot (AlarmManager clears alarms on reboot)
- * and re-applies Shizuku anti-kill tweaks.
+ * and re-applies Shizuku anti-kill tweaks. Timezone/time changes deliberately
+ * do not trigger rescheduling: each alarm keeps the absolute trigger time that
+ * was captured when it was saved.
  */
 class BootReceiver : BroadcastReceiver() {
 
@@ -33,21 +36,27 @@ class BootReceiver : BroadcastReceiver() {
             try {
                 val preferences = AlarmPreferences(context)
                 val scheduler = AlarmScheduler(context)
-                val shizuku = ShizukuDaemonManager(context)
+                val shellManager = ShellManager.get(context)
+                val keepAlive = KeepAliveController.get(context)
 
+                preferences.migrateOrReset()
                 val alarms = preferences.getAlarms().first()
-                if (alarms.any { it.enabled }) {
-                    scheduler.reconcile(alarms, startServiceNow = false)
-                    Log.i(TAG, "Re-scheduled ${alarms.count { it.enabled }} alarms")
-                } else {
-                    scheduler.cancelKeepAlive()
-                }
+                scheduler.reconcile(alarms)
+                Log.i(TAG, "Re-scheduled ${alarms.count { it.enabled }} alarms")
 
-                if (shizuku.isShizukuAvailable() && shizuku.isShizukuPermitted()) {
-                    shizuku.stopWatchdogDaemon()
-                    shizuku.applyAntiKillingTweaks()
-                    shizuku.startWatchdogDaemon()
-                    Log.i(TAG, "Success Daemon.")
+                // Restore the optional keep-alive layer without starting the
+                // FGS directly (Android 15+ blocks mediaPlayback FGS starts
+                // from BOOT_COMPLETED; the recovery alarm starts it shortly).
+                keepAlive.sync(
+                    hasEnabledAlarms = alarms.any { it.enabled },
+                    startServiceNow = false
+                )
+
+                if (preferences.privilegedEnabled.first() &&
+                    shellManager.current() != null
+                ) {
+                    shellManager.applyAntiKillTweaks()
+                    Log.i(TAG, "Privileged anti-kill tweaks applied")
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Boot processing failed", e)

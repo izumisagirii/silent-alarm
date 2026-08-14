@@ -8,6 +8,7 @@
     <string name="no_alarms">Будильники не настроены. Нажмите +, чтобы добавить.</string>
     <string name="add_alarm">Добавить будильник</string>
     <string name="delete_alarm">Удалить будильник</string>
+    <string name="delete_alarm_confirm">Удалить будильник?</string>
     <string name="edit_alarm">Изменить будильник</string>
     <string name="new_alarm">Новый будильник</string>
     <string name="ok">ОК</string>
@@ -58,6 +59,7 @@
     <string name="alarm_stopped">Будильник остановлен</string>
 
     <string name="schedule_one_shot">Одноразовый</string>
+    <string name="alarm_local_time_format">Местное время %1$s</string>
 
     <string-array name="day_letters">
         <item></item>
@@ -103,7 +105,35 @@
     <string name="notification_channel_active">Будильник играет</string>
     <string name="notification_channel_active_desc">Показывается, когда будильник активно играет</string>
     <string name="notification_waiting">Ожидание следующего будильника</string>
+    <string name="notification_next_alarm_format">Следующий будильник: %1$s</string>
     <string name="notification_alarm_active">Будильник активен</string>
     <string name="notification_earphones">Играет через наушники</string>
     <string name="notification_no_earphones">Наушники не обнаружены</string>
+    <string name="notification_speaker">Воспроизведение через динамик</string>
+    <string name="notification_vibrate">Вибрация</string>
+    <string name="snooze_5min">Отложить 5 мин</string>
+    <string name="notification_snoozing">Будильник приостановлен</string>
+    <string name="notification_snooze_resume">Прозвонит снова через 5 минут</string>
+    <string name="no_alarm_ringing">Сейчас не звонит ни один будильник</string>
+    <string name="undo">Отменить</string>
+    <string name="retry">Повторить</string>
+    <string name="battery_already_exempt">Оптимизация батареи уже отключена</string>
+    <string name="timezone_title">Часовой пояс</string>
+    <string name="timezone_auto">Системный часовой пояс</string>
+    <string name="timezone_selected">Выбранный часовой пояс</string>
+    <string name="timezone_search">Поиск часовых поясов</string>
+    <string name="timezone_no_results">Часовые пояса не найдены</string>
+
+    <string name="alarm_label">Название</string>
+    <string name="notification_channel_stopped">Напоминание будильника</string>
+    <string name="notification_channel_stopped_desc">Одноразовое беззвучное уведомление с временем последнего звонка после пропущенного будильника</string>
+    <string name="notification_missed_alarm">Пропущенный будильник</string>
+    <string name="notification_last_rang_time_format">Время последнего звонка: %1$s</string>
+
+    <string name="search_alarms">Поиск будильников</string>
+    <string name="no_alarms_found">Нет подходящих будильников</string>
+    <string name="keep_alive_title">Держать уведомление</string>
+    <string name="keep_alive_desc">Постоянное уведомление, авто-восстановление после остановки</string>
+    <string name="shizuku_desc">Используйте разрешение Shizuku для усиления защиты</string>
+    <string name="battery_not_exempt">Не исключено</string>
 </resources>

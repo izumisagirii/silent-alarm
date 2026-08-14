@@ -8,6 +8,7 @@
     <string name="no_alarms">Walang alarm na naka-set. I-tap ang + para magdagdag.</string>
     <string name="add_alarm">Magdagdag ng alarm</string>
     <string name="delete_alarm">Tanggalin ang alarm</string>
+    <string name="delete_alarm_confirm">Tanggalin ang alarm?</string>
     <string name="edit_alarm">I-edit ang alarm</string>
     <string name="new_alarm">Bagong alarm</string>
     <string name="ok">OK</string>
@@ -58,6 +59,7 @@
     <string name="alarm_stopped">Na-stop ang alarm</string>
 
     <string name="schedule_one_shot">Isang beses</string>
+    <string name="alarm_local_time_format">Lokal na oras %1$s</string>
 
     <string-array name="day_letters">
         <item></item>
@@ -103,7 +105,35 @@
     <string name="notification_channel_active">Tumutunog ang alarm</string>
     <string name="notification_channel_active_desc">Ipapakita habang tumutunog ang alarm</string>
     <string name="notification_waiting">Naghihintay sa susunod na alarm</string>
+    <string name="notification_next_alarm_format">Susunod na alarm: %1$s</string>
     <string name="notification_alarm_active">Aktibo ang alarm</string>
     <string name="notification_earphones">Tumutunog sa earphone</string>
     <string name="notification_no_earphones">Walang nakitang earphone</string>
+    <string name="notification_speaker">Tumutugtog sa speaker</string>
+    <string name="notification_vibrate">Nagvibrate</string>
+    <string name="snooze_5min">Snooze 5 min</string>
+    <string name="notification_snoozing">Naka-pause ang alarm</string>
+    <string name="notification_snooze_resume">Tutunog muli sa loob ng 5 minuto</string>
+    <string name="no_alarm_ringing">Walang alarm na tumutunog ngayon</string>
+    <string name="undo">I-undo</string>
+    <string name="retry">Subukan muli</string>
+    <string name="battery_already_exempt">Naka-disable na ang pag-optimize ng baterya</string>
+    <string name="timezone_title">Time zone</string>
+    <string name="timezone_auto">System time zone</string>
+    <string name="timezone_selected">Napiling time zone</string>
+    <string name="timezone_search">Maghanap ng time zone</string>
+    <string name="timezone_no_results">Walang nakitang time zone</string>
+
+    <string name="alarm_label">Label</string>
+    <string name="notification_channel_stopped">Paalala sa Alarm</string>
+    <string name="notification_channel_stopped_desc">Isang-beses na tahimik na notification na nagpapakita ng huling oras ng pag-ring pagkatapos ng nakaligtaang alarm</string>
+    <string name="notification_missed_alarm">Nakaligtaang alarm</string>
+    <string name="notification_last_rang_time_format">Huling oras ng pag-ring: %1$s</string>
+
+    <string name="search_alarms">Maghanap ng mga alarm</string>
+    <string name="no_alarms_found">Walang tumutugmang alarm</string>
+    <string name="keep_alive_title">Panatilihin ang notification</string>
+    <string name="keep_alive_desc">Permanenteng notification, awtomatikong ibabalik pagkatapos isara</string>
+    <string name="shizuku_desc">Gamitin ang Shizuku permission para sa mas malakas na proteksyon</string>
+    <string name="battery_not_exempt">Hindi exempted</string>
 </resources>

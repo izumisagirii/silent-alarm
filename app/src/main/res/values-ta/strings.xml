@@ -8,6 +8,7 @@
     <string name="no_alarms">அலாரம் அமைக்கப்படவில்லை. சேர்க்க + ஐத் தட்டவும்.</string>
     <string name="add_alarm">அலாரம் சேர்க்க</string>
     <string name="delete_alarm">அலாரத்தை நீக்கு</string>
+    <string name="delete_alarm_confirm">அலாரத்தை நீக்கு?</string>
     <string name="edit_alarm">அலாரத்தை திருத்து</string>
     <string name="new_alarm">புதிய அலாரம்</string>
     <string name="ok">சரி</string>
@@ -58,6 +59,7 @@
     <string name="alarm_stopped">அலாரம் நிறுத்தப்பட்டது</string>
 
     <string name="schedule_one_shot">ஒருமுறை</string>
+    <string name="alarm_local_time_format">உள்ளூர் நேரம் %1$s</string>
 
     <string-array name="day_letters">
         <item></item>
@@ -103,7 +105,35 @@
     <string name="notification_channel_active">அலாரம் ஒலிக்கிறது</string>
     <string name="notification_channel_active_desc">அலாரம் ஒலிக்கும்போது காட்டப்படும்</string>
     <string name="notification_waiting">அடுத்த அலாரத்திற்காக காத்திருக்கிறது</string>
+    <string name="notification_next_alarm_format">அடுத்த அலாரம்: %1$s</string>
     <string name="notification_alarm_active">அலாரம் செயலில் உள்ளது</string>
     <string name="notification_earphones">ஹெட்ஃபோனில் ஒலிக்கிறது</string>
     <string name="notification_no_earphones">ஹெட்ஃபோன் கண்டறியப்படவில்லை</string>
+    <string name="notification_speaker">ஒலிபெருக்கி வழியாக இயங்குகிறது</string>
+    <string name="notification_vibrate">அதிர்கிறது</string>
+    <string name="snooze_5min">5 நிமிட ஸ்னூஸ்</string>
+    <string name="notification_snoozing">அலாரம் இடைநிறுத்தப்பட்டது</string>
+    <string name="notification_snooze_resume">5 நிமிடங்களில் மீண்டும் ஒலிக்கும்</string>
+    <string name="no_alarm_ringing">தற்போது அலாரம் எதுவும் ஒலிக்கவில்லை</string>
+    <string name="undo">செயல்தவிர்</string>
+    <string name="retry">மீண்டும் முயற்சி</string>
+    <string name="battery_already_exempt">பேட்டரி மேம்படுத்தல் ஏற்கனவே முடக்கப்பட்டுள்ளது</string>
+    <string name="timezone_title">நேர மண்டலம்</string>
+    <string name="timezone_auto">கணினி நேர மண்டலம்</string>
+    <string name="timezone_selected">தேர்ந்தெடுத்த நேர மண்டலம்</string>
+    <string name="timezone_search">நேர மண்டலங்களைத் தேடு</string>
+    <string name="timezone_no_results">நேர மண்டலங்கள் இல்லை</string>
+
+    <string name="alarm_label">லேபிள்</string>
+    <string name="notification_channel_stopped">அலார நினைவூட்டல்</string>
+    <string name="notification_channel_stopped_desc">தவறவிட்ட அலாரத்திற்குப் பிறகு கடைசியாக ஒலித்த நேரத்தைக் காட்டும் ஒருமுறை அமைதியான அறிவிப்பு</string>
+    <string name="notification_missed_alarm">தவறவிட்ட அலாரம்</string>
+    <string name="notification_last_rang_time_format">கடைசியாக ஒலித்த நேரம்: %1$s</string>
+
+    <string name="search_alarms">அலாரங்களைத் தேடு</string>
+    <string name="no_alarms_found">பொருந்தும் அலாரம் இல்லை</string>
+    <string name="keep_alive_title">அறிவிப்பை வைத்திரு</string>
+    <string name="keep_alive_desc">நிரந்தர அறிவிப்பு, மூடப்பட்ட பிறகு தானியங்கி மீட்பு</string>
+    <string name="shizuku_desc">வலுவான பாதுகாப்பிற்கு Shizuku அனுமதியைப் பயன்படுத்தவும்</string>
+    <string name="battery_not_exempt">விலக்கு இல்லை</string>
 </resources>

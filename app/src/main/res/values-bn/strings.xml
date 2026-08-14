@@ -8,6 +8,7 @@
     <string name="no_alarms">কোনো অ্যালার্ম সেট নেই। যোগ করতে + ট্যাপ করুন।</string>
     <string name="add_alarm">অ্যালার্ম যোগ করুন</string>
     <string name="delete_alarm">অ্যালার্ম মুছুন</string>
+    <string name="delete_alarm_confirm">অ্যালার্ম মুছুন?</string>
     <string name="edit_alarm">অ্যালার্ম সম্পাদনা করুন</string>
     <string name="new_alarm">নতুন অ্যালার্ম</string>
     <string name="ok">ঠিক আছে</string>
@@ -58,6 +59,7 @@
     <string name="alarm_stopped">অ্যালার্ম বন্ধ হয়েছে</string>
 
     <string name="schedule_one_shot">একবার</string>
+    <string name="alarm_local_time_format">স্থানীয় সময় %1$s</string>
 
     <string-array name="day_letters">
         <item></item>
@@ -103,7 +105,35 @@
     <string name="notification_channel_active">অ্যালার্ম বাজছে</string>
     <string name="notification_channel_active_desc">অ্যালার্ম বাজলে দেখানো হয়</string>
     <string name="notification_waiting">পরবর্তী অ্যালার্মের অপেক্ষা</string>
+    <string name="notification_next_alarm_format">পরবর্তী অ্যালার্ম: %1$s</string>
     <string name="notification_alarm_active">অ্যালার্ম সক্রিয়</string>
     <string name="notification_earphones">ইয়ারফোনে বাজছে</string>
     <string name="notification_no_earphones">কোনো ইয়ারফোন পাওয়া যায়নি</string>
+    <string name="notification_speaker">স্পিকারের মাধ্যমে বাজছে</string>
+    <string name="notification_vibrate">কম্পন হচ্ছে</string>
+    <string name="snooze_5min">৫ মিনিটের স্নুজ</string>
+    <string name="notification_snoozing">অ্যালার্ম সাময়িকভাবে বিরত</string>
+    <string name="notification_snooze_resume">৫ মিনিট পরে আবার বাজবে</string>
+    <string name="no_alarm_ringing">বর্তমানে কোনো অ্যালার্ম বাজছে না</string>
+    <string name="undo">আনডু</string>
+    <string name="retry">আবার চেষ্টা করুন</string>
+    <string name="battery_already_exempt">ব্যাটারি অপ্টিমাইজেশন ইতিমধ্যে বন্ধ করা আছে</string>
+    <string name="timezone_title">সময় অঞ্চল</string>
+    <string name="timezone_auto">সিস্টেম সময় অঞ্চল</string>
+    <string name="timezone_selected">নির্বাচিত সময় অঞ্চল</string>
+    <string name="timezone_search">সময় অঞ্চল খুঁজুন</string>
+    <string name="timezone_no_results">কোনো সময় অঞ্চল পাওয়া যায়নি</string>
+
+    <string name="alarm_label">লেবেল</string>
+    <string name="notification_channel_stopped">অ্যালার্ম রিমাইন্ডার</string>
+    <string name="notification_channel_stopped_desc">মিস করা অ্যালার্মের পরে শেষ বাজানোর সময় দেখানো এককালীন নীরব বিজ্ঞপ্তি</string>
+    <string name="notification_missed_alarm">মিস করা অ্যালার্ম</string>
+    <string name="notification_last_rang_time_format">শেষ বাজানোর সময়: %1$s</string>
+
+    <string name="search_alarms">অ্যালার্ম খুঁজুন</string>
+    <string name="no_alarms_found">কোনো মিল থাকা অ্যালার্ম নেই</string>
+    <string name="keep_alive_title">নোটিফিকেশন বজায় রাখুন</string>
+    <string name="keep_alive_desc">স্থায়ী নোটিফিকেশন, বন্ধ হলে স্বয়ংক্রিয় পুনরুদ্ধার</string>
+    <string name="shizuku_desc">শক্তিশালী সুরক্ষার জন্য Shizuku অনুমতি ব্যবহার করুন</string>
+    <string name="battery_not_exempt">ছাড় নেই</string>
 </resources>

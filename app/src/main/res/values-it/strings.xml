@@ -8,6 +8,7 @@
     <string name="no_alarms">Nessuna sveglia impostata. Tocca + per aggiungerne una.</string>
     <string name="add_alarm">Aggiungi sveglia</string>
     <string name="delete_alarm">Elimina sveglia</string>
+    <string name="delete_alarm_confirm">Elimina sveglia?</string>
     <string name="edit_alarm">Modifica sveglia</string>
     <string name="new_alarm">Nuova sveglia</string>
     <string name="ok">OK</string>
@@ -58,6 +59,7 @@
     <string name="alarm_stopped">Sveglia interrotta</string>
 
     <string name="schedule_one_shot">Una volta</string>
+    <string name="alarm_local_time_format">Ora locale %1$s</string>
 
     <string-array name="day_letters">
         <item></item>
@@ -103,7 +105,35 @@
     <string name="notification_channel_active">Sveglia in riproduzione</string>
     <string name="notification_channel_active_desc">Mostrato quando la sveglia sta suonando</string>
     <string name="notification_waiting">In attesa della prossima sveglia</string>
+    <string name="notification_next_alarm_format">Prossima sveglia: %1$s</string>
     <string name="notification_alarm_active">Sveglia attiva</string>
     <string name="notification_earphones">Riproduzione nelle cuffie</string>
     <string name="notification_no_earphones">Nessuna cuffia rilevata</string>
+    <string name="notification_speaker">Riproduzione tramite altoparlante</string>
+    <string name="notification_vibrate">In vibrazione</string>
+    <string name="snooze_5min">Rimanda 5 min</string>
+    <string name="notification_snoozing">Sveglia in pausa</string>
+    <string name="notification_snooze_resume">Suonerà di nuovo tra 5 minuti</string>
+    <string name="no_alarm_ringing">Nessuna sveglia sta suonando</string>
+    <string name="undo">Annulla</string>
+    <string name="retry">Riprova</string>
+    <string name="battery_already_exempt">L’ottimizzazione della batteria è già disattivata</string>
+    <string name="timezone_title">Fuso orario</string>
+    <string name="timezone_auto">Fuso orario di sistema</string>
+    <string name="timezone_selected">Fuso orario selezionato</string>
+    <string name="timezone_search">Cerca fusi orari</string>
+    <string name="timezone_no_results">Nessun fuso orario trovato</string>
+
+    <string name="alarm_label">Etichetta</string>
+    <string name="notification_channel_stopped">Promemoria sveglia</string>
+    <string name="notification_channel_stopped_desc">Notifica silenziosa monouso che mostra l’ultimo orario di suoneria dopo una sveglia persa</string>
+    <string name="notification_missed_alarm">Sveglia persa</string>
+    <string name="notification_last_rang_time_format">Ultimo orario di suoneria: %1$s</string>
+
+    <string name="search_alarms">Cerca sveglie</string>
+    <string name="no_alarms_found">Nessuna sveglia corrispondente</string>
+    <string name="keep_alive_title">Mantieni la notifica</string>
+    <string name="keep_alive_desc">Notifica persistente, ripristino automatico dopo la chiusura</string>
+    <string name="shizuku_desc">Usa il permesso Shizuku per una protezione più forte</string>
+    <string name="battery_not_exempt">Non esentata</string>
 </resources>

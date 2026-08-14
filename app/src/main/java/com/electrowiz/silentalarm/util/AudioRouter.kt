@@ -1,8 +1,8 @@
 package com.electrowiz.silentalarm.util
 
+import android.annotation.SuppressLint
 import android.media.AudioDeviceInfo
 import android.media.AudioManager
-import android.util.Log
 import com.electrowiz.silentalarm.data.NoEarphoneAction
 
 /**
@@ -12,9 +12,8 @@ import com.electrowiz.silentalarm.data.NoEarphoneAction
 class AudioRouter(private val audioManager: AudioManager) {
 
     companion object {
-        private const val TAG = "AudioRouter"
-
         /** Device types considered "earphone" for routing purposes. */
+        @SuppressLint("InlinedApi")
         private val EARPHONE_TYPES = setOf(
             AudioDeviceInfo.TYPE_WIRED_HEADSET,
             AudioDeviceInfo.TYPE_WIRED_HEADPHONES,
@@ -30,16 +29,24 @@ class AudioRouter(private val audioManager: AudioManager) {
     /** Final action the alarm service should perform. */
     enum class ResolvedAction { PLAY_VIA_EARPHONES, PLAY_VIA_SPEAKER, VIBRATE_ONLY }
 
-    /** Query [AudioManager] for the current output topology. */
-    fun detectOutputType(): AudioOutputType {
+    /** All routing information obtained from a single device query. */
+    data class AudioRoute(
+        val outputType: AudioOutputType,
+        val earphoneDevice: AudioDeviceInfo?,
+        val speakerDevice: AudioDeviceInfo?
+    )
+
+    /** Query [AudioManager] once and return the complete routing picture. */
+    fun inspectRoute(): AudioRoute {
         val devices = audioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS)
-        for (d in devices) {
-            if (d.type in EARPHONE_TYPES) {
-                Log.d(TAG, "Earphone found: type=${d.type} name=${d.productName}")
-                return AudioOutputType.EARPHONES_AVAILABLE
-            }
+        val earphoneDevice = devices.firstOrNull { it.type in EARPHONE_TYPES }
+        val speakerDevice = devices.firstOrNull { it.type == AudioDeviceInfo.TYPE_BUILTIN_SPEAKER }
+        val outputType = if (earphoneDevice != null) {
+            AudioOutputType.EARPHONES_AVAILABLE
+        } else {
+            AudioOutputType.SPEAKER_ONLY
         }
-        return AudioOutputType.SPEAKER_ONLY
+        return AudioRoute(outputType, earphoneDevice, speakerDevice)
     }
 
     /** Given hardware state and user preference, decide what to do. */
@@ -53,14 +60,4 @@ class AudioRouter(private val audioManager: AudioManager) {
             NoEarphoneAction.LOUDSPEAKER -> ResolvedAction.PLAY_VIA_SPEAKER
         }
     }
-
-    /** Find the first earphone-type device among active outputs, or null. */
-    fun findEarphoneDevice(): AudioDeviceInfo? =
-        audioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS)
-            .firstOrNull { it.type in EARPHONE_TYPES }
-
-    /** Find the built-in speaker, or null. */
-    fun findSpeakerDevice(): AudioDeviceInfo? =
-        audioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS)
-            .firstOrNull { it.type == AudioDeviceInfo.TYPE_BUILTIN_SPEAKER }
 }

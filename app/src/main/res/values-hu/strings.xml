@@ -8,6 +8,7 @@
     <string name="no_alarms">Nincs ébresztő beállítva. A + megérintésével adhat hozzá.</string>
     <string name="add_alarm">Ébresztő hozzáadása</string>
     <string name="delete_alarm">Ébresztő törlése</string>
+    <string name="delete_alarm_confirm">Ébresztő törlése?</string>
     <string name="edit_alarm">Ébresztő szerkesztése</string>
     <string name="new_alarm">Új ébresztő</string>
     <string name="ok">OK</string>
@@ -58,6 +59,7 @@
     <string name="alarm_stopped">Ébresztő leállítva</string>
 
     <string name="schedule_one_shot">Egyszeri</string>
+    <string name="alarm_local_time_format">Helyi idő %1$s</string>
 
     <string-array name="day_letters">
         <item></item>
@@ -103,7 +105,35 @@
     <string name="notification_channel_active">Az ébresztő szól</string>
     <string name="notification_channel_active_desc">Akkor jelenik meg, amikor az ébresztő szól</string>
     <string name="notification_waiting">Várakozás a következő ébresztőre</string>
+    <string name="notification_next_alarm_format">Következő ébresztő: %1$s</string>
     <string name="notification_alarm_active">Az ébresztő aktív</string>
     <string name="notification_earphones">Lejátszás fejhallgatón</string>
     <string name="notification_no_earphones">Nem észlelhető fejhallgató</string>
+    <string name="notification_speaker">Lejátszás a hangszórón</string>
+    <string name="notification_vibrate">Rezeg</string>
+    <string name="snooze_5min">Szundi 5 perc</string>
+    <string name="notification_snoozing">Ébresztő szüneteltetve</string>
+    <string name="notification_snooze_resume">5 perc múlva újra csörög</string>
+    <string name="no_alarm_ringing">Jelenleg nem szól ébresztő</string>
+    <string name="undo">Visszavonás</string>
+    <string name="retry">Újra</string>
+    <string name="battery_already_exempt">Az akkumulátor-optimalizálás már ki van kapcsolva</string>
+    <string name="timezone_title">Időzóna</string>
+    <string name="timezone_auto">Rendszer időzóna</string>
+    <string name="timezone_selected">Kiválasztott időzóna</string>
+    <string name="timezone_search">Időzónák keresése</string>
+    <string name="timezone_no_results">Nem található időzóna</string>
+
+    <string name="alarm_label">Címke</string>
+    <string name="notification_channel_stopped">Ébresztő-emlékeztető</string>
+    <string name="notification_channel_stopped_desc">Egyszeri néma értesítés, amely az elmulasztott ébresztő utáni utolsó csörgési időt mutatja</string>
+    <string name="notification_missed_alarm">Elmulasztott ébresztő</string>
+    <string name="notification_last_rang_time_format">Utolsó csörgés: %1$s</string>
+
+    <string name="search_alarms">Ébresztők keresése</string>
+    <string name="no_alarms_found">Nincs egyező ébresztő</string>
+    <string name="keep_alive_title">Értesítés megtartása</string>
+    <string name="keep_alive_desc">Állandó értesítés, automatikus visszaállítás bezárás után</string>
+    <string name="shizuku_desc">Használja a Shizuku-engedélyt a hatékonyabb védelemhez</string>
+    <string name="battery_not_exempt">Nincs felmentve</string>
 </resources>

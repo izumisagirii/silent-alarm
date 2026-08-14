@@ -8,6 +8,7 @@
     <string name="no_alarms">Ingen alarmer indstillet. Tryk på + for at tilføje en.</string>
     <string name="add_alarm">Tilføj alarm</string>
     <string name="delete_alarm">Slet alarm</string>
+    <string name="delete_alarm_confirm">Slet alarm?</string>
     <string name="edit_alarm">Rediger alarm</string>
     <string name="new_alarm">Ny alarm</string>
     <string name="ok">OK</string>
@@ -58,6 +59,7 @@
     <string name="alarm_stopped">Alarm stoppet</string>
 
     <string name="schedule_one_shot">Én gang</string>
+    <string name="alarm_local_time_format">Lokal tid %1$s</string>
 
     <string-array name="day_letters">
         <item></item>
@@ -103,7 +105,35 @@
     <string name="notification_channel_active">Alarm spiller</string>
     <string name="notification_channel_active_desc">Vises, mens alarmen spiller</string>
     <string name="notification_waiting">Venter på næste alarm</string>
+    <string name="notification_next_alarm_format">Næste alarm: %1$s</string>
     <string name="notification_alarm_active">Alarm aktiv</string>
     <string name="notification_earphones">Spiller via høretelefoner</string>
     <string name="notification_no_earphones">Ingen høretelefoner fundet</string>
+    <string name="notification_speaker">Afspiller via højttaler</string>
+    <string name="notification_vibrate">Vibrerer</string>
+    <string name="snooze_5min">Snooze 5 min</string>
+    <string name="notification_snoozing">Alarm sat på pause</string>
+    <string name="notification_snooze_resume">Ringer igen om 5 minutter</string>
+    <string name="no_alarm_ringing">Ingen alarm ringer i øjeblikket</string>
+    <string name="undo">Fortryd</string>
+    <string name="retry">Prøv igen</string>
+    <string name="battery_already_exempt">Batterioptimering er allerede deaktiveret</string>
+    <string name="timezone_title">Tidszone</string>
+    <string name="timezone_auto">Systemtidszone</string>
+    <string name="timezone_selected">Valgt tidszone</string>
+    <string name="timezone_search">Søg tidszoner</string>
+    <string name="timezone_no_results">Ingen tidszoner fundet</string>
+
+    <string name="alarm_label">Etiket</string>
+    <string name="notification_channel_stopped">Alarmpåmindelse</string>
+    <string name="notification_channel_stopped_desc">Engangsstillemeddelelse, der viser sidste ringetid efter en overset alarm</string>
+    <string name="notification_missed_alarm">Overset alarm</string>
+    <string name="notification_last_rang_time_format">Sidste ringetid: %1$s</string>
+
+    <string name="search_alarms">Søg i alarmer</string>
+    <string name="no_alarms_found">Ingen matchende alarmer</string>
+    <string name="keep_alive_title">Behold meddelelsen</string>
+    <string name="keep_alive_desc">Vedvarende meddelelse, automatisk gendannelse efter lukning</string>
+    <string name="shizuku_desc">Brug Shizuku-tilladelsen til stærkere beskyttelse</string>
+    <string name="battery_not_exempt">Ikke fritaget</string>
 </resources>

@@ -26,7 +26,7 @@ Keep-alive strategy against OEM background killers:
 
 | Layer | Mechanism                  | Effect                                                                 |
 | :---: | -------------------------- | ---------------------------------------------------------------------- |
-|   1   | **Exact Alarm Recovery**   | `setAlarmClock` for real alarms plus `setExactAndAllowWhileIdle` recovery alarm, so the system can wake the app even after the process is killed |
+|   1   | **Exact Alarm Recovery**   | `setAlarmClock` for real alarms plus an inexact `setAndAllowWhileIdle` recovery alarm, so the system can wake the app even after the process is killed |
 |   2   | **Foreground Service**     | `mediaPlayback` foreground service keeps the process alive while the app is closed or the screen is off |
 |   3   | **Shizuku (optional)**     | `cmd deviceidle whitelist` + `am set-standby-bucket active` to reduce OEM battery-management interference |
 |   4   | **Watchdog Daemon**        | Shell script under Shizuku's UID monitors the app and restarts the service if it is killed |

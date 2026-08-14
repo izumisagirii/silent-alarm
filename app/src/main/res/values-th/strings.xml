@@ -8,6 +8,7 @@
     <string name="no_alarms">ยังไม่มีนาฬิกาปลุก แตะ + เพื่อเพิ่ม</string>
     <string name="add_alarm">เพิ่มนาฬิกาปลุก</string>
     <string name="delete_alarm">ลบนาฬิกาปลุก</string>
+    <string name="delete_alarm_confirm">ลบนาฬิกาปลุก?</string>
     <string name="edit_alarm">แก้ไขนาฬิกาปลุก</string>
     <string name="new_alarm">นาฬิกาปลุกใหม่</string>
     <string name="ok">ตกลง</string>
@@ -58,6 +59,7 @@
     <string name="alarm_stopped">หยุดนาฬิกาปลุกแล้ว</string>
 
     <string name="schedule_one_shot">ครั้งเดียว</string>
+    <string name="alarm_local_time_format">เวลาท้องถิ่น %1$s</string>
 
     <string-array name="day_letters">
         <item></item>
@@ -71,13 +73,13 @@
     </string-array>
     <string-array name="day_names_short">
         <item></item>
-        <item>อา.</item>
-        <item>จ.</item>
-        <item>อ.</item>
-        <item>พ.</item>
-        <item>พฤ.</item>
-        <item>ศ.</item>
-        <item>ส.</item>
+        <item>อา</item>
+        <item>จ</item>
+        <item>อ</item>
+        <item>พ</item>
+        <item>พฤ</item>
+        <item>ศ</item>
+        <item>ส</item>
     </string-array>
 
     <string name="github">GitHub</string>
@@ -103,7 +105,35 @@
     <string name="notification_channel_active">กำลังเล่นนาฬิกาปลุก</string>
     <string name="notification_channel_active_desc">แสดงเมื่อนาฬิกาปลุกกำลังเล่น</string>
     <string name="notification_waiting">รอนาฬิกาปลุกครั้งถัดไป</string>
+    <string name="notification_next_alarm_format">นาฬิกาปลุกถัดไป: %1$s</string>
     <string name="notification_alarm_active">นาฬิกาปลุกทำงานอยู่</string>
     <string name="notification_earphones">กำลังเล่นผ่านหูฟัง</string>
     <string name="notification_no_earphones">ตรวจไม่พบหูฟัง</string>
+    <string name="notification_speaker">กำลังเล่นผ่านลำโพง</string>
+    <string name="notification_vibrate">กำลังสั่น</string>
+    <string name="snooze_5min">เลื่อน 5 นาที</string>
+    <string name="notification_snoozing">นาฬิกาปลุกหยุดชั่วคราว</string>
+    <string name="notification_snooze_resume">จะดังอีกครั้งใน 5 นาที</string>
+    <string name="no_alarm_ringing">ไม่มีนาฬิกาปลุกดังอยู่ในขณะนี้</string>
+    <string name="undo">เลิกทำ</string>
+    <string name="retry">ลองอีกครั้ง</string>
+    <string name="battery_already_exempt">ปิดการเพิ่มประสิทธิภาพแบตเตอรี่แล้ว</string>
+    <string name="timezone_title">เขตเวลา</string>
+    <string name="timezone_auto">เขตเวลาของระบบ</string>
+    <string name="timezone_selected">เขตเวลาที่เลือก</string>
+    <string name="timezone_search">ค้นหาเขตเวลา</string>
+    <string name="timezone_no_results">ไม่พบเขตเวลา</string>
+
+    <string name="alarm_label">ป้ายกำกับ</string>
+    <string name="notification_channel_stopped">การแจ้งเตือนนาฬิกาปลุก</string>
+    <string name="notification_channel_stopped_desc">การแจ้งเตือนแบบเงียบครั้งเดียวที่แสดงเวลาปลุกครั้งสุดท้ายหลังจากพลาดนาฬิกาปลุก</string>
+    <string name="notification_missed_alarm">พลาดนาฬิกาปลุก</string>
+    <string name="notification_last_rang_time_format">เวลาปลุกครั้งล่าสุด: %1$s</string>
+
+    <string name="search_alarms">ค้นหานาฬิกาปลุก</string>
+    <string name="no_alarms_found">ไม่พบนาฬิกาปลุกที่ตรงกัน</string>
+    <string name="keep_alive_title">เก็บการแจ้งเตือนไว้</string>
+    <string name="keep_alive_desc">การแจ้งเตือนถาวร กู้คืนอัตโนมัติหลังถูกปิด</string>
+    <string name="shizuku_desc">ใช้สิทธิ์ Shizuku เพื่อเพิ่มการป้องกัน</string>
+    <string name="battery_not_exempt">ไม่ได้รับการยกเว้น</string>
 </resources>

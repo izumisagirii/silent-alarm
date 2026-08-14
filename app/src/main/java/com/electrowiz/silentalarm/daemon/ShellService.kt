@@ -5,8 +5,10 @@ import android.os.Binder
 import android.os.IBinder
 import android.os.Parcel
 import android.util.Log
-import java.io.BufferedReader
-import java.io.InputStreamReader
+import java.io.IOException
+import java.io.InputStream
+import java.util.concurrent.TimeUnit
+import kotlin.concurrent.thread
 
 /**
  * Shizuku UserService that executes privileged shell commands.
@@ -34,7 +36,15 @@ class ShellService : Binder {
         const val DESCRIPTOR = "com.electrowiz.silentalarm.daemon.IShellService"
 
         /** Transaction code: execute a shell command. */
-        private const val TRANSACTION_EXECUTE = 1
+        const val TRANSACTION_EXECUTE = 1
+
+        /**
+         * Transaction sent by Shizuku when [rikka.shizuku.Shizuku.unbindUserService]
+         * is called with `remove = true`.
+         */
+        private const val TRANSACTION_DESTROY = 16777115
+
+        private const val COMMAND_TIMEOUT_MS = 30_000L
     }
 
     constructor() : super()
@@ -58,6 +68,12 @@ class ShellService : Binder {
                 reply?.writeString(result)
                 return true
             }
+            TRANSACTION_DESTROY -> {
+                reply?.writeNoException()
+                Log.i(TAG, "Shizuku requested UserService destruction")
+                System.exit(0)
+                return true
+            }
         }
         return super.onTransact(code, data, reply, flags)
     }
@@ -72,29 +88,58 @@ class ShellService : Binder {
     private fun execute(command: String): String {
         Log.d(TAG, "Executing (Shizuku UserService): $command")
 
+        val process = try {
+            Runtime.getRuntime().exec(arrayOf("sh", "-c", command))
+        } catch (e: IOException) {
+            Log.e(TAG, "Failed to start shell", e)
+            return ""
+        }
+
+        val stdout = StringBuilder()
+        val stderr = StringBuilder()
+        val stdoutThread = process.inputStream.drain("ShellService-stdout", stdout)
+        val stderrThread = process.errorStream.drain("ShellService-stderr", stderr)
+
         return try {
-            val process = Runtime.getRuntime().exec(arrayOf("sh", "-c", command))
+            val finished = process.waitFor(COMMAND_TIMEOUT_MS, TimeUnit.MILLISECONDS)
+            if (!finished) {
+                process.destroyForcibly()
+                process.waitFor(1, TimeUnit.SECONDS)
+                Log.w(TAG, "Command timed out after ${COMMAND_TIMEOUT_MS}ms: $command")
+                return ""
+            }
 
-            val stdout = BufferedReader(InputStreamReader(process.inputStream)).readText()
-            val stderr = BufferedReader(InputStreamReader(process.errorStream)).readText()
-
+            stdoutThread.join(1_000)
+            stderrThread.join(1_000)
             val exitCode = process.waitFor()
 
-            if (stderr.isNotBlank()) {
-                Log.w(TAG, "stderr($exitCode): $stderr")
+            val stderrText = stderr.toString()
+            val stdoutText = stdout.toString()
+
+            if (stderrText.isNotBlank()) {
+                Log.w(TAG, "stderr($exitCode): $stderrText")
             }
-            if (stdout.isNotBlank()) {
-                Log.d(TAG, "stdout($exitCode): $stdout")
+            if (stdoutText.isNotBlank()) {
+                Log.d(TAG, "stdout($exitCode): $stdoutText")
             }
 
             if (exitCode != 0) {
                 Log.w(TAG, "Command exited $exitCode: $command")
             }
 
-            stdout.ifBlank { stderr }
+            stdoutText.ifBlank { stderrText }
         } catch (e: Exception) {
             Log.e(TAG, "Command failed: ${e.message}", e)
             ""
+        } finally {
+            if (process.isAlive) process.destroy()
         }
     }
+
+    private fun InputStream.drain(name: String, sink: StringBuilder): Thread =
+        thread(isDaemon = true, name = name) {
+            bufferedReader().use { reader ->
+                reader.forEachLine { sink.appendLine(it) }
+            }
+        }
 }

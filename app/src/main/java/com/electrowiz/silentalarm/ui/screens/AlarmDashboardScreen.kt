@@ -1,73 +1,63 @@
 package com.electrowiz.silentalarm.ui.screens
 
-import androidx.compose.foundation.background
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.VolumeUp
 import androidx.compose.foundation.layout.Box
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.outlined.Alarm
-import androidx.compose.material.icons.outlined.HeadsetOff
-import androidx.compose.material.icons.outlined.MusicNote
-import androidx.compose.material.icons.outlined.Shield
-import androidx.compose.material.icons.outlined.Timer
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.RadioButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Switch
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TimePicker
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.res.stringArrayResource
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.electrowiz.silentalarm.R
-import com.electrowiz.silentalarm.data.AlarmItem
-import com.electrowiz.silentalarm.data.NoEarphoneAction
-import com.electrowiz.silentalarm.data.TimeoutAction
 import com.electrowiz.silentalarm.ui.components.GitHubRepoCard
 import com.electrowiz.silentalarm.ui.components.LanguageSettingsCard
-import com.electrowiz.silentalarm.ui.components.SettingsCardHeader
-import com.electrowiz.silentalarm.ui.components.VolumeSlider
+import com.electrowiz.silentalarm.ui.components.TimezoneSettingsCard
 import com.electrowiz.silentalarm.ui.viewmodel.AlarmViewModel
+import java.util.Calendar
+import kotlinx.coroutines.launch
 
 /**
  * Main dashboard: test/stop → alarm list → settings → process keeping.
@@ -78,28 +68,98 @@ fun AlarmDashboardScreen(
     viewModel: AlarmViewModel,
     onPickRingtone: () -> Unit,
     onRequestExactAlarmPermission: () -> Unit,
+    onRequestBatteryExemption: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val alarms by viewModel.alarms.collectAsState()
-    val earphoneVolume by viewModel.earphoneVolume.collectAsState()
-    val speakerVolume by viewModel.speakerVolume.collectAsState()
-    val noEarphoneAction by viewModel.noEarphoneAction.collectAsState()
-    val globalRingtoneUri by viewModel.globalRingtoneUri.collectAsState()
-    val timeoutSeconds by viewModel.timeoutSeconds.collectAsState()
-    val timeoutAction by viewModel.timeoutAction.collectAsState()
-    val showTimePicker by viewModel.showTimePicker.collectAsState()
-    val snackbarMessage by viewModel.snackbarMessage.collectAsState()
+    val alarms by viewModel.alarms.collectAsStateWithLifecycle()
+    val earphoneVolume by viewModel.earphoneVolume.collectAsStateWithLifecycle()
+    val speakerVolume by viewModel.speakerVolume.collectAsStateWithLifecycle()
+    val noEarphoneAction by viewModel.noEarphoneAction.collectAsStateWithLifecycle()
+    val globalRingtoneUri by viewModel.globalRingtoneUri.collectAsStateWithLifecycle()
+    val timeoutSeconds by viewModel.timeoutSeconds.collectAsStateWithLifecycle()
+    val timeoutAction by viewModel.timeoutAction.collectAsStateWithLifecycle()
+    val timezoneMode by viewModel.timezoneMode.collectAsStateWithLifecycle()
+    val timezoneId by viewModel.timezoneId.collectAsStateWithLifecycle()
+    val showTimePicker by viewModel.showTimePicker.collectAsStateWithLifecycle()
+    val snackbarMessage by viewModel.snackbarMessage.collectAsStateWithLifecycle()
+    var pendingDeleteId by remember { mutableStateOf<String?>(null) }
+    var deletingAlarmId by remember { mutableStateOf<String?>(null) }
+    var searchActive by remember { mutableStateOf(false) }
+    var searchQuery by remember { mutableStateOf("") }
+    var emptyStateHiding by remember { mutableStateOf(false) }
+    val cultureQuote = remember { timeQuotes.random() }
+    val listState = rememberLazyListState()
+    val quoteVisible by remember(listState) {
+        derivedStateOf {
+            val info = listState.layoutInfo
+            !listState.canScrollForward && info.visibleItemsInfo.isNotEmpty()
+        }
+    }
+    val quoteAlpha by animateFloatAsState(
+        targetValue = if (quoteVisible) 1f else 0f,
+        animationSpec = tween(durationMillis = 400),
+        label = "quoteAlpha"
+    )
 
-    val shizukuOk by viewModel.shizukuConnected.collectAsState()
-    val shizukuPerm by viewModel.shizukuPermitted.collectAsState()
-    val exactAlarmAllowed by viewModel.exactAlarmAllowed.collectAsState()
+    val visibleAlarms = remember(alarms, searchActive, searchQuery, viewModel) {
+        if (searchActive && searchQuery.isNotBlank()) {
+            alarms.filter { alarm ->
+                alarm.label.contains(searchQuery, ignoreCase = true) ||
+                    viewModel.formatAlarmTime(alarm).contains(searchQuery) ||
+                    viewModel.formatAlarmLocalTime(alarm).contains(searchQuery)
+            }
+        } else {
+            alarms
+        }
+    }
+
+    val keepAliveEnabled by viewModel.keepAliveEnabled.collectAsStateWithLifecycle()
+    val privilegedEnabled by viewModel.privilegedEnabled.collectAsStateWithLifecycle()
+    val shellReady by viewModel.shellReady.collectAsStateWithLifecycle()
+    val shizukuPermissionNeeded by viewModel.shizukuPermissionNeeded.collectAsStateWithLifecycle()
+    val exactAlarmAllowed by viewModel.exactAlarmAllowed.collectAsStateWithLifecycle()
+    val batteryOptimizationIgnored by viewModel.batteryOptimizationIgnored.collectAsStateWithLifecycle()
+    val alarmActive by viewModel.alarmActive.collectAsStateWithLifecycle()
 
     val snackbarHostState = remember { SnackbarHostState() }
 
+    // First-launch entrance: the whole dashboard fades in and rises
+    // slightly; alarm cards additionally pop in individually below.
+    val loadAlpha = remember { Animatable(0f) }
+    val loadOffset = remember { Animatable(0f) }
+    val density = LocalDensity.current.density
+    LaunchedEffect(Unit) {
+        launch { loadAlpha.animateTo(1f, tween(durationMillis = 450)) }
+        launch {
+            loadOffset.animateTo(1f, tween(durationMillis = 450, easing = FastOutSlowInEasing))
+        }
+    }
+
     LaunchedEffect(snackbarMessage) {
-        snackbarMessage?.let {
-            snackbarHostState.showSnackbar(it)
+        snackbarMessage?.let { event ->
+            val result = if (event.actionLabel != null) {
+                snackbarHostState.showSnackbar(
+                    message = event.message,
+                    actionLabel = event.actionLabel,
+                    withDismissAction = true,
+                    duration = SnackbarDuration.Long
+                )
+            } else {
+                snackbarHostState.showSnackbar(event.message)
+            }
+            if (result == SnackbarResult.ActionPerformed) {
+                event.onAction()
+            }
             viewModel.clearSnackbar()
+        }
+    }
+
+    val showEmptyState = alarms.isEmpty() ||
+        (searchActive && searchQuery.isNotBlank() && visibleAlarms.isEmpty())
+
+    LaunchedEffect(showEmptyState) {
+        if (!showEmptyState) {
+            emptyStateHiding = true
         }
     }
 
@@ -107,7 +167,16 @@ fun AlarmDashboardScreen(
         modifier = modifier.fillMaxSize(),
         snackbarHost = { SnackbarHost(snackbarHostState) },
         floatingActionButton = {
-            FloatingActionButton(onClick = { viewModel.showAddTimePicker() }) {
+            val source = remember { MutableInteractionSource() }
+            val scale = rememberPressScale(source, pressedScale = 0.94f)
+            FloatingActionButton(
+                onClick = { viewModel.showAddTimePicker() },
+                interactionSource = source,
+                modifier = Modifier.graphicsLayer {
+                    scaleX = scale
+                    scaleY = scale
+                }
+            ) {
                 Icon(
                     Icons.Default.Add,
                     contentDescription = stringResource(R.string.add_alarm)
@@ -115,306 +184,187 @@ fun AlarmDashboardScreen(
             }
         }
     ) { innerPadding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            // ── Header ──────────────────────────────────────────────────
-            item {
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    stringResource(R.string.dashboard_title),
-                    style = MaterialTheme.typography.headlineMedium
+        Box(modifier = Modifier.fillMaxSize()) {
+            LazyColumn(
+                state = listState,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+                    .padding(horizontal = 16.dp)
+                    .graphicsLayer {
+                        alpha = loadAlpha.value
+                        translationY = (1f - loadOffset.value) * 16f * density
+                    },
+                contentPadding = PaddingValues(bottom = 84.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+            item(key = "header") {
+                DashboardHeader(
+                    searchActive = searchActive,
+                    onToggleSearch = { searchActive = !searchActive },
+                    modifier = itemAnim()
                 )
-                Text(stringResource(R.string.dashboard_subtitle),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
 
-            // ── Test / Stop Buttons ─────────────────────────────────────
-            item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    Button(
-                        onClick = { viewModel.testAlarm() },
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Icon(Icons.Default.PlayArrow, contentDescription = null,
-                            modifier = Modifier.padding(end = 4.dp))
-                        Text(
-                            stringResource(R.string.test_alarm),
-                            maxLines = 1,
-                            softWrap = false,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
-                    Button(
-                        onClick = { viewModel.stopAlarm() },
-                        modifier = Modifier.weight(1f),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.error
-                        )
-                    ) {
-                        Icon(Icons.Default.Close, contentDescription = null,
-                            modifier = Modifier.padding(end = 4.dp))
-                        Text(stringResource(R.string.stop))
-                    }
-                }
+            item(key = "buttons") {
+                TestStopButtons(
+                    alarmActive = alarmActive,
+                    onTest = { viewModel.testAlarm() },
+                    onStop = { viewModel.stopAlarm() },
+                    modifier = itemAnim()
+                )
             }
 
-            // ── Alarm List ──────────────────────────────────────────────
-            if (alarms.isEmpty()) {
-                item {
-                    Text(
-                        stringResource(R.string.no_alarms),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(vertical = 24.dp)
+            // Conditional items: a hidden zero-height item would still consume
+            // a spacedBy() slot on both sides, making the surrounding gaps
+            // look twice as large. Add/remove them with the visibility state.
+            if (searchActive) {
+                item(key = "search-field") {
+                    DashboardSearchField(
+                        searchQuery = searchQuery,
+                        onSearchQueryChange = { searchQuery = it },
+                        modifier = itemAnim()
                     )
                 }
-            } else {
-                items(alarms, key = { it.id }) { alarm ->
-                    AlarmCard(
-                        alarm = alarm,
-                        onToggle = { viewModel.toggleAlarm(alarm.id, it) },
-                        onDelete = { viewModel.deleteAlarm(alarm.id) },
-                        onToggleDay = { day ->
-                            val newDays = if (day in alarm.daysOfWeek)
-                                alarm.daysOfWeek - day else alarm.daysOfWeek + day
-                            viewModel.updateAlarm(alarm.copy(daysOfWeek = newDays))
+            }
+
+            if (showEmptyState || emptyStateHiding) {
+                item(key = "empty-state") {
+                    EmptyAlarmState(
+                        message = if (searchActive && searchQuery.isNotBlank()) {
+                            stringResource(R.string.no_alarms_found)
+                        } else {
+                            stringResource(R.string.no_alarms)
                         },
-                        formatTime = { viewModel.formatTime(alarm.hour, alarm.minute) },
-                        formatSchedule = { viewModel.formatSchedule(alarm) }
+                        hiding = emptyStateHiding,
+                        onHidingFinished = { emptyStateHiding = false },
+                        modifier = itemAnim()
                     )
                 }
             }
 
-            // ── Volume Settings ─────────────────────────────────────────
-            item {
-                Card(modifier = Modifier.fillMaxWidth()) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        SettingsCardHeader(
-                            icon = Icons.AutoMirrored.Outlined.VolumeUp,
-                            title = stringResource(R.string.volume_settings)
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        VolumeSlider(stringResource(R.string.earphone), earphoneVolume,
-                            onValueChange = { viewModel.setEarphoneVolume(it) })
-                        Spacer(modifier = Modifier.height(4.dp))
-                        VolumeSlider(stringResource(R.string.speaker), speakerVolume,
-                            onValueChange = { viewModel.setSpeakerVolume(it) })
-                    }
-                }
+            itemsIndexed(visibleAlarms, key = { _, it -> it.id }) { _, alarm ->
+                AlarmListItem(
+                    alarm = alarm,
+                    deletingAlarmId = deletingAlarmId,
+                    onDeleteRequest = { pendingDeleteId = alarm.id },
+                    onDelete = { viewModel.deleteAlarm(it) },
+                    onDeleteAnimationFinished = { deletingAlarmId = null },
+                    onToggle = { viewModel.toggleAlarm(alarm.id, it) },
+                    onEditTime = { viewModel.showEditTimePicker(alarm.id) },
+                    onToggleDay = { day ->
+                        val newDays = if (day in alarm.daysOfWeek)
+                            alarm.daysOfWeek - day else alarm.daysOfWeek + day
+                        viewModel.updateAlarm(alarm.copy(daysOfWeek = newDays))
+                    },
+                    formatTime = { viewModel.formatAlarmTime(alarm) },
+                    formatSchedule = { viewModel.formatSchedule(alarm) },
+                    timezoneText = viewModel.timezoneLabelForAlarm(alarm),
+                    localTimeText = viewModel.localTimeCaption(alarm),
+                    modifier = itemAnim()
+                )
             }
 
-            // ── Alarm Timeout ───────────────────────────────────────────
-            item {
-                Card(modifier = Modifier.fillMaxWidth()) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        SettingsCardHeader(
-                            icon = Icons.Outlined.Timer,
-                            title = stringResource(R.string.alarm_timeout)
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        VolumeSlider(
-                            label = stringResource(R.string.duration),
-                            value = timeoutSeconds,
-                            onValueChange = { viewModel.setTimeoutSeconds((it / 10) * 10) },
-                            valueRange = 30f..1800f,
-                            displayText = formatDuration(
-                                timeoutSeconds,
-                                stringResource(R.string.duration_min)
-                            )
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            stringResource(R.string.timeout_description),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            stringResource(R.string.after_earphone_timeout),
-                            style = MaterialTheme.typography.titleSmall
-                        )
-                        TimeoutAction.entries.forEach { action ->
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .selectable(
-                                        selected = timeoutAction == action,
-                                        onClick = { viewModel.setTimeoutAction(action) },
-                                        role = Role.RadioButton
-                                    )
-                                    .padding(vertical = 2.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                RadioButton(selected = timeoutAction == action, onClick = null)
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(
-                                    timeoutActionLabel(action),
-                                    style = MaterialTheme.typography.bodyLarge
-                                )
-                            }
-                        }
-                        if (timeoutAction == TimeoutAction.FALLBACK) {
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                stringResource(R.string.timeout_fallback_hint),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
-                }
+            item(key = "volume-settings") {
+                VolumeSettingsCard(
+                    earphoneVolume = earphoneVolume,
+                    speakerVolume = speakerVolume,
+                    onEarphoneVolumeChange = { viewModel.setEarphoneVolume(it) },
+                    onSpeakerVolumeChange = { viewModel.setSpeakerVolume(it) },
+                    modifier = itemAnim()
+                )
             }
 
-            // ── No-Earphone Action ──────────────────────────────────────
-            item {
-                Card(modifier = Modifier.fillMaxWidth()) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        SettingsCardHeader(
-                            icon = Icons.Outlined.HeadsetOff,
-                            title = stringResource(R.string.no_earphone_title)
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        NoEarphoneAction.entries.forEach { action ->
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .selectable(
-                                        selected = noEarphoneAction == action,
-                                        onClick = { viewModel.setNoEarphoneAction(action) },
-                                        role = Role.RadioButton
-                                    )
-                                    .padding(vertical = 2.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                RadioButton(selected = noEarphoneAction == action, onClick = null)
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(
-                                    noEarphoneActionLabel(action),
-                                    style = MaterialTheme.typography.bodyLarge
-                                )
-                            }
-                        }
-                    }
-                }
+            item(key = "alarm-timeout") {
+                AlarmTimeoutCard(
+                    timeoutSeconds = timeoutSeconds,
+                    timeoutAction = timeoutAction,
+                    onSecondsChange = { viewModel.setTimeoutSeconds((it / 10) * 10) },
+                    onActionChange = { viewModel.setTimeoutAction(it) },
+                    modifier = itemAnim()
+                )
             }
 
-            // ── Ringtone Picker (global, applies to all alarms) ─────────
-            item {
-                Card(modifier = Modifier.fillMaxWidth()) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        SettingsCardHeader(
-                            icon = Icons.Outlined.MusicNote,
-                            title = stringResource(R.string.ringtone)
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            if (globalRingtoneUri.isNotBlank()) {
-                                stringResource(R.string.custom_ringtone_set)
-                            } else {
-                                stringResource(R.string.system_default_alarm)
-                            },
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Button(
-                            onClick = onPickRingtone,
-                        ) { Text(stringResource(R.string.pick_ringtone)) }
-                    }
-                }
+            item(key = "no-earphone") {
+                NoEarphoneCard(
+                    noEarphoneAction = noEarphoneAction,
+                    onActionChange = { viewModel.setNoEarphoneAction(it) },
+                    modifier = itemAnim()
+                )
             }
 
-            // ── Process Keeping ─────────────────────────────────────────
-            item {
-                Card(modifier = Modifier.fillMaxWidth()) {
-                    Column(
-                        modifier = Modifier.padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        SettingsCardHeader(
-                            icon = Icons.Outlined.Shield,
-                            title = stringResource(R.string.process_keeping)
-                        )
-
-                        // ── Exact Alarm ─────────────────────────────────
-                        StatusRow(
-                            label = stringResource(R.string.exact_alarm),
-                            ok = exactAlarmAllowed,
-                            statusText = if (exactAlarmAllowed) {
-                                stringResource(R.string.exact_alarm_allowed)
-                            } else {
-                                stringResource(R.string.exact_alarm_denied)
-                            },
-                            actionText = if (exactAlarmAllowed) {
-                                null
-                            } else {
-                                stringResource(R.string.exact_alarm_request)
-                            },
-                            onAction = if (exactAlarmAllowed) {
-                                null
-                            } else {
-                                onRequestExactAlarmPermission
-                            }
-                        )
-
-                        // ── Shizuku ─────────────────────────────────────
-                        StatusRow(
-                            label = stringResource(R.string.shizuku),
-                            ok = shizukuOk && shizukuPerm,
-                            statusText = when {
-                                shizukuOk && shizukuPerm ->
-                                    stringResource(R.string.shizuku_connected)
-                                shizukuOk && !shizukuPerm ->
-                                    stringResource(R.string.shizuku_waiting_permission)
-                                else -> stringResource(R.string.shizuku_not_installed)
-                            },
-                            actionText = when {
-                                !shizukuOk -> stringResource(R.string.shizuku_install)
-                                !shizukuPerm -> stringResource(R.string.shizuku_authorize)
-                                else -> null
-                            },
-                            onAction = when {
-                                !shizukuOk -> null // no action, informational
-                                !shizukuPerm -> { { viewModel.requestShizukuPermission() } }
-                                else -> null
-                            }
-                        )
-
-                        // ── Battery Optimization ──────────────────────────
-                        TextButton(
-                            onClick = { viewModel.requestBatteryExemption() },
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text(stringResource(R.string.disable_battery_optimization))
-                        }
-                    }
-                }
+            item(key = "ringtone") {
+                RingtoneCard(
+                    globalRingtoneUri = globalRingtoneUri,
+                    onPickRingtone = onPickRingtone,
+                    modifier = itemAnim()
+                )
             }
 
-            // ── Language ────────────────────────────────────────────────
-            item { LanguageSettingsCard() }
+            item(key = "process-keeping") {
+                ProcessKeepingCard(
+                    exactAlarmAllowed = exactAlarmAllowed,
+                    batteryOptimizationIgnored = batteryOptimizationIgnored,
+                    keepAliveEnabled = keepAliveEnabled,
+                    onKeepAliveChange = viewModel::setKeepAliveEnabled,
+                    privilegedEnabled = privilegedEnabled,
+                    onPrivilegedChange = viewModel::setPrivilegedEnabled,
+                    shellReady = shellReady,
+                    shizukuPermissionNeeded = shizukuPermissionNeeded,
+                    onRequestPrivilegedPermission = viewModel::requestPrivilegedPermission,
+                    onRequestExactAlarmPermission = onRequestExactAlarmPermission,
+                    onRequestBatteryExemption = onRequestBatteryExemption,
+                    modifier = itemAnim()
+                )
+            }
 
-            // ── GitHub Repo ─────────────────────────────────────────
-            item { GitHubRepoCard() }
+            item(key = "language") { LanguageSettingsCard(modifier = itemAnim()) }
 
-            item { Spacer(modifier = Modifier.height(80.dp)) }
+            item(key = "timezone") {
+                TimezoneSettingsCard(
+                    mode = timezoneMode,
+                    selectedId = timezoneId,
+                    onModeChange = { viewModel.setTimezoneMode(it) },
+                    onSelect = { viewModel.setTimezoneId(it) },
+                    modifier = itemAnim()
+                )
+            }
+
+            item(key = "github") { GitHubRepoCard(modifier = itemAnim()) }
+
+            }
+
+            Text(
+                text = cultureQuote,
+                style = MaterialTheme.typography.bodySmall.copy(
+                    brush = Brush.linearGradient(
+                        colors = listOf(
+                            MaterialTheme.colorScheme.onSurfaceVariant,
+                            MaterialTheme.colorScheme.primary
+                        )
+                    )
+                ),
+                maxLines = 4,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .padding(start = 16.dp, end = 88.dp, bottom = 12.dp)
+                    .alpha(quoteAlpha)
+            )
         }
     }
 
     // ── Time Picker Dialog ───────────────────────────────────────────────
     if (showTimePicker) {
         val editing = viewModel.editingAlarm()
+        // New alarms default to the next full hour. Existing alarms are shown
+        // as their absolute trigger time converted to the current timezone.
+        val editingTime = editing?.let { viewModel.alarmPickerHourMinute(it) }
+        var label by remember(editing?.id) { mutableStateOf(editing?.label.orEmpty()) }
+        val nextHour = remember { (Calendar.getInstance().get(Calendar.HOUR_OF_DAY) + 1) % 24 }
         val pickerState = rememberTimePickerState(
-            initialHour = editing?.hour ?: 8,
-            initialMinute = editing?.minute ?: 0,
+            initialHour = editingTime?.first ?: nextHour,
+            initialMinute = editingTime?.second ?: 0,
             is24Hour = true
         )
 
@@ -426,10 +376,22 @@ fun AlarmDashboardScreen(
                     else stringResource(R.string.new_alarm)
                 )
             },
-            text = { TimePicker(state = pickerState) },
+            text = {
+                Column {
+                    TimePicker(state = pickerState)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    OutlinedTextField(
+                        value = label,
+                        onValueChange = { label = it },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        label = { Text(stringResource(R.string.alarm_label)) }
+                    )
+                }
+            },
             confirmButton = {
                 TextButton(onClick = {
-                    viewModel.onTimeSelected(pickerState.hour, pickerState.minute)
+                    viewModel.onTimeSelected(pickerState.hour, pickerState.minute, label.trim())
                 }) { Text(stringResource(R.string.ok)) }
             },
             dismissButton = {
@@ -439,192 +401,27 @@ fun AlarmDashboardScreen(
             }
         )
     }
-}
 
-// ── Status Row ───────────────────────────────────────────────────────────
-
-/**
- * A single row in the Process Keeping card: colored dot + label + status text
- * on the left, and an optional action button on the right.
- */
-@Composable
-private fun StatusRow(
-    label: String,
-    ok: Boolean,
-    statusText: String,
-    actionText: String?,
-    onAction: (() -> Unit)?
-) {
-    val dotColor = if (ok) androidx.compose.ui.graphics.Color(0xFF4CAF50)
-                   else androidx.compose.ui.graphics.Color(0xFFFF5252)
-
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Row(
-            modifier = Modifier.weight(1f),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Spacer(modifier = Modifier.size(8.dp)
-                .clip(CircleShape)
-                .background(dotColor))
-            Spacer(modifier = Modifier.width(8.dp))
-            Column {
-                Text(label, style = MaterialTheme.typography.bodyMedium)
-                Text(statusText,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
-        }
-        if (actionText != null && onAction != null) {
-            TextButton(onClick = onAction) {
-                Text(actionText, style = MaterialTheme.typography.labelMedium)
-            }
-        }
-    }
-}
-
-// ── Day-of-Week Constants ────────────────────────────────────────────────
-
-private val ALL_DAYS = 1..7
-
-/**
- * Format a duration in seconds for display:
- *   60 → "1 min"
- *   90 → "1:30"
- *  300 → "5 min"
- */
-private fun formatDuration(seconds: Int, minuteFormat: String): String {
-    val mins = seconds / 60
-    val secs = seconds % 60
-    return if (secs == 0) minuteFormat.format(mins)
-    else "${mins}:%02d".format(secs)
-}
-
-@Composable
-private fun timeoutActionLabel(action: TimeoutAction): String = when (action) {
-    TimeoutAction.STOP -> stringResource(R.string.stop)
-    TimeoutAction.FALLBACK -> stringResource(R.string.fallback)
-}
-
-@Composable
-private fun noEarphoneActionLabel(action: NoEarphoneAction): String = when (action) {
-    NoEarphoneAction.VIBRATE_ONLY -> stringResource(R.string.vibrate_only)
-    NoEarphoneAction.LOUDSPEAKER -> stringResource(R.string.loudspeaker)
-}
-
-// ── Day Circle Picker ────────────────────────────────────────────────────
-
-/**
- * A row of 7 circular day buttons, each with a single letter.
- * Selected days get a filled primary-color circle; unselected are outlined.
- * Tapping toggles the day on/off.
- *
- * When no days are selected the alarm is treated as a one-shot.
- */
-@Composable
-private fun DayCircleRow(
-    selectedDays: Set<Int>,
-    onToggleDay: (Int) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val dayLetters = stringArrayResource(R.array.day_letters)
-
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceEvenly
-    ) {
-        ALL_DAYS.forEach { day ->
-            val isSelected = day in selectedDays
-            androidx.compose.material3.Surface(
-                onClick = { onToggleDay(day) },
-                shape = CircleShape,
-                color = if (isSelected) MaterialTheme.colorScheme.primary
-                        else MaterialTheme.colorScheme.surfaceVariant,
-                modifier = Modifier.size(40.dp)
-            ) {
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    Text(
-                        text = dayLetters[day],
-                        style = MaterialTheme.typography.labelLarge,
-                        color = if (isSelected) MaterialTheme.colorScheme.onPrimary
-                                else MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
-        }
-    }
-}
-
-// ── Alarm Card ───────────────────────────────────────────────────────────
-
-/**
- * A single alarm card with time, day-of-week circle picker,
- * enable/disable switch, and delete button.
- */
-@Composable
-private fun AlarmCard(
-    alarm: AlarmItem,
-    onToggle: (Boolean) -> Unit,
-    onDelete: () -> Unit,
-    onToggleDay: (Int) -> Unit,
-    formatTime: () -> String,
-    formatSchedule: () -> String
-) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = if (alarm.enabled)
-                MaterialTheme.colorScheme.primaryContainer
-            else MaterialTheme.colorScheme.surfaceVariant
-        )
-    ) {
-        Column(modifier = Modifier.padding(12.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Row(
-                    modifier = Modifier.weight(1f),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        Icons.Outlined.Alarm,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(24.dp)
-                    )
-                    Spacer(modifier = Modifier.width(10.dp))
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(formatTime(), style = MaterialTheme.typography.headlineSmall)
-                        if (alarm.label.isNotBlank()) {
-                            Text(alarm.label, style = MaterialTheme.typography.bodyMedium)
-                        }
-                        Text(formatSchedule(),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant)
+    pendingDeleteId?.let { alarmId ->
+        AlertDialog(
+            onDismissRequest = { pendingDeleteId = null },
+            title = { Text(stringResource(R.string.delete_alarm)) },
+            text = { Text(stringResource(R.string.delete_alarm_confirm)) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        pendingDeleteId = null
+                        deletingAlarmId = alarmId
                     }
+                ) {
+                    Text(stringResource(R.string.delete_alarm))
                 }
-                Switch(checked = alarm.enabled, onCheckedChange = onToggle)
-                IconButton(onClick = onDelete) {
-                    Icon(
-                        Icons.Default.Delete,
-                        stringResource(R.string.delete_alarm),
-                        tint = MaterialTheme.colorScheme.error)
+            },
+            dismissButton = {
+                TextButton(onClick = { pendingDeleteId = null }) {
+                    Text(stringResource(R.string.cancel))
                 }
             }
-
-            DayCircleRow(
-                selectedDays = alarm.daysOfWeek,
-                onToggleDay = onToggleDay,
-                modifier = Modifier.padding(top = 8.dp)
-            )
-        }
+        )
     }
 }

@@ -8,6 +8,7 @@
     <string name="no_alarms">アラームがありません。+ をタップして追加します。</string>
     <string name="add_alarm">アラームを追加</string>
     <string name="delete_alarm">アラームを削除</string>
+    <string name="delete_alarm_confirm">アラームを削除?</string>
     <string name="edit_alarm">アラームを編集</string>
     <string name="new_alarm">新しいアラーム</string>
     <string name="ok">OK</string>
@@ -58,6 +59,7 @@
     <string name="alarm_stopped">アラームを停止しました</string>
 
     <string name="schedule_one_shot">1回のみ</string>
+    <string name="alarm_local_time_format">現地時間 %1$s</string>
 
     <string-array name="day_letters">
         <item></item>
@@ -103,7 +105,35 @@
     <string name="notification_channel_active">アラーム再生中</string>
     <string name="notification_channel_active_desc">アラームが再生中に表示されます</string>
     <string name="notification_waiting">次のアラームを待機中</string>
+    <string name="notification_next_alarm_format">次のアラーム: %1$s</string>
     <string name="notification_alarm_active">アラーム作動中</string>
     <string name="notification_earphones">イヤホンで再生中</string>
     <string name="notification_no_earphones">イヤホンが検出されません</string>
+    <string name="notification_speaker">スピーカーで再生中</string>
+    <string name="notification_vibrate">振動中</string>
+    <string name="snooze_5min">5分間スヌーズ</string>
+    <string name="notification_snoozing">アラームを一時停止しました</string>
+    <string name="notification_snooze_resume">5分後に再び鳴ります</string>
+    <string name="no_alarm_ringing">現在鳴っているアラームはありません</string>
+    <string name="undo">元に戻す</string>
+    <string name="retry">再試行</string>
+    <string name="battery_already_exempt">バッテリー最適化はすでに無効です</string>
+    <string name="timezone_title">タイムゾーン</string>
+    <string name="timezone_auto">システムのタイムゾーン</string>
+    <string name="timezone_selected">選択したタイムゾーン</string>
+    <string name="timezone_search">タイムゾーンを検索</string>
+    <string name="timezone_no_results">タイムゾーンが見つかりません</string>
+
+    <string name="alarm_label">ラベル</string>
+    <string name="notification_channel_stopped">アラームリマインダー</string>
+    <string name="notification_channel_stopped_desc">見逃したアラーム後の最後の鳴動時刻を表示する1回限りのサイレント通知</string>
+    <string name="notification_missed_alarm">見逃したアラーム</string>
+    <string name="notification_last_rang_time_format">最終鳴動時刻: %1$s</string>
+
+    <string name="search_alarms">アラームを検索</string>
+    <string name="no_alarms_found">一致するアラームはありません</string>
+    <string name="keep_alive_title">通知の常駐表示</string>
+    <string name="keep_alive_desc">常駐通知、終了後は自動復元</string>
+    <string name="shizuku_desc">Shizuku の権限でより強い保活を実現</string>
+    <string name="battery_not_exempt">未除外</string>
 </resources>

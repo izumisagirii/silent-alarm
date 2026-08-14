@@ -1,42 +1,33 @@
 package com.electrowiz.silentalarm.service
 
-import android.app.Notification
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
 import android.app.Service
+import android.content.BroadcastReceiver
 import android.content.Intent
-import android.graphics.drawable.Icon
-import android.media.AudioAttributes
-import android.media.AudioDeviceInfo
 import android.media.AudioFocusRequest
 import android.media.AudioManager
 import android.media.MediaPlayer
-import android.net.Uri
-import android.os.Build
 import android.os.IBinder
 import android.os.PowerManager
-import android.os.VibrationEffect
 import android.os.Vibrator
-import android.os.VibratorManager
 import android.util.Log
-import androidx.core.app.NotificationCompat
-import com.electrowiz.silentalarm.MainActivity
-import com.electrowiz.silentalarm.R
 import com.electrowiz.silentalarm.data.AlarmPreferences
 import com.electrowiz.silentalarm.data.AlarmScheduler
-import com.electrowiz.silentalarm.data.NoEarphoneAction
-import com.electrowiz.silentalarm.data.TimeoutAction
+import com.electrowiz.silentalarm.keepalive.KeepAliveController
 import com.electrowiz.silentalarm.util.AudioRouter
+import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import androidx.core.net.toUri
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 
 /**
  * Foreground service for alarm audio playback.
@@ -44,8 +35,22 @@ import androidx.core.net.toUri
  * ## Entry Points (via intent actions)
  * - [AlarmScheduler.ACTION_ALARM_TRIGGER] — scheduled alarm from AlarmManager
  * - [AlarmScheduler.ACTION_TEST_ALARM] — instant test fire from UI button
- * - [AlarmScheduler.ACTION_KEEP_ALIVE] — background recovery alarm
+ * - [KeepAliveController.ACTION_KEEP_ALIVE] — background recovery alarm
  * - [AlarmScheduler.ACTION_STOP_ALARM] — stop from notification action or UI button
+ * - [AlarmScheduler.ACTION_SNOOZE_ALARM] — snooze from notification swipe or button
+ * - [AlarmScheduler.ACTION_SNOOZE_EXPIRED] — snooze delay elapsed, resume ringing
+ *
+ * ## State Machine
+ * Playback state is a sealed type ([PlaybackState]) mutated only on the main
+ * thread inside [serviceScope], so intent handlers are fully serialized and
+ * cannot interleave. A STOP cancels any in-flight trigger routine, keeping
+ * the "stop wins over trigger" semantics without boolean flag races.
+ *
+ * ## Notification
+ * The ringing notification has Snooze/Stop actions, and its delete intent
+ * snoozes the alarm for 5 minutes — swiping it away (Android 13+ allows
+ * dismissing FGS notifications) is never a dead end: the snooze notification
+ * returns immediately and the stop button stays reachable.
  *
  * ## Audio Routing
  * 1. Detect earphone-type output devices via [AudioManager.getDevices].
@@ -60,46 +65,95 @@ class AlarmAudioService : Service() {
 
     companion object {
         private const val TAG = "AlarmAudioService"
-        private const val NOTIFICATION_ID = 2001
-        private const val CHANNEL_IDLE = "alarm_idle_channel"
-        private const val CHANNEL_ACTIVE = "alarm_active_channel"
+
+        /**
+         * Process-local playback activity signal for the UI (stop button
+         * state). Service and UI share one process; on process death the
+         * alarm dies with it, so a false default stays accurate.
+         */
+        val playbackActive = MutableStateFlow(false)
+
+        val activeAlarmId = MutableStateFlow<String?>(null)
+
+        /** Whether the service process is currently running (any state). */
+        val serviceAlive = MutableStateFlow(false)
+    }
+
+    /**
+     * Playback state machine. Only mutated inside [serviceScope] coroutines
+     * on the main thread; read freely elsewhere for guards.
+     */
+    internal sealed interface PlaybackState {
+        data object Idle : PlaybackState
+        data class Ringing(val alarmId: String?) : PlaybackState
+        data class Snoozing(val alarmId: String?) : PlaybackState
+    }
+
+    /** Single mutation point — keeps [playbackActive] in sync with the state. */
+    internal fun updatePlaybackState(newState: PlaybackState) {
+        state = newState
+        playbackActive.value = newState is PlaybackState.Ringing || newState is PlaybackState.Snoozing
+        activeAlarmId.value = when (newState) {
+            is PlaybackState.Ringing -> newState.alarmId
+            is PlaybackState.Snoozing -> newState.alarmId
+            PlaybackState.Idle -> null
+        }
+    }
+
+    /**
+     * Post the active ringing notification reflecting the actual playback
+     * mode. A null action falls back to the current audio route and is only
+     * used for the brief pre-routing window — the routed path re-posts with
+     * the resolved mode immediately after.
+     */
+    internal fun postActiveNotification(action: AudioRouter.ResolvedAction?) {
+        startForeground(
+            AlarmNotificationController.NOTIFICATION_ID,
+            notifications.buildActiveNotification(action)
+        )
     }
 
     // ── Dependencies ─────────────────────────────────────────────────────
-    private lateinit var audioManager: AudioManager
-    private lateinit var audioRouter: AudioRouter
-    private lateinit var preferences: AlarmPreferences
-    private lateinit var scheduler: AlarmScheduler
+    internal lateinit var audioManager: AudioManager
+    internal lateinit var audioRouter: AudioRouter
+    internal lateinit var preferences: AlarmPreferences
+    internal lateinit var scheduler: AlarmScheduler
+    internal lateinit var notifications: AlarmNotificationController
+    internal lateinit var keepAliveController: KeepAliveController
 
     // ── Playback Resources ───────────────────────────────────────────────
-    private var mediaPlayer: MediaPlayer? = null
-    private var wakeLock: PowerManager.WakeLock? = null
-    private var vibrator: Vibrator? = null
-    private var audioFocusRequest: AudioFocusRequest? = null
-    private var autoStopJob: Job? = null
-    private var alarmActive = false
+    internal var mediaPlayer: MediaPlayer? = null
+    internal var wakeLock: PowerManager.WakeLock? = null
+    internal var vibrator: Vibrator? = null
+    internal var audioFocusRequest: AudioFocusRequest? = null
+    internal var autoStopJob: Job? = null
+    internal var idleRefreshJob: Job? = null
+    private var snoozeJob: Job? = null
+    private var triggerJob: Job? = null
+    private var postAlarmJob: Job? = null
+    internal val previousVolumes = mutableMapOf<Int, Int>()
+    internal var state: PlaybackState = PlaybackState.Idle
+    /** Resolved playback mode of the current ring session (drives the notification text). */
+    internal var activeAction: AudioRouter.ResolvedAction? = null
+    private var lastRingTimeMs = 0L
+    internal var noisyReceiver: BroadcastReceiver? = null
+    internal val defaultAlarmUri = android.provider.Settings.System.DEFAULT_ALARM_ALERT_URI
 
-    /**
-     * Set when the alarm should stop and cleared when a new alarm starts.
-     * Guards against a STOP intent being processed between the TRIGGER's
-     * start and its (suspendable) preference reads — without it, playback
-     * could resume after the user pressed stop.
-     */
-    @Volatile
-    private var stopRequested = false
-    private val defaultAlarmUri = android.provider.Settings.System.DEFAULT_ALARM_ALERT_URI
-
-    private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+    internal val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+    internal val playbackMutex = Mutex()
 
     // ── Service Lifecycle ────────────────────────────────────────────────
 
     override fun onCreate() {
         super.onCreate()
+        serviceAlive.value = true
         audioManager = getSystemService(AUDIO_SERVICE) as AudioManager
         audioRouter = AudioRouter(audioManager)
         preferences = AlarmPreferences(this)
         scheduler = AlarmScheduler(this)
-        createNotificationChannel()
+        keepAliveController = KeepAliveController.get(this)
+        notifications = AlarmNotificationController(this, scheduler, audioRouter)
+        notifications.createChannels()
         Log.i(TAG, "Service created")
     }
 
@@ -108,51 +162,76 @@ class AlarmAudioService : Service() {
         val alarmId = intent?.getStringExtra(AlarmScheduler.EXTRA_ALARM_ID)
         Log.i(TAG, "onStartCommand action=$action alarmId=$alarmId")
 
-        // STOP action: shutdown cleanly, no foreground notification needed
-        if (action == AlarmScheduler.ACTION_STOP_ALARM) {
-            stopAlarm()
-            return START_STICKY
-        }
-
-        val isAlarmAction = action == AlarmScheduler.ACTION_ALARM_TRIGGER ||
-                            action == AlarmScheduler.ACTION_TEST_ALARM
-
-        if (isAlarmAction) {
-            stopRequested = false
-            // MUST call startForeground() within 5s of startForegroundService().
-            startForeground(NOTIFICATION_ID, buildIdleNotification())
-            serviceScope.launch {
-                // The alarm may have been deleted or disabled since it was
-                // armed (e.g. process died between the delete write and the
-                // cancel). Verify before ringing; cancel the stale schedule
-                // and stay silent instead of playing a ghost alarm.
-                if (action == AlarmScheduler.ACTION_ALARM_TRIGGER && alarmId != null &&
-                    !preferences.getAlarms().first().any { it.id == alarmId && it.enabled }
-                ) {
-                    Log.w(TAG, "Stale trigger for '$alarmId' — alarm no longer exists or is disabled")
-                    scheduler.cancelAlarm(alarmId)
-                    if (alarmActive) {
-                        // Another alarm is already ringing — restore its
-                        // notification but leave the playback untouched.
-                        startForeground(NOTIFICATION_ID, buildActiveNotification())
-                    } else {
-                        stopAlarm()
-                    }
-                    return@launch
-                }
-                alarmActive = true
-                startForeground(NOTIFICATION_ID, buildActiveNotification())
-                acquireWakeLock()
-                executeAlarmRoutine()
-                handlePostAlarm(alarmId)
+        when (action) {
+            AlarmScheduler.ACTION_STOP_ALARM -> {
+                // No foreground post needed here: either the service is
+                // already foreground (its notification stays until the
+                // handler replaces it) or it was plain-started just to stop,
+                // in which case the handler decides whether to promote to
+                // the idle keep-alive.
+                triggerJob?.cancel()
+                triggerJob = null
+                // Manual stop — no "alarm stopped" notification. That one is
+                // reserved for alarms the user missed (auto-timeout).
+                serviceScope.launch { playbackMutex.withLock { handleStop(notifyStopped = false) } }
             }
-        } else if (!alarmActive) {
-            startForeground(NOTIFICATION_ID, buildIdleNotification())
-            serviceScope.launch { startIdleKeepAlive() }
-        } else {
-            // A recovery alarm arrived while playback is active; leave the
-            // active notification untouched and only re-arm the recovery alarm.
-            serviceScope.launch { scheduler.scheduleKeepAlive() }
+
+            AlarmScheduler.ACTION_ALARM_TRIGGER,
+            AlarmScheduler.ACTION_TEST_ALARM -> {
+                startRinging(alarmId, reRing = false, runPostAlarm = true)
+            }
+
+            AlarmScheduler.ACTION_SNOOZE_ALARM -> {
+                serviceScope.launch { playbackMutex.withLock { handleSnooze() } }
+            }
+
+            AlarmScheduler.ACTION_SNOOZE_EXPIRED -> {
+                if (state == PlaybackState.Idle) {
+                    startRinging(alarmId, reRing = true, runPostAlarm = false)
+                } else {
+                    serviceScope.launch { playbackMutex.withLock { handleSnoozeExpired() } }
+                }
+            }
+
+            else -> {
+                // KEEP_ALIVE (recovery heartbeat) or a sticky restart with no intent.
+                if (state != PlaybackState.Idle) {
+                    // Ringing/snoozing — leave the notification untouched and
+                    // only re-arm the recovery alarm.
+                    keepAliveController.scheduleRecovery()
+                } else if (idleRefreshJob?.isActive == true) {
+                    // Routine heartbeat while the idle FGS is already up:
+                    // silently re-arm. No startForeground, no notification
+                    // re-post — the visible notification stays in place.
+                    keepAliveController.scheduleRecovery()
+                } else {
+                    // Fresh start after process death (real recovery): post
+                    // the idle placeholder synchronously to satisfy the 5s
+                    // FGS deadline, then let transitionToIdle refresh it with
+                    // the actual next-alarm time.
+                    startForeground(
+                        AlarmNotificationController.NOTIFICATION_ID,
+                        notifications.buildIdleNotification(emptyList())
+                    )
+                    // cancelPendingSnooze = false: if the process died while
+                    // snoozing, the AlarmManager-backed snooze-expiry alarm is
+                    // still armed and must be left alone so it can resume
+                    // ringing. An explicit stop/snooze cancels it instead.
+                    serviceScope.launch {
+                        playbackMutex.withLock {
+                            // Re-check inside the lock: a trigger may have
+                            // started while this coroutine was queued, and it
+                            // must not tear down the ringing session.
+                            if (state == PlaybackState.Idle) {
+                                transitionToIdle(
+                                    showStoppedNotification = false,
+                                    cancelPendingSnooze = false
+                                )
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         return START_STICKY
@@ -161,419 +240,267 @@ class AlarmAudioService : Service() {
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onDestroy() {
+        triggerJob?.cancel(); triggerJob = null
         autoStopJob?.cancel(); autoStopJob = null
+        idleRefreshJob?.cancel(); idleRefreshJob = null
+        snoozeJob?.cancel(); snoozeJob = null
+        postAlarmJob?.cancel(); postAlarmJob = null
+        serviceAlive.value = false
+        updatePlaybackState(PlaybackState.Idle)
         releaseMediaPlayer()
         releaseVibrator()
         releaseWakeLock()
         releaseAudioFocus()
-        alarmActive = false
+        restoreVolume()
         serviceScope.cancel()
         Log.i(TAG, "Service destroyed — all resources released")
         super.onDestroy()
     }
 
-    /** Start or refresh the idle keep-alive state when the service is recovered. */
-    private suspend fun startIdleKeepAlive() {
-        val hasEnabled = preferences.getAlarms().first().any { it.enabled }
-        if (hasEnabled) {
-            scheduler.scheduleKeepAlive()
-        } else {
-            stopAlarm()
-        }
-    }
-
-    // ── Alarm Routine ────────────────────────────────────────────────────
+    // ── Intent Handlers (serialized on the main thread) ──────────────────
 
     /**
-     * Read user preferences, detect audio output topology, and execute
-     * the appropriate playback action (earphones, speaker, or vibrate).
-     * Uses the user's configured volumes — no forced override.
+     * Promote the service to foreground with the active notification first,
+     * then run the trigger path on the playback mutex. Posting synchronously
+     * satisfies the 5s foreground-service deadline and avoids the idle→active
+     * same-ID replacement race seen on OEM ROMs.
      */
-    private suspend fun executeAlarmRoutine() {
-        val outputType = audioRouter.detectOutputType()
-        val noEarphonePref = preferences.noEarphoneAction.first()
-        val action = audioRouter.resolveAction(outputType, noEarphonePref)
-        val earphoneVol = preferences.earphoneVolume.first()
-        val speakerVol = preferences.speakerVolume.first()
-        val ringtone = preferences.globalRingtoneUri.first()
-        val uri = resolveRingtoneUri(ringtone)
-        val timeoutSeconds = preferences.timeoutSeconds.first()
-        val timeoutAction = preferences.timeoutAction.first()
-
-        Log.i(TAG, "Routing: output=$outputType action=$action earVol=$earphoneVol spkVol=$speakerVol timeout=$timeoutSeconds s")
-
-        // A STOP may have been processed while we were reading preferences —
-        // don't resume playback after the user asked to stop.
-        if (stopRequested) {
-            Log.i(TAG, "Stop requested during setup — aborting alarm routine")
-            return
-        }
-
-        when (action) {
-            AudioRouter.ResolvedAction.PLAY_VIA_EARPHONES -> {
-                playAudio(uri, earphoneVol, audioRouter.findEarphoneDevice())
-                armAutoStop(timeoutSeconds) {
-                    Log.i(TAG, "Earphone timeout reached: $timeoutSeconds s, action=$timeoutAction")
-                    when (timeoutAction) {
-                        TimeoutAction.STOP -> stopAlarm()
-                        TimeoutAction.FALLBACK -> {
-                            releaseMediaPlayer()
-                            fallbackToNoEarphone(uri, speakerVol, noEarphonePref, timeoutSeconds)
-                        }
-                    }
-                }
-            }
-            AudioRouter.ResolvedAction.PLAY_VIA_SPEAKER -> {
-                playAudio(uri, speakerVol, audioRouter.findSpeakerDevice())
-                armAutoStop(timeoutSeconds) {
-                    Log.i(TAG, "Speaker auto-stop after $timeoutSeconds s")
-                    stopAlarm()
-                }
-            }
-            AudioRouter.ResolvedAction.VIBRATE_ONLY -> {
-                startRepeatingVibration()
-                armAutoStop(timeoutSeconds) {
-                    Log.i(TAG, "Vibrate auto-stop after $timeoutSeconds s")
-                    stopAlarm()
-                }
-            }
-        }
-    }
-
-    /** Cancel any pending auto-stop and arm a new one for [timeoutSeconds]. */
-    private fun armAutoStop(timeoutSeconds: Int, onTimeout: () -> Unit) {
-        autoStopJob?.cancel()
-        autoStopJob = serviceScope.launch {
-            delay(timeoutSeconds * 1000L)
-            onTimeout()
+    private fun startRinging(alarmId: String?, reRing: Boolean, runPostAlarm: Boolean) {
+        idleRefreshJob?.cancel(); idleRefreshJob = null
+        postActiveNotification(null)
+        triggerJob?.cancel()
+        triggerJob = serviceScope.launch {
+            playbackMutex.withLock { handleTrigger(alarmId, reRing, runPostAlarm) }
         }
     }
 
     /**
-     * Called after earphone timeout with [TimeoutAction.FALLBACK].
-     * Releases earphone resources and executes the no-earphone route
-     * (vibrate or loudspeaker) with its own auto-stop timer.
-     */
-    private fun fallbackToNoEarphone(
-        uri: Uri,
-        speakerVol: Int,
-        noEarphonePref: NoEarphoneAction,
-        timeoutSeconds: Int
-    ) {
-        Log.i(TAG, "Fallback → no-earphone mode: $noEarphonePref")
-        when (noEarphonePref) {
-            NoEarphoneAction.VIBRATE_ONLY -> startRepeatingVibration()
-            NoEarphoneAction.LOUDSPEAKER ->
-                playAudio(uri, speakerVol, audioRouter.findSpeakerDevice())
-        }
-        armAutoStop(timeoutSeconds) {
-            Log.i(TAG, "No-earphone fallback auto-stop after $timeoutSeconds s")
-            stopAlarm()
-        }
-    }
-
-    // ── Audio Playback ───────────────────────────────────────────────────
-
-    /**
-     * Play [ringtoneUri] through [preferredDevice] at [volumePercent]%.
+     * Validate and start an alarm session.
      *
-     * Two-phase playback:
-     * 1. 500ms silent WAV wakes the Bluetooth/DAC pipeline (prevents truncation).
-     * 2. On completion, reuse the same MediaPlayer to loop the user's ringtone;
-     *    fall back to the system default alarm sound if needed.
+     * @param reRing true when this is a snooze re-ring: the alarm only needs
+     * to still exist, because one-shot alarms auto-disable themselves at the
+     * first trigger and are already disabled while snoozed.
      */
-    private fun playAudio(ringtoneUri: Uri, volumePercent: Int, preferredDevice: AudioDeviceInfo?) {
-        if (stopRequested) {
-            Log.i(TAG, "Stop requested — skipping playback")
-            return
-        }
-        val max = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
-        audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, (max * volumePercent / 100).coerceIn(0, max), 0)
-        requestAudioFocus()
-
-        val silentUri = "android.resource://${packageName}/${R.raw.silent_500ms}".toUri()
-        val player = mediaPlayer ?: createMediaPlayer(preferredDevice)
-        mediaPlayer = player
-
-        player.setOnCompletionListener { completed ->
-            if (stopRequested || mediaPlayer !== completed) {
-                releaseMediaPlayer()
-                return@setOnCompletionListener
-            }
-            playLoopingOnPlayer(completed, ringtoneUri, preferredDevice, allowDefaultFallback = true)
-        }
-
-        try {
-            player.reset()
-            configurePlayer(player, preferredDevice)
-            player.setDataSource(this, silentUri)
-            player.prepare()
-            player.start()
-        } catch (e: Exception) {
-            Log.e(TAG, "Silent warm-up failed, using default alarm directly", e)
-            playLoopingOnPlayer(player, defaultAlarmUri, preferredDevice, allowDefaultFallback = false)
-        }
-    }
-
-    /**
-     * Build one reusable MediaPlayer. The same instance is used for the
-     * 500ms warm-up and the looping ringtone, so stop/release only needs to
-     * track [mediaPlayer].
-     */
-    private fun createMediaPlayer(preferredDevice: AudioDeviceInfo?): MediaPlayer =
-        MediaPlayer().apply { configurePlayer(this, preferredDevice) }
-
-    /**
-     * Re-apply attributes and routing after [MediaPlayer.reset]. These must be
-     * set before [MediaPlayer.prepare] and are not preserved across reset().
-     */
-    private fun configurePlayer(player: MediaPlayer, preferredDevice: AudioDeviceInfo?) {
-        player.setAudioAttributes(AudioAttributes.Builder()
-            .setUsage(AudioAttributes.USAGE_MEDIA)
-            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-            .build())
-        if (preferredDevice != null) {
-            player.setPreferredDevice(preferredDevice)
-        }
-        player.setWakeMode(this@AlarmAudioService, PowerManager.PARTIAL_WAKE_LOCK)
-    }
-
-    /**
-     * Reuse [player] for looping playback. If [uri] is a custom ringtone and it
-     * cannot be prepared, fall back to the system default alarm sound.
-     */
-    private fun playLoopingOnPlayer(
-        player: MediaPlayer,
-        uri: Uri,
-        preferredDevice: AudioDeviceInfo?,
-        allowDefaultFallback: Boolean
+    private suspend fun handleTrigger(
+        alarmId: String?,
+        reRing: Boolean,
+        runPostAlarm: Boolean = !reRing
     ) {
-        if (stopRequested || mediaPlayer !== player) {
-            releaseMediaPlayer()
+        // The alarm may have been deleted or disabled since it was armed
+        // (e.g. process died between the delete write and the cancel).
+        // Verify before ringing; cancel the stale schedule and stay silent
+        // instead of playing a ghost alarm.
+        val alarms = preferences.getAlarms().first()
+        val stale = when {
+            alarmId == null -> false // test alarm (or snoozed test) — always allowed
+            reRing -> alarms.none { it.id == alarmId }
+            else -> alarms.none { it.id == alarmId && it.enabled }
+        }
+        if (stale) {
+            Log.w(TAG, "Stale trigger for '$alarmId' — alarm no longer exists or is disabled")
+            if (alarmId != null) scheduler.cancelAlarm(alarmId)
+            // If another alarm is already ringing or snoozed, leave it alone.
+            if (state == PlaybackState.Idle) {
+                transitionToIdle(showStoppedNotification = false)
+            }
             return
         }
 
+        // A fresh trigger supersedes any pending snooze from a previous session.
+        snoozeJob?.cancel(); snoozeJob = null
+        scheduler.cancelSnoozeExpiry()
+
+        lastRingTimeMs = System.currentTimeMillis()
+        updatePlaybackState(PlaybackState.Ringing(alarmId))
+        acquireWakeLock()
         try {
-            player.reset()
-            configurePlayer(player, preferredDevice)
-            player.setDataSource(this, uri)
-            player.prepare()
-            player.isLooping = true
-            player.start()
+            executeAlarmRoutine()
+            if (runPostAlarm && alarmId != null) runPostAlarm(alarmId)
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to play ${if (uri == defaultAlarmUri) "default alarm" else "custom ringtone"}", e)
-            if (allowDefaultFallback && uri != defaultAlarmUri) {
-                Log.w(TAG, "Custom ringtone unavailable, using default alarm")
-                playLoopingOnPlayer(player, defaultAlarmUri, preferredDevice, allowDefaultFallback = false)
-            } else {
+            // Never leave the service "ringing" with no sound (e.g. a
+            // DataStore read fails): tear down into the idle keep-alive.
+            Log.e(TAG, "Alarm routine failed — stopping", e)
+            transitionToIdle(showStoppedNotification = false)
+        }
+    }
+
+    /**
+     * Post-trigger bookkeeping (disable one-shot / reschedule recurring) runs
+     * in its own non-cancellable job. A later trigger or a stop — both of
+     * which legitimately cancel the playback session — must never swallow
+     * these writes: otherwise a one-shot alarm stays enabled and a recurring
+     * alarm is not re-armed until the app is opened again.
+     */
+    private fun runPostAlarm(alarmId: String) {
+        postAlarmJob = serviceScope.launch {
+            withContext(NonCancellable) { handlePostAlarm(alarmId) }
+        }
+    }
+
+    /**
+     * Snooze the ringing alarm for [AlarmScheduler.SNOOZE_DURATION_MS].
+     * Also re-arms the timer and re-posts the notification when the user
+     * swiped it away while already snoozing.
+     */
+    private suspend fun handleSnooze() {
+        val current = state
+        when (current) {
+            is PlaybackState.Ringing -> {
+                Log.i(TAG, "Snoozing alarm for ${AlarmScheduler.SNOOZE_DURATION_MS / 1000}s")
+                autoStopJob?.cancel(); autoStopJob = null
+                idleRefreshJob?.cancel(); idleRefreshJob = null
+                updatePlaybackState(PlaybackState.Snoozing(current.alarmId))
+                activeAction = null
                 releaseMediaPlayer()
+                releaseVibrator()
+                releaseWakeLock()
+                releaseAudioFocus()
+                restoreVolume()
+            }
+            is PlaybackState.Snoozing -> Log.i(TAG, "Snooze refreshed")
+            PlaybackState.Idle -> {
+                Log.w(TAG, "Snooze request while idle — ignored")
+                return
             }
         }
+
+        val snoozing = state as PlaybackState.Snoozing
+        armSnoozeExpiry(snoozing.alarmId)
+        // Re-post after the swipe removed it — the stop button stays available.
+        startForeground(
+            AlarmNotificationController.NOTIFICATION_ID,
+            notifications.buildSnoozeNotification()
+        )
     }
 
-    private fun resolveRingtoneUri(stored: String): Uri =
-        stored.takeIf { it.isNotBlank() }?.toUri()
-            ?: defaultAlarmUri
-
-    /** Request transient audio focus for alarm playback. */
-    private fun requestAudioFocus() {
-        val req = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
-            .setAudioAttributes(AudioAttributes.Builder()
-                .setUsage(AudioAttributes.USAGE_MEDIA)
-                .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC).build())
-            .setOnAudioFocusChangeListener { change ->
-                when (change) {
-                    AudioManager.AUDIOFOCUS_LOSS -> stopAlarm()
-                    AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> mediaPlayer?.pause()
-                    AudioManager.AUDIOFOCUS_GAIN -> mediaPlayer?.start()
-                }
-            }.build()
-        audioFocusRequest = req
-        audioManager.requestAudioFocus(req)
-    }
-
-    // ── Vibration ────────────────────────────────────────────────────────
-
-    /** Start a repeating vibration pattern (500ms on, 300ms off). */
-    private fun startRepeatingVibration() {
-        if (stopRequested) {
-            Log.i(TAG, "Stop requested — skipping vibration")
+    /** Snooze delay elapsed — resume ringing with a fresh auto-stop timer. */
+    private suspend fun handleSnoozeExpired() {
+        val snoozing = state as? PlaybackState.Snoozing ?: run {
+            Log.w(TAG, "Snooze expiry without an active snooze — ignored")
             return
         }
-        vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            (getSystemService(VIBRATOR_MANAGER_SERVICE) as VibratorManager).defaultVibrator
-        } else {
-            @Suppress("DEPRECATION") getSystemService(VIBRATOR_SERVICE) as Vibrator
+        Log.i(TAG, "Snooze expired — resuming ringing")
+        lastRingTimeMs = System.currentTimeMillis()
+        updatePlaybackState(PlaybackState.Ringing(snoozing.alarmId))
+        postActiveNotification(null)
+        acquireWakeLock()
+        try {
+            executeAlarmRoutine()
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Log.e(TAG, "Snooze re-ring failed — stopping", e)
+            transitionToIdle(showStoppedNotification = false)
         }
-        vibrator?.vibrate(VibrationEffect.createWaveform(
-            longArrayOf(0, 500, 300),
-            intArrayOf(0, VibrationEffect.DEFAULT_AMPLITUDE, 0),
-            0 // repeat indefinitely
-        ))
-    }
-
-    // ── Resource Management ──────────────────────────────────────────────
-
-    private fun acquireWakeLock() {
-        val pm = getSystemService(POWER_SERVICE) as PowerManager
-        wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "SilentAlarm::WakeLock").apply {
-            acquire(60 * 60 * 1000L) // covers max timeout (30 min) + max system alarm (30 min)
-        }
-    }
-
-    private fun releaseMediaPlayer() {
-        val player = mediaPlayer
-        mediaPlayer = null
-        if (player != null) {
-            runCatching { player.stop() }
-            runCatching { player.reset() }
-            runCatching { player.release() }
-        }
-    }
-
-    private fun releaseVibrator() { vibrator?.cancel(); vibrator = null }
-
-    private fun releaseWakeLock() {
-        wakeLock?.let { if (it.isHeld) it.release() }
-        wakeLock = null
-    }
-
-    private fun releaseAudioFocus() {
-        audioFocusRequest?.let { audioManager.abandonAudioFocusRequest(it) }
-        audioFocusRequest = null
-    }
-
-    // ── Notification ─────────────────────────────────────────────────────
-
-    private fun createNotificationChannel() {
-        val nm = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-
-        // Idle channel: silent, no status bar icon — for watchdog background presence
-        val idleCh = NotificationChannel(CHANNEL_IDLE,
-            getString(R.string.notification_channel_alarm),
-            NotificationManager.IMPORTANCE_MIN).apply {
-            description = getString(R.string.notification_channel_desc)
-            setShowBadge(false)
-        }
-        nm.createNotificationChannel(idleCh)
-
-        // Active channel: shows status bar icon + stop action — for alarm playback
-        val activeCh = NotificationChannel(CHANNEL_ACTIVE,
-            getString(R.string.notification_channel_active),
-            NotificationManager.IMPORTANCE_HIGH).apply {
-            description = getString(R.string.notification_channel_active_desc)
-            setShowBadge(false)
-        }
-        nm.createNotificationChannel(activeCh)
-    }
-
-    /** Minimal, silent notification for watchdog background presence. */
-    private fun buildIdleNotification(): Notification {
-        val contentPi = PendingIntent.getActivity(this, 2003,
-            Intent(this, MainActivity::class.java),
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
-
-        return NotificationCompat.Builder(this, CHANNEL_IDLE)
-            .setContentTitle(getString(R.string.app_name))
-            .setContentText(getString(R.string.notification_waiting))
-            .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
-            .setOngoing(false)
-            .setPriority(NotificationCompat.PRIORITY_MIN)
-            .setContentIntent(contentPi)
-            .build()
-    }
-
-    /** Richer notification with stop button shown during alarm playback. */
-    private fun buildActiveNotification(): Notification {
-        val stopPi = PendingIntent.getService(this, 2002,
-            Intent(this, AlarmAudioService::class.java).apply {
-                action = AlarmScheduler.ACTION_STOP_ALARM
-            },
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
-
-        val contentPi = PendingIntent.getActivity(this, 2003,
-            Intent(this, MainActivity::class.java),
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
-
-        val subtitle = when (audioRouter.detectOutputType()) {
-            AudioRouter.AudioOutputType.EARPHONES_AVAILABLE ->
-                getString(R.string.notification_earphones)
-            AudioRouter.AudioOutputType.SPEAKER_ONLY ->
-                getString(R.string.notification_no_earphones)
-        }
-
-        // fix stop button not showing
-        val stopIcon = Icon.createWithResource(this, android.R.drawable.ic_media_pause)
-        val stopAction = Notification.Action.Builder(
-            stopIcon,
-            getString(R.string.stop),
-            stopPi
-        ).build()
-
-        return Notification.Builder(this, CHANNEL_ACTIVE)
-            .setContentTitle(getString(R.string.notification_alarm_active))
-            .setContentText(subtitle)
-            .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
-            .setOngoing(true)
-            .setContentIntent(contentPi)
-            .addAction(stopAction)
-            .setStyle(Notification.MediaStyle().setShowActionsInCompactView(0))
-            .build()
+        // handlePostAlarm already ran at the original trigger — don't repeat it.
     }
 
     /**
-     * After the alarm routine completes: disable one-shot alarms so they
-     * don't fire again, and re-schedule recurring alarms for the next day.
-     * Also pushes a tile update so the QS tile reflects the new state.
+     * Stop active playback (or snooze) and transition to idle keep-alive.
+     * Cancels an in-flight trigger routine so a stop that races a trigger
+     * still wins, exactly as before the state-machine refactor.
+     *
+     * @param notifyStopped when true and the alarm was ringing, post the
+     * one-shot "alarm stopped" notification. Manual stops pass false; auto
+     * timeout (missed alarm) keeps the default true.
      */
-    private suspend fun handlePostAlarm(alarmId: String?) {
-        if (alarmId == null) return // test alarm or missing ID — nothing to do
-
-        val alarms = preferences.getAlarms().first()
-        val alarm = alarms.find { it.id == alarmId } ?: return
-        // The alarm may have been disabled while it was ringing — never
-        // re-schedule a disabled alarm.
-        if (!alarm.enabled) return
-
-        if (alarm.daysOfWeek.isEmpty()) {
-            // One-shot: auto-disable so it doesn't fire again tomorrow
-            preferences.toggleAlarm(alarmId, false)
-            AlarmTileService.requestTileUpdate(this)
-            Log.i(TAG, "One-shot alarm '$alarmId' auto-disabled")
-        } else {
-            // Recurring: re-schedule for next matching day
-            scheduler.scheduleOne(alarm)
-            scheduler.scheduleKeepAlive()
-            Log.i(TAG, "Recurring alarm '$alarmId' re-scheduled")
-        }
-    }
-
-    /**
-     * Stop active alarm playback and transition to idle keep-alive mode.
-     * The foreground service stays alive with a silent notification so the
-     * process is less likely to be killed before the next scheduled alarm.
-     */
-    private fun stopAlarm() {
+    internal suspend fun handleStop(notifyStopped: Boolean = true) {
         Log.i(TAG, "Alarm stopped — transitioning to idle keep-alive")
-        stopRequested = true
+        // Cancel an in-flight trigger routine (mid-setup or already playing)
+        // so a stop always wins. Note that a coroutine waiting to start also
+        // reports isActive=true, so this cancels queued triggers too — a
+        // stop that arrives after the trigger intent still wins.
+        if (triggerJob?.isActive == true) triggerJob?.cancel()
+        transitionToIdle(
+            showStoppedNotification = notifyStopped && state is PlaybackState.Ringing
+        )
+    }
+
+    /**
+     * Common teardown: release every playback resource, optionally post the
+     * one-shot "alarm stopped" notification, then let the optional keep-alive
+     * layer decide whether the service stays alive as the idle FGS.
+     */
+    private suspend fun transitionToIdle(
+        showStoppedNotification: Boolean,
+        cancelPendingSnooze: Boolean = true
+    ) {
         autoStopJob?.cancel(); autoStopJob = null
-        alarmActive = false
+        snoozeJob?.cancel(); snoozeJob = null
+        idleRefreshJob?.cancel(); idleRefreshJob = null
+        if (cancelPendingSnooze) scheduler.cancelSnoozeExpiry()
+
+        val ringing = state as? PlaybackState.Ringing
+        updatePlaybackState(PlaybackState.Idle)
+        activeAction = null
         releaseMediaPlayer()
         releaseVibrator()
         releaseWakeLock()
         releaseAudioFocus()
-        // Check whether there are enabled alarms worth protecting
-        serviceScope.launch {
-            val hasEnabled = preferences.getAlarms().first().any { it.enabled }
-            if (hasEnabled) {
-                scheduler.scheduleKeepAlive()
-                // Update notification to idle — service stays alive
-                startForeground(NOTIFICATION_ID, buildIdleNotification())
+        restoreVolume()
+
+        // Best-effort bookkeeping. A DataStore/notification failure must never
+        // leave the ringing FGS notification stranded on screen, so the
+        // teardown below is additionally guarded by an outer catch.
+        val alarms = runCatching { preferences.getAlarms().first() }.getOrDefault(emptyList())
+        if (showStoppedNotification) {
+            val ringingId = ringing?.alarmId
+            val alarm = ringingId?.let { id -> alarms.find { it.id == id } }
+            // Auto-timeout always counts as missed — including test alarms
+            // (alarmId == null) which have no entity to look up.
+            if (alarm != null || ringingId == null) {
+                runCatching { notifications.postStoppedNotification(lastRingTimeMs) }
+                    .onFailure { Log.w(TAG, "Failed to post missed-alarm notification", it) }
+            }
+        }
+
+        // The optional keep-alive layer decides whether the idle service
+        // should stay alive. When it's off (or no alarms are enabled) the
+        // service stops; alarms still fire later through AlarmManager.
+        try {
+            val stayIdle = runCatching {
+                keepAliveController.shouldStayIdle(alarms.any { it.enabled })
+            }.getOrDefault(false)
+            if (stayIdle) {
+                startForeground(
+                    AlarmNotificationController.NOTIFICATION_ID,
+                    notifications.buildIdleNotification(alarms)
+                )
+                keepAliveController.onIdleServiceStarted()
+                startIdleRefreshTicker()
             } else {
-                // No alarms left — stop the service
+                keepAliveController.onIdleServiceStopped()
                 stopForeground(STOP_FOREGROUND_REMOVE)
                 stopSelf()
             }
+        } catch (e: Exception) {
+            // Last-resort teardown: never leave the ringing notification up.
+            Log.e(TAG, "Idle transition failed — force-stopping", e)
+            runCatching { stopForeground(STOP_FOREGROUND_REMOVE) }
+            stopSelf()
         }
     }
+
+    /**
+     * Arm the snooze-expiry timer. Prefers an exact alarm (survives process
+     * death, reliable in Doze); falls back to an in-process delay when the
+     * exact-alarm permission is unavailable.
+     */
+    private fun armSnoozeExpiry(alarmId: String?) {
+        snoozeJob?.cancel(); snoozeJob = null
+        val armed = scheduler.scheduleSnoozeExpiry(alarmId)
+        if (!armed) {
+            snoozeJob = serviceScope.launch {
+                delay(AlarmScheduler.SNOOZE_DURATION_MS)
+                playbackMutex.withLock { handleSnoozeExpired() }
+            }
+        }
+    }
+
+    // ── Alarm Routine ────────────────────────────────────────────────────
+    // Playback execution lives in AlarmAudioPlayback.kt; the idle
+    // notification ticker and post-alarm bookkeeping live in
+    // AlarmAudioServiceLifecycle.kt.
 }

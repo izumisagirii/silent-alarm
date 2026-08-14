@@ -8,6 +8,7 @@
     <string name="no_alarms">هیچ زنگی تنظیم نشده است. برای افزودن روی + ضربه بزنید.</string>
     <string name="add_alarm">افزودن زنگ</string>
     <string name="delete_alarm">حذف زنگ</string>
+    <string name="delete_alarm_confirm">حذف زنگ?</string>
     <string name="edit_alarm">ویرایش زنگ</string>
     <string name="new_alarm">زنگ جدید</string>
     <string name="ok">تأیید</string>
@@ -58,6 +59,7 @@
     <string name="alarm_stopped">زنگ متوقف شد</string>
 
     <string name="schedule_one_shot">یک بار</string>
+    <string name="alarm_local_time_format">زمان محلی %1$s</string>
 
     <string-array name="day_letters">
         <item></item>
@@ -103,7 +105,35 @@
     <string name="notification_channel_active">زنگ در حال پخش است</string>
     <string name="notification_channel_active_desc">زمانی که زنگ در حال پخش است نمایش داده می‌شود</string>
     <string name="notification_waiting">در انتظار زنگ بعدی</string>
+    <string name="notification_next_alarm_format">زنگ بعدی: %1$s</string>
     <string name="notification_alarm_active">زنگ فعال است</string>
     <string name="notification_earphones">در حال پخش از طریق هدست</string>
     <string name="notification_no_earphones">هدست شناسایی نشد</string>
+    <string name="notification_speaker">پخش از طریق بلندگو</string>
+    <string name="notification_vibrate">در حال لرزش</string>
+    <string name="snooze_5min">چرت ۵ دقیقه</string>
+    <string name="notification_snoozing">زنگ موقتاً متوقف شد</string>
+    <string name="notification_snooze_resume">۵ دقیقه دیگر دوباره به صدا در می‌آید</string>
+    <string name="no_alarm_ringing">در حال حاضر زنگی در حال پخش نیست</string>
+    <string name="undo">بازگردانی</string>
+    <string name="retry">تلاش مجدد</string>
+    <string name="battery_already_exempt">بهینه‌سازی باتری قبلاً غیرفعال شده است</string>
+    <string name="timezone_title">منطقه زمانی</string>
+    <string name="timezone_auto">منطقه زمانی سیستم</string>
+    <string name="timezone_selected">منطقه زمانی انتخاب‌شده</string>
+    <string name="timezone_search">جستجوی مناطق زمانی</string>
+    <string name="timezone_no_results">منطقه زمانی یافت نشد</string>
+
+    <string name="alarm_label">برچسب</string>
+    <string name="notification_channel_stopped">یادآور زنگ</string>
+    <string name="notification_channel_stopped_desc">اعلان بی‌صدای یکباره که زمان آخرین زنگ پس از هشدار از دست رفته را نشان می‌دهد</string>
+    <string name="notification_missed_alarm">زنگ از دست رفته</string>
+    <string name="notification_last_rang_time_format">آخرین زمان زنگ: %1$s</string>
+
+    <string name="search_alarms">جستجوی زنگ‌ها</string>
+    <string name="no_alarms_found">زنگ مطابقی یافت نشد</string>
+    <string name="keep_alive_title">حفظ اعلان</string>
+    <string name="keep_alive_desc">اعلان دائمی، بازیابی خودکار پس از بسته شدن</string>
+    <string name="shizuku_desc">برای محافظت قوی‌تر از مجوز Shizuku استفاده کنید</string>
+    <string name="battery_not_exempt">مستثنی نیست</string>
 </resources>

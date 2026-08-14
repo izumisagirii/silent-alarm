@@ -8,14 +8,18 @@ import android.os.Build
 import android.util.Log
 import com.electrowiz.silentalarm.service.AlarmAudioService
 import java.util.Calendar
+import java.util.TimeZone
 
 /**
- * Schedules exact-alarm triggers via [AlarmManager.setAlarmClock] and arms
- * keep-alive recovery alarms via [AlarmManager.setExactAndAllowWhileIdle].
+ * Schedules exact-alarm triggers via [AlarmManager.setAlarmClock] and the
+ * snooze-expiry alarm via [AlarmManager.setExactAndAllowWhileIdle].
  *
  * Each alarm gets a unique [PendingIntent] via a per-ID request code so
  * individual alarms can be cancelled without affecting others. Uses
  * [AlarmManager.AlarmClockInfo] for the highest scheduler priority.
+ *
+ * The optional notification keep-alive (recovery alarm, idle FGS, watchdog)
+ * is owned by KeepAliveController and never touched here.
  */
 class AlarmScheduler(private val context: Context) {
 
@@ -31,26 +35,22 @@ class AlarmScheduler(private val context: Context) {
         /** Action for a test/instant alarm fire. */
         const val ACTION_TEST_ALARM = "com.electrowiz.silentalarm.ACTION_TEST_ALARM"
 
-        /** Action for the keep-alive recovery alarm. */
-        const val ACTION_KEEP_ALIVE = "com.electrowiz.silentalarm.ACTION_KEEP_ALIVE"
-
         /** Action that stops active playback and/or the idle foreground service. */
         const val ACTION_STOP_ALARM = "com.electrowiz.silentalarm.ACTION_STOP_ALARM"
+
+        /** Action that snoozes active playback for [SNOOZE_DURATION_MS]. */
+        const val ACTION_SNOOZE_ALARM = "com.electrowiz.silentalarm.ACTION_SNOOZE_ALARM"
+
+        /** Action fired when a snooze delay expires — resumes ringing. */
+        const val ACTION_SNOOZE_EXPIRED = "com.electrowiz.silentalarm.ACTION_SNOOZE_EXPIRED"
 
         /** Intent extra key for the alarm ID. */
         const val EXTRA_ALARM_ID = "alarm_id"
 
-        private const val KEEP_ALIVE_REQUEST_CODE = 8001
+        /** Snooze duration in milliseconds (fixed 5 minutes). */
+        const val SNOOZE_DURATION_MS = 5 * 60 * 1000L
 
-        /** Keep-alive heartbeat interval when the app is backgrounded without Shizuku. */
-        private const val KEEP_ALIVE_INTERVAL_MS = 6 * 60 * 60 * 1000L
-
-        /**
-         * Delay used after boot. Android 15+ forbids starting a mediaPlayback
-         * foreground service from BOOT_COMPLETED directly, so we use an exact
-         * alarm to start it instead.
-         */
-        private const val BOOT_RECOVERY_DELAY_MS = 15_000L
+        private const val SNOOZE_EXPIRY_REQUEST_CODE = 8002
     }
 
     private val alarmManager: AlarmManager =
@@ -63,22 +63,18 @@ class AlarmScheduler(private val context: Context) {
         Build.VERSION.SDK_INT < Build.VERSION_CODES.S || alarmManager.canScheduleExactAlarms()
 
     /**
-     * Single reconciliation point for alarm state and keep-alive state.
+     * Single reconciliation point for alarm state.
      *
-     * Cancels stale alarms, schedules enabled ones, and then either arms the
-     * keep-alive recovery alarm or tears the service down when nothing is enabled.
+     * Cancels stale alarms and schedules enabled ones. This scheduler is
+     * deliberately keep-alive-agnostic: the optional notification keep-alive
+     * layer listens to the same alarm-state changes through its own sync().
      *
-     * @param startServiceNow when false, the foreground service is not started
-     * directly. This is used from boot because Android 15+ blocks direct
-     * mediaPlayback foreground-service starts from BOOT_COMPLETED; the recovery
-     * exact alarm starts it a moment later.
      * @param stopServiceWhenDisabled when false, a disabled one-shot alarm that
      * is currently ringing is left running. The app startup path uses this so
      * opening the app while an alarm is active doesn't stop it.
      */
     fun reconcile(
         alarms: List<AlarmItem>,
-        startServiceNow: Boolean = true,
         stopServiceWhenDisabled: Boolean = true
     ) {
         val enabled = alarms.filter { it.enabled }
@@ -86,17 +82,10 @@ class AlarmScheduler(private val context: Context) {
         enabled.forEach { scheduleOne(it) }
 
         if (enabled.isEmpty()) {
-            cancelKeepAlive()
             if (stopServiceWhenDisabled) {
                 stopAlarm()
             }
             return
-        }
-
-        val recoveryDelay = if (startServiceNow) KEEP_ALIVE_INTERVAL_MS else BOOT_RECOVERY_DELAY_MS
-        scheduleKeepAlive(recoveryDelay)
-        if (startServiceNow) {
-            startIdleService()
         }
     }
 
@@ -110,7 +99,7 @@ class AlarmScheduler(private val context: Context) {
             return
         }
 
-        val triggerEpoch = computeNextFireEpoch(item.hour, item.minute, item.daysOfWeek)
+        val triggerEpoch = nextFireEpoch(item)
         if (triggerEpoch <= System.currentTimeMillis()) {
             Log.w(TAG, "Alarm '${item.label}' trigger time is in the past — skipping")
             return
@@ -134,6 +123,21 @@ class AlarmScheduler(private val context: Context) {
         Log.d(TAG, "Cancelled alarm $alarmId")
     }
 
+    /** Return the enabled alarm that will fire next, or null when none are enabled. */
+    fun nextAlarm(alarms: List<AlarmItem>): AlarmItem? =
+        alarms.asSequence()
+            .filter { it.enabled }
+            .minByOrNull { nextFireEpoch(it) }
+
+    /** Exposed so the service can show the same fire time that the scheduler uses. */
+    fun nextFireEpoch(item: AlarmItem): Long =
+        computeNextFireEpoch(item.hour, item.minute, item.daysOfWeek, timeZoneFor(item))
+
+    private fun timeZoneFor(item: AlarmItem): TimeZone =
+        item.timeZoneId.takeIf { it.isNotBlank() }
+            ?.let { TimeZone.getTimeZone(it) }
+            ?: TimeZone.getDefault()
+
     /** Used before re-scheduling from [reconcile]. */
     private fun cancelAll(alarms: List<AlarmItem>) {
         alarms.forEach { cancelAlarm(it.id) }
@@ -141,44 +145,37 @@ class AlarmScheduler(private val context: Context) {
     }
 
     /**
-     * Start [AlarmAudioService] in idle mode (no alarm playback).
-     * Used whenever at least one alarm is enabled.
+     * Arm the snooze-expiry exact alarm. When it fires, the service resumes
+     * ringing (or recovers it if the process was killed during the snooze).
+     *
+     * @return true when the exact alarm was armed; false when exact-alarm
+     * scheduling is unavailable, so the caller can fall back to an
+     * in-process timer.
      */
-    private fun startIdleService() {
-        val intent = Intent(context, AlarmAudioService::class.java)
-        try {
-            context.startForegroundService(intent)
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to start idle service", e)
-        }
-        Log.d(TAG, "Idle service started for keep-alive")
-    }
-
-    /**
-     * Arm the keep-alive exact alarm. If the process is killed, this alarm can
-     * still wake the app and restart the foreground service.
-     */
-    fun scheduleKeepAlive(delayMs: Long = KEEP_ALIVE_INTERVAL_MS) {
+    fun scheduleSnoozeExpiry(alarmId: String?, delayMs: Long = SNOOZE_DURATION_MS): Boolean {
         if (!canScheduleExactAlarms()) {
-            Log.w(TAG, "Exact alarm permission missing — keep-alive alarm skipped")
-            return
+            Log.w(TAG, "Exact alarm permission missing — snooze expiry skipped")
+            return false
         }
 
-        val pi = buildKeepAlivePendingIntent()
+        val pi = buildSnoozeExpiryPendingIntent(alarmId)
         val triggerAt = System.currentTimeMillis() + delayMs.coerceAtLeast(0L)
-        try {
+        return try {
             alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAt, pi)
-            Log.d(TAG, "Keep-alive alarm armed in ${delayMs / 1000}s")
+            Log.d(TAG, "Snooze expiry armed in ${delayMs / 1000}s")
+            true
         } catch (e: SecurityException) {
             Log.e(TAG, "SCHEDULE_EXACT_ALARM permission missing", e)
+            false
         }
     }
 
-    fun cancelKeepAlive() {
-        val pi = buildKeepAlivePendingIntent()
+    /** Cancel any pending snooze-expiry alarm (no-op if none was armed). */
+    fun cancelSnoozeExpiry() {
+        val pi = buildSnoozeExpiryPendingIntent(null)
         alarmManager.cancel(pi)
         pi.cancel()
-        Log.d(TAG, "Keep-alive alarm cancelled")
+        Log.d(TAG, "Snooze expiry cancelled")
     }
 
     /**
@@ -190,7 +187,11 @@ class AlarmScheduler(private val context: Context) {
         val intent = Intent(context, AlarmAudioService::class.java).apply {
             action = ACTION_TEST_ALARM
         }
-        context.startForegroundService(intent)
+        try {
+            context.startForegroundService(intent)
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to start test alarm service", e)
+        }
         Log.i(TAG, "Test alarm triggered")
     }
 
@@ -230,15 +231,20 @@ class AlarmScheduler(private val context: Context) {
         return PendingIntent.getForegroundService(context, requestCodeFor(alarmId), intent, flags)
     }
 
-    /** Build the singleton [PendingIntent] used by the keep-alive exact alarm. */
-    private fun buildKeepAlivePendingIntent(): PendingIntent {
+    /**
+     * Build the singleton [PendingIntent] used by the snooze-expiry alarm.
+     * [alarmId] rides as an extra; PendingIntent identity ignores extras, so
+     * cancel and (re)schedule always address the same instance.
+     */
+    private fun buildSnoozeExpiryPendingIntent(alarmId: String?): PendingIntent {
         val intent = Intent(context, AlarmAudioService::class.java).apply {
-            action = ACTION_KEEP_ALIVE
+            action = ACTION_SNOOZE_EXPIRED
+            putExtra(EXTRA_ALARM_ID, alarmId)
         }
         val flags = PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         return PendingIntent.getForegroundService(
             context,
-            KEEP_ALIVE_REQUEST_CODE,
+            SNOOZE_EXPIRY_REQUEST_CODE,
             intent,
             flags
         )
@@ -250,9 +256,14 @@ class AlarmScheduler(private val context: Context) {
      * - If [daysOfWeek] is empty → one-shot: next occurrence of (hour, minute).
      * - If [daysOfWeek] is non-empty → recurring: next matching day-of-week.
      */
-    private fun computeNextFireEpoch(hour: Int, minute: Int, daysOfWeek: Set<Int>): Long {
+    private fun computeNextFireEpoch(
+        hour: Int,
+        minute: Int,
+        daysOfWeek: Set<Int>,
+        timeZone: TimeZone
+    ): Long {
         val now = Calendar.getInstance()
-        val target = Calendar.getInstance().apply {
+        val target = Calendar.getInstance(timeZone).apply {
             set(Calendar.HOUR_OF_DAY, hour)
             set(Calendar.MINUTE, minute)
             set(Calendar.SECOND, 0)
@@ -269,7 +280,7 @@ class AlarmScheduler(private val context: Context) {
 
         // Recurring: find the next matching day within 7 days
         for (offset in 0..7) {
-            val candidate = Calendar.getInstance().apply {
+            val candidate = Calendar.getInstance(timeZone).apply {
                 timeInMillis = target.timeInMillis
                 add(Calendar.DAY_OF_YEAR, offset)
             }

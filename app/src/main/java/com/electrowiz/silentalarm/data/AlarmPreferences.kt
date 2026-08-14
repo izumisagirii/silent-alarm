@@ -4,15 +4,18 @@ import android.content.Context
 import android.net.Uri
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import org.json.JSONArray
 import org.json.JSONObject
 import java.util.UUID
+import java.util.TimeZone
 
 /** DataStore singleton — one instance per process. */
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "alarm_settings")
@@ -44,6 +47,16 @@ enum class TimeoutAction {
     }
 }
 
+enum class TimezoneMode {
+    SYSTEM,
+    SELECTED;
+
+    companion object {
+        fun fromOrdinal(ordinal: Int): TimezoneMode =
+            entries.getOrElse(ordinal) { SYSTEM }
+    }
+}
+
 /**
  * A single alarm entity. Persisted as JSON in DataStore.
  *
@@ -54,6 +67,8 @@ enum class TimeoutAction {
  * @property label user-visible name (e.g. "Morning Meds")
  * @property daysOfWeek which days of the week this alarm fires;
  *             empty set means "one-shot" (fires once, next occurrence)
+ * @property timeZoneId timezone captured when the alarm was last saved/edited;
+ *             blank means legacy data and is treated as the system timezone.
  */
 data class AlarmItem(
     val id: String = UUID.randomUUID().toString(),
@@ -61,7 +76,25 @@ data class AlarmItem(
     val minute: Int = 0,
     val enabled: Boolean = true,
     val label: String = "",
-    val daysOfWeek: Set<Int> = emptySet() // Calendar.SUNDAY=1 … Calendar.SATURDAY=7
+    val daysOfWeek: Set<Int> = emptySet(), // Calendar.SUNDAY=1 … Calendar.SATURDAY=7
+    val timeZoneId: String = ""
+)
+
+/**
+ * Immutable snapshot of every global alarm setting.
+ *
+ * The alarm service reads this once per ring session instead of issuing
+ * several sequential DataStore reads, which keeps trigger latency low.
+ */
+data class AlarmSettings(
+    val earphoneVolume: Int,
+    val speakerVolume: Int,
+    val noEarphoneAction: NoEarphoneAction,
+    val globalRingtoneUri: String,
+    val timeoutSeconds: Int,
+    val timeoutAction: TimeoutAction,
+    val timezoneMode: TimezoneMode,
+    val timezoneId: String
 )
 
 /**
@@ -73,8 +106,20 @@ data class AlarmItem(
  */
 class AlarmPreferences(private val context: Context) {
 
+    companion object {
+        /**
+         * Bump this only when the persisted shape changes incompatibly.
+         * Alarm/timezone data is cleared when the stored schema is older.
+         */
+        private const val SCHEMA_VERSION = 1
+    }
+
+    /** Single DataStore flow shared by every reader (each access is one emission). */
+    private val data: Flow<Preferences> = context.dataStore.data
+
     // ── Preference Keys ──────────────────────────────────────────────────
     private object Keys {
+        val SCHEMA_VERSION = intPreferencesKey("schema_version")
         val ALARMS_JSON = stringPreferencesKey("alarms_json")
         val EARPHONE_VOLUME = intPreferencesKey("earphone_volume")
         val SPEAKER_VOLUME = intPreferencesKey("speaker_volume")
@@ -82,38 +127,81 @@ class AlarmPreferences(private val context: Context) {
         val GLOBAL_RINGTONE_URI = stringPreferencesKey("global_ringtone_uri")
         val TIMEOUT_SECONDS = intPreferencesKey("timeout_seconds")
         val TIMEOUT_ACTION = intPreferencesKey("timeout_action")
+        val TIMEZONE_MODE = intPreferencesKey("timezone_mode")
+        val TIMEZONE_ID = stringPreferencesKey("timezone_id")
+        val KEEP_ALIVE_ENABLED = booleanPreferencesKey("keep_alive_enabled")
+        val PRIVILEGED_ENABLED = booleanPreferencesKey("privileged_enabled")
     }
 
     // ── Global Settings (shared across all alarms) ───────────────────────
 
     /** Earphone volume 0–100. Default: 80. */
-    val earphoneVolume: Flow<Int> = context.dataStore.data.map { p ->
+    val earphoneVolume: Flow<Int> = data.map { p ->
         p[Keys.EARPHONE_VOLUME] ?: 80
     }
 
     /** Speaker volume 0–100. Default: 60. */
-    val speakerVolume: Flow<Int> = context.dataStore.data.map { p ->
+    val speakerVolume: Flow<Int> = data.map { p ->
         p[Keys.SPEAKER_VOLUME] ?: 60
     }
 
     /** What to do when no earphones are connected. Default: VIBRATE_ONLY. */
-    val noEarphoneAction: Flow<NoEarphoneAction> = context.dataStore.data.map { p ->
+    val noEarphoneAction: Flow<NoEarphoneAction> = data.map { p ->
         NoEarphoneAction.fromOrdinal(p[Keys.NO_EARPHONE_ACTION] ?: 0)
     }
 
     /** Global ringtone URI (applies to all alarms). Empty = system default. */
-    val globalRingtoneUri: Flow<String> = context.dataStore.data.map { p ->
+    val globalRingtoneUri: Flow<String> = data.map { p ->
         p[Keys.GLOBAL_RINGTONE_URI] ?: ""
     }
 
     /** Earphone alarm timeout in seconds. Range 30–1800, default 300 (5 min). */
-    val timeoutSeconds: Flow<Int> = context.dataStore.data.map { p ->
+    val timeoutSeconds: Flow<Int> = data.map { p ->
         p[Keys.TIMEOUT_SECONDS] ?: 300
     }
 
     /** Action to take after the earphone timeout expires. Default: STOP. */
-    val timeoutAction: Flow<TimeoutAction> = context.dataStore.data.map { p ->
+    val timeoutAction: Flow<TimeoutAction> = data.map { p ->
         TimeoutAction.fromOrdinal(p[Keys.TIMEOUT_ACTION] ?: 0)
+    }
+
+    val timezoneMode: Flow<TimezoneMode> = data.map { p ->
+        TimezoneMode.fromOrdinal(p[Keys.TIMEZONE_MODE] ?: 0)
+    }
+
+    val timezoneId: Flow<String> = data.map { p ->
+        p[Keys.TIMEZONE_ID] ?: ""
+    }
+
+    /**
+     * Whether the idle notification keep-alive (foreground service + recovery
+     * alarm + watchdog) is enabled. Default: off — alarms still fire from
+     * AlarmManager even with the keep-alive layer disabled.
+     */
+    val keepAliveEnabled: Flow<Boolean> = data.map { p ->
+        p[Keys.KEEP_ALIVE_ENABLED] ?: false
+    }
+
+    /**
+     * Whether privileged anti-kill (deviceidle whitelist / standby bucket,
+     * executed through Root shell or Shizuku) is enabled. Default: off.
+     */
+    val privilegedEnabled: Flow<Boolean> = data.map { p ->
+        p[Keys.PRIVILEGED_ENABLED] ?: false
+    }
+
+    /** One-shot snapshot of all global settings (a single DataStore read). */
+    suspend fun snapshot(): AlarmSettings = data.first().let { p ->
+        AlarmSettings(
+            earphoneVolume = p[Keys.EARPHONE_VOLUME] ?: 80,
+            speakerVolume = p[Keys.SPEAKER_VOLUME] ?: 60,
+            noEarphoneAction = NoEarphoneAction.fromOrdinal(p[Keys.NO_EARPHONE_ACTION] ?: 0),
+            globalRingtoneUri = p[Keys.GLOBAL_RINGTONE_URI] ?: "",
+            timeoutSeconds = p[Keys.TIMEOUT_SECONDS] ?: 300,
+            timeoutAction = TimeoutAction.fromOrdinal(p[Keys.TIMEOUT_ACTION] ?: 0),
+            timezoneMode = TimezoneMode.fromOrdinal(p[Keys.TIMEZONE_MODE] ?: 0),
+            timezoneId = p[Keys.TIMEZONE_ID] ?: ""
+        )
     }
 
     // ── Alarm List (JSON-backed) ─────────────────────────────────────────
@@ -122,9 +210,28 @@ class AlarmPreferences(private val context: Context) {
      * Reactive stream of all alarms, sorted by (hour, minute).
      * Returns empty list if no alarms have been saved yet.
      */
-    fun getAlarms(): Flow<List<AlarmItem>> = context.dataStore.data.map { prefs ->
+    fun getAlarms(): Flow<List<AlarmItem>> = data.map { prefs ->
         val json = prefs[Keys.ALARMS_JSON] ?: "[]"
         parseAlarms(json).sortedWith(compareBy({ it.hour }, { it.minute }))
+    }
+
+    /**
+     * Remove legacy or corrupt alarm data before it reaches the scheduler.
+     * Existing preferences are otherwise left intact.
+     */
+    suspend fun migrateOrReset() {
+        context.dataStore.edit { prefs ->
+            val current = prefs[Keys.SCHEMA_VERSION] ?: 0
+            if (current >= SCHEMA_VERSION) return@edit
+
+            // Older builds did not have a schema version and their alarm/timezone
+            // payloads may be incompatible with the current editor. Reset those
+            // keys on first migration; global volumes/ringtone are preserved.
+            prefs.remove(Keys.ALARMS_JSON)
+            prefs.remove(Keys.TIMEZONE_MODE)
+            prefs.remove(Keys.TIMEZONE_ID)
+            prefs[Keys.SCHEMA_VERSION] = SCHEMA_VERSION
+        }
     }
 
     /**
@@ -220,8 +327,9 @@ class AlarmPreferences(private val context: Context) {
                 uri,
                 android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION
             )
-        } catch (_: SecurityException) {
-            // Some content URIs don't require persistable permission
+        } catch (_: Exception) {
+            // Some content URIs can't grant a persistable permission; the
+            // in-session read still works, it just won't survive a reboot.
         }
         context.dataStore.edit { prefs ->
             prefs[Keys.GLOBAL_RINGTONE_URI] = uri.toString()
@@ -240,21 +348,53 @@ class AlarmPreferences(private val context: Context) {
         }
     }
 
+    suspend fun setTimezoneMode(mode: TimezoneMode) {
+        context.dataStore.edit { prefs ->
+            prefs[Keys.TIMEZONE_MODE] = mode.ordinal
+        }
+    }
+
+    suspend fun setTimezoneId(id: String) {
+        val normalized = id.takeIf { it.isNotBlank() && TimeZone.getTimeZone(it).id == it }
+            ?: TimeZone.getDefault().id
+        context.dataStore.edit { prefs ->
+            prefs[Keys.TIMEZONE_ID] = normalized
+        }
+    }
+
+    suspend fun setKeepAliveEnabled(enabled: Boolean) {
+        context.dataStore.edit { prefs ->
+            prefs[Keys.KEEP_ALIVE_ENABLED] = enabled
+        }
+    }
+
+    suspend fun setPrivilegedEnabled(enabled: Boolean) {
+        context.dataStore.edit { prefs ->
+            prefs[Keys.PRIVILEGED_ENABLED] = enabled
+        }
+    }
+
     // ── JSON Helpers ─────────────────────────────────────────────────────
 
     private fun parseAlarms(json: String): List<AlarmItem> {
         return try {
             val arr = JSONArray(json)
-            (0 until arr.length()).map { i ->
-                val obj = arr.getJSONObject(i)
-                AlarmItem(
-                    id = obj.optString("id", UUID.randomUUID().toString()),
-                    hour = obj.optInt("hour", 8),
-                    minute = obj.optInt("minute", 0),
-                    enabled = obj.optBoolean("enabled", true),
-                    label = obj.optString("label", ""),
-                    daysOfWeek = jsonArrayToIntSet(obj.optJSONArray("daysOfWeek"))
-                )
+            (0 until arr.length()).mapNotNull { index ->
+                runCatching {
+                    val obj = arr.optJSONObject(index) ?: return@runCatching null
+                    val id = obj.optString("id", "").takeIf { it.isNotBlank() }
+                        ?: return@runCatching null
+                    AlarmItem(
+                        id = id,
+                        hour = obj.optInt("hour", 8).coerceIn(0, 23),
+                        minute = obj.optInt("minute", 0).coerceIn(0, 59),
+                        enabled = obj.optBoolean("enabled", true),
+                        label = obj.optString("label", ""),
+                        daysOfWeek = jsonArrayToIntSet(obj.optJSONArray("daysOfWeek"))
+                            .filterTo(mutableSetOf()) { it in 1..7 },
+                        timeZoneId = obj.optString("timeZoneId", "")
+                    )
+                }.getOrNull()
             }
         } catch (_: Exception) {
             emptyList()
@@ -271,6 +411,7 @@ class AlarmPreferences(private val context: Context) {
                 put("enabled", item.enabled)
                 put("label", item.label)
                 put("daysOfWeek", JSONArray(item.daysOfWeek))
+                put("timeZoneId", item.timeZoneId)
             })
         }
         return arr.toString()
