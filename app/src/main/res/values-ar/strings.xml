@@ -43,7 +43,6 @@
     <string name="shizuku_connected">متصل ومصرح به</string>
     <string name="shizuku_waiting_permission">بانتظار الإذن</string>
     <string name="shizuku_not_installed">غير مثبت</string>
-    <string name="shizuku_install">تثبيت Shizuku</string>
     <string name="shizuku_authorize">منح الإذن</string>
     <string name="disable_battery_optimization">تعطيل تحسين البطارية</string>
     <string name="shizuku_activated">Shizuku متصل، حماية الإيقاف نشطة</string>

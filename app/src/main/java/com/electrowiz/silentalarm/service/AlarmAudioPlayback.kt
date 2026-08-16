@@ -226,20 +226,24 @@ internal fun AlarmAudioService.playAudio(
 
     player.setOnCompletionListener { completed ->
         // MediaPlayer fires completion on its own thread. Every other player
-        // operation (stop/release from stop/snooze/disconnect) runs on the
-        // main dispatcher, so hop back to it to keep accesses serialized.
+        // operation runs on the main dispatcher, so hop back and serialize on
+        // the playback mutex.
         serviceScope.launch {
-            if (state !is AlarmAudioService.PlaybackState.Ringing || mediaPlayer !== completed) {
-                releaseMediaPlayer()
-                return@launch
+            playbackMutex.withLock {
+                if (state !is AlarmAudioService.PlaybackState.Ringing ||
+                    mediaPlayer !== completed
+                ) {
+                    if (mediaPlayer === completed) releaseMediaPlayer()
+                    return@withLock
+                }
+                playLoopingOnPlayer(
+                    player = completed,
+                    uri = ringtoneUri,
+                    preferredDevice = preferredDevice,
+                    allowDefaultFallback = true,
+                    useAlarmAudio = useAlarmAudio
+                )
             }
-            playLoopingOnPlayer(
-                player = completed,
-                uri = ringtoneUri,
-                preferredDevice = preferredDevice,
-                allowDefaultFallback = true,
-                useAlarmAudio = useAlarmAudio
-            )
         }
     }
 
@@ -251,14 +255,16 @@ internal fun AlarmAudioService.playAudio(
     player.setOnErrorListener { _, what, extra ->
         Log.e(TAG, "Silent warm-up failed (what=$what extra=$extra), using default alarm directly")
         serviceScope.launch {
-            if (state is AlarmAudioService.PlaybackState.Ringing && mediaPlayer === player) {
-                playLoopingOnPlayer(
-                    player = player,
-                    uri = defaultAlarmUri,
-                    preferredDevice = preferredDevice,
-                    allowDefaultFallback = false,
-                    useAlarmAudio = useAlarmAudio
-                )
+            playbackMutex.withLock {
+                if (state is AlarmAudioService.PlaybackState.Ringing && mediaPlayer === player) {
+                    playLoopingOnPlayer(
+                        player = player,
+                        uri = defaultAlarmUri,
+                        preferredDevice = preferredDevice,
+                        allowDefaultFallback = false,
+                        useAlarmAudio = useAlarmAudio
+                    )
+                }
             }
         }
         true
@@ -315,7 +321,7 @@ internal fun AlarmAudioService.playLoopingOnPlayer(
     useAlarmAudio: Boolean
 ) {
     if (state !is AlarmAudioService.PlaybackState.Ringing || mediaPlayer !== player) {
-        releaseMediaPlayer()
+        if (mediaPlayer === player) releaseMediaPlayer()
         return
     }
 
@@ -331,18 +337,27 @@ internal fun AlarmAudioService.playLoopingOnPlayer(
                 "(what=$what extra=$extra)"
         )
         serviceScope.launch {
-            if (mediaPlayer !== player) return@launch
-            if (allowDefaultFallback && uri != defaultAlarmUri) {
-                Log.w(TAG, "Custom ringtone unavailable, using default alarm")
-                playLoopingOnPlayer(
-                    player = player,
-                    uri = defaultAlarmUri,
-                    preferredDevice = preferredDevice,
-                    allowDefaultFallback = false,
-                    useAlarmAudio = useAlarmAudio
-                )
-            } else {
-                releaseMediaPlayer()
+            playbackMutex.withLock {
+                if (state !is AlarmAudioService.PlaybackState.Ringing || mediaPlayer !== player) {
+                    if (mediaPlayer === player) releaseMediaPlayer()
+                    return@withLock
+                }
+                if (allowDefaultFallback && uri != defaultAlarmUri) {
+                    Log.w(TAG, "Custom ringtone unavailable, using default alarm")
+                    playLoopingOnPlayer(
+                        player = player,
+                        uri = defaultAlarmUri,
+                        preferredDevice = preferredDevice,
+                        allowDefaultFallback = false,
+                        useAlarmAudio = useAlarmAudio
+                    )
+                } else {
+                    // Both the requested URI and the default alarm are broken.
+                    // Stop the session instead of leaving a "ringing" alarm
+                    // with no sound until the timeout expires.
+                    Log.e(TAG, "All alarm audio sources failed — stopping playback")
+                    transitionToIdle(showStoppedNotification = false)
+                }
             }
         }
         true
@@ -366,7 +381,14 @@ internal fun AlarmAudioService.playLoopingOnPlayer(
                 useAlarmAudio = useAlarmAudio
             )
         } else {
-            releaseMediaPlayer()
+            Log.e(TAG, "All alarm audio sources failed synchronously — scheduling stop")
+            serviceScope.launch {
+                playbackMutex.withLock {
+                    if (state is AlarmAudioService.PlaybackState.Ringing && mediaPlayer === player) {
+                        transitionToIdle(showStoppedNotification = false)
+                    }
+                }
+            }
         }
     }
 }
@@ -437,6 +459,21 @@ internal fun AlarmAudioService.startRepeatingVibration() {
                 .build()
         )
     }
+}
+
+/**
+ * Release every resource owned by the current playback session before a new
+ * trigger replaces it. Keeps overlapping triggers (two alarms at the same
+ * minute, or Test while ringing) from mixing audio, vibration and volumes.
+ */
+internal fun AlarmAudioService.teardownPlaybackSession() {
+    autoStopJob?.cancel(); autoStopJob = null
+    activeAction = null
+    releaseMediaPlayer()
+    releaseVibrator()
+    releaseWakeLock()
+    releaseAudioFocus()
+    restoreVolume()
 }
 
 internal fun AlarmAudioService.acquireWakeLock() {

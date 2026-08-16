@@ -43,7 +43,6 @@
     <string name="shizuku_connected">Connesso e autorizzato</string>
     <string name="shizuku_waiting_permission">In attesa di autorizzazione</string>
     <string name="shizuku_not_installed">Non installato</string>
-    <string name="shizuku_install">Installa Shizuku</string>
     <string name="shizuku_authorize">Autorizza</string>
     <string name="disable_battery_optimization">Disattiva ottimizzazione batteria</string>
     <string name="shizuku_activated">Shizuku connesso, protezione anti-kill attiva</string>

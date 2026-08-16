@@ -19,7 +19,7 @@ import kotlin.concurrent.thread
  *
  * ## Communication Protocol (Binder-based, no AIDL)
  * - Transaction code `1` (EXECUTE): reads a String (command), executes it,
- *   writes the result String back.
+ *   writes an Int exit code followed by the combined output String.
  * - Uses Binder token for interface enforcement.
  *
  * ## Shizuku Requirements
@@ -44,7 +44,7 @@ class ShellService : Binder {
          */
         private const val TRANSACTION_DESTROY = 16777115
 
-        private const val COMMAND_TIMEOUT_MS = 30_000L
+        private const val COMMAND_TIMEOUT_MS = 10_000L
     }
 
     constructor() : super()
@@ -56,7 +56,8 @@ class ShellService : Binder {
      * Handle incoming Binder transactions from the client.
      *
      * Supported codes:
-     * - [TRANSACTION_EXECUTE]: read command String, execute it, write result String back.
+     * - [TRANSACTION_EXECUTE]: read command String, execute it, write exit code
+     *   and output back.
      */
     override fun onTransact(code: Int, data: Parcel, reply: Parcel?, flags: Int): Boolean {
         when (code) {
@@ -65,7 +66,8 @@ class ShellService : Binder {
                 val command: String = data.readString() ?: ""
                 val result = execute(command)
                 reply?.writeNoException()
-                reply?.writeString(result)
+                reply?.writeInt(result.exitCode)
+                reply?.writeString(result.output)
                 return true
             }
             TRANSACTION_DESTROY -> {
@@ -85,14 +87,14 @@ class ShellService : Binder {
      * root (UID 0) or shell (UID 2000) permissions, allowing commands
      * like `cmd deviceidle` and `am set-standby-bucket` to work.
      */
-    private fun execute(command: String): String {
+    private fun execute(command: String): ShellResult {
         Log.d(TAG, "Executing (Shizuku UserService): $command")
 
         val process = try {
             Runtime.getRuntime().exec(arrayOf("sh", "-c", command))
         } catch (e: IOException) {
             Log.e(TAG, "Failed to start shell", e)
-            return ""
+            return ShellResult(exitCode = -1, output = "failed to start shell: ${e.message}")
         }
 
         val stdout = StringBuilder()
@@ -106,7 +108,7 @@ class ShellService : Binder {
                 process.destroyForcibly()
                 process.waitFor(1, TimeUnit.SECONDS)
                 Log.w(TAG, "Command timed out after ${COMMAND_TIMEOUT_MS}ms: $command")
-                return ""
+                return ShellResult(exitCode = -1, output = "command timed out")
             }
 
             stdoutThread.join(1_000)
@@ -127,10 +129,15 @@ class ShellService : Binder {
                 Log.w(TAG, "Command exited $exitCode: $command")
             }
 
-            stdoutText.ifBlank { stderrText }
+            ShellResult(
+                exitCode = exitCode,
+                output = listOf(stdoutText, stderrText)
+                    .filter { it.isNotBlank() }
+                    .joinToString("\n")
+            )
         } catch (e: Exception) {
             Log.e(TAG, "Command failed: ${e.message}", e)
-            ""
+            ShellResult(exitCode = -1, output = e.message.orEmpty())
         } finally {
             if (process.isAlive) process.destroy()
         }

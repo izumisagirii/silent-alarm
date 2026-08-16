@@ -125,6 +125,7 @@ class AlarmPreferences(private val context: Context) {
         val TIMEOUT_ACTION = intPreferencesKey("timeout_action")
         val KEEP_ALIVE_ENABLED = booleanPreferencesKey("keep_alive_enabled")
         val PRIVILEGED_ENABLED = booleanPreferencesKey("privileged_enabled")
+        val RESUME_ALARM_ID = stringPreferencesKey("resume_alarm_id")
     }
 
     // ── Global Settings (shared across all alarms) ───────────────────────
@@ -212,6 +213,7 @@ class AlarmPreferences(private val context: Context) {
             // payloads may be incompatible with the current editor. Reset those
             // keys on first migration; global volumes/ringtone are preserved.
             prefs.remove(Keys.ALARMS_JSON)
+            prefs.remove(Keys.RESUME_ALARM_ID)
             prefs[Keys.SCHEMA_VERSION] = SCHEMA_VERSION
         }
     }
@@ -341,6 +343,29 @@ class AlarmPreferences(private val context: Context) {
             prefs[Keys.PRIVILEGED_ENABLED] = enabled
         }
     }
+
+    // ── Interrupted-ring recovery ────────────────────────────────────────
+
+    /** Alarm id that should resume ringing after the service process restarts. */
+    suspend fun pendingResumeAlarmId(): String? =
+        data.first()[Keys.RESUME_ALARM_ID]
+
+    /**
+     * Persist/clear the alarm session that must survive process death while
+     * ringing. Snooze uses AlarmManager for the same purpose, so the key is
+     * cleared as soon as the session enters snooze or idle.
+     */
+    suspend fun setResumeAlarmId(alarmId: String?) {
+        context.dataStore.edit { prefs ->
+            if (alarmId.isNullOrBlank()) {
+                prefs.remove(Keys.RESUME_ALARM_ID)
+            } else {
+                prefs[Keys.RESUME_ALARM_ID] = alarmId
+            }
+        }
+    }
+
+    suspend fun clearResumeAlarmId() = setResumeAlarmId(null)
 
     // ── JSON Helpers ─────────────────────────────────────────────────────
 

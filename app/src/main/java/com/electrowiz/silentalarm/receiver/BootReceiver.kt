@@ -15,10 +15,10 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 /**
- * Re-schedules all enabled alarms on boot (AlarmManager clears alarms on reboot)
- * and re-applies Shizuku anti-kill tweaks. Timezone/time changes deliberately
+ * Re-schedules all enabled alarms after reboot (AlarmManager clears alarms)
+ * and after the system wall-clock time changes. Timezone changes deliberately
  * do not trigger rescheduling: each alarm keeps the absolute trigger time that
- * was captured when it was saved.
+ * was captured in its own timezone when it was saved.
  */
 class BootReceiver : BroadcastReceiver() {
 
@@ -27,39 +27,55 @@ class BootReceiver : BroadcastReceiver() {
     }
 
     override fun onReceive(context: Context, intent: Intent) {
-        if (intent.action != Intent.ACTION_BOOT_COMPLETED) return
+        when (intent.action) {
+            Intent.ACTION_BOOT_COMPLETED -> process(context, isBoot = true)
+            Intent.ACTION_TIME_CHANGED -> process(context, isBoot = false)
+            else -> return
+        }
+    }
 
-        Log.i(TAG, "Boot completed — re-scheduling alarms")
+    private fun process(context: Context, isBoot: Boolean) {
+        Log.i(TAG, if (isBoot) "Boot completed — re-scheduling alarms" else "Time changed — re-scheduling alarms")
         val pending = goAsync()
 
         CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
             try {
                 val preferences = AlarmPreferences(context)
                 val scheduler = AlarmScheduler(context)
-                val shellManager = ShellManager.get(context)
-                val keepAlive = KeepAliveController.get(context)
 
                 preferences.migrateOrReset()
+
+                if (isBoot) {
+                    // A reboot cancels both AlarmManager entries and any active
+                    // ringing session. Never resume the old ring after reboot.
+                    preferences.clearResumeAlarmId()
+                }
+
                 val alarms = preferences.getAlarms().first()
                 scheduler.reconcile(alarms)
                 Log.i(TAG, "Re-scheduled ${alarms.count { it.enabled }} alarms")
 
-                // Restore the optional keep-alive layer without starting the
-                // FGS directly (Android 15+ blocks mediaPlayback FGS starts
-                // from BOOT_COMPLETED; the recovery alarm starts it shortly).
-                keepAlive.sync(
-                    hasEnabledAlarms = alarms.any { it.enabled },
-                    startServiceNow = false
-                )
+                if (isBoot) {
+                    val shellManager = ShellManager.get(context)
+                    val keepAlive = KeepAliveController.get(context)
 
-                if (preferences.privilegedEnabled.first() &&
-                    shellManager.current() != null
-                ) {
-                    shellManager.applyAntiKillTweaks()
-                    Log.i(TAG, "Privileged anti-kill tweaks applied")
+                    // Restore the optional keep-alive layer without starting the
+                    // FGS directly (Android 15+ blocks mediaPlayback FGS starts
+                    // from BOOT_COMPLETED; the recovery alarm starts it shortly).
+                    keepAlive.sync(
+                        hasEnabledAlarms = alarms.any { it.enabled },
+                        startServiceNow = false
+                    )
+
+                    if (preferences.privilegedEnabled.first() &&
+                        shellManager.current() != null
+                    ) {
+                        shellManager.applyAntiKillTweaks()
+                        Log.i(TAG, "Privileged anti-kill tweaks applied")
+                    }
                 }
             } catch (e: Exception) {
-                Log.e(TAG, "Boot processing failed", e)
+                Log.e(TAG, if (isBoot) "Boot processing failed" else "Time-change processing failed", e)
             } finally {
                 pending.finish()
             }

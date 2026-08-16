@@ -68,8 +68,9 @@ class AlarmAudioService : Service() {
 
         /**
          * Process-local playback activity signal for the UI (stop button
-         * state). Service and UI share one process; on process death the
-         * alarm dies with it, so a false default stays accurate.
+         * state). Service and UI share one process. After process death the
+         * signal resets to false; interrupted scheduled alarms are restored
+         * from the persisted resume marker when the service restarts.
          */
         val playbackActive = MutableStateFlow(false)
 
@@ -207,8 +208,8 @@ class AlarmAudioService : Service() {
                 } else {
                     // Fresh start after process death (real recovery): post
                     // the idle placeholder synchronously to satisfy the 5s
-                    // FGS deadline, then let transitionToIdle refresh it with
-                    // the actual next-alarm time.
+                    // FGS deadline, then either resume an interrupted ringing
+                    // session or settle into idle keep-alive.
                     startForeground(
                         AlarmNotificationController.NOTIFICATION_ID,
                         notifications.buildIdleNotification(emptyList())
@@ -223,10 +224,7 @@ class AlarmAudioService : Service() {
                             // started while this coroutine was queued, and it
                             // must not tear down the ringing session.
                             if (state == PlaybackState.Idle) {
-                                transitionToIdle(
-                                    showStoppedNotification = false,
-                                    cancelPendingSnooze = false
-                                )
+                                recoverInterruptedRingOrIdle()
                             }
                         }
                     }
@@ -294,7 +292,17 @@ class AlarmAudioService : Service() {
         // (e.g. process died between the delete write and the cancel).
         // Verify before ringing; cancel the stale schedule and stay silent
         // instead of playing a ghost alarm.
-        val alarms = preferences.getAlarms().first()
+        val alarms = try {
+            preferences.getAlarms().first()
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to validate alarm trigger for '$alarmId'", e)
+            if (state == PlaybackState.Idle) {
+                transitionToIdle(showStoppedNotification = false)
+            }
+            return
+        }
         val stale = when {
             alarmId == null -> false // test alarm (or snoozed test) — always allowed
             reRing -> alarms.none { it.id == alarmId }
@@ -314,6 +322,15 @@ class AlarmAudioService : Service() {
         snoozeJob?.cancel(); snoozeJob = null
         scheduler.cancelSnoozeExpiry()
 
+        // Persist the new session before state changes so a process death after
+        // this point resumes the same alarm. Test alarms (null id) are not
+        // restored after a process restart.
+        persistResumeSession(alarmId)
+
+        // A concurrent trigger (two alarms at the same minute, or Test during a
+        // real alarm) must not leave the previous audio/vibration session running.
+        teardownPlaybackSession()
+
         lastRingTimeMs = System.currentTimeMillis()
         updatePlaybackState(PlaybackState.Ringing(alarmId))
         acquireWakeLock()
@@ -327,6 +344,56 @@ class AlarmAudioService : Service() {
             // DataStore read fails): tear down into the idle keep-alive.
             Log.e(TAG, "Alarm routine failed — stopping", e)
             transitionToIdle(showStoppedNotification = false)
+        }
+    }
+
+    private suspend fun persistResumeSession(alarmId: String?) {
+        try {
+            preferences.setResumeAlarmId(alarmId)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Log.w(TAG, "Failed to persist interrupted-ring session", e)
+        }
+    }
+
+    /**
+     * Called from the sticky/KEEP_ALIVE restart path while the mutex is held.
+     * If a ringing session was persisted before process death, resume it;
+     * otherwise fall through to the normal idle keep-alive transition.
+     */
+    private suspend fun recoverInterruptedRingOrIdle() {
+        val pendingId = try {
+            preferences.pendingResumeAlarmId()
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to read pending resume alarm", e)
+            null
+        }?.takeIf { it.isNotBlank() }
+
+        val canResume = pendingId != null && (try {
+            preferences.getAlarms().first().any { it.id == pendingId }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to validate pending resume alarm '$pendingId'", e)
+            false
+        })
+
+        if (canResume) {
+            val id = pendingId ?: return
+            Log.i(TAG, "Resuming interrupted ringing session for '$id'")
+            postActiveNotification(null)
+            handleTrigger(id, reRing = true, runPostAlarm = true)
+        } else {
+            if (pendingId != null) {
+                Log.w(TAG, "Pending resume alarm '$pendingId' no longer exists — clearing")
+            }
+            transitionToIdle(
+                showStoppedNotification = false,
+                cancelPendingSnooze = false
+            )
         }
     }
 
@@ -372,6 +439,15 @@ class AlarmAudioService : Service() {
 
         val snoozing = state as PlaybackState.Snoozing
         armSnoozeExpiry(snoozing.alarmId)
+        // AlarmManager now owns the snooze resume path; the process-death
+        // ringing marker must not race it after a restart.
+        try {
+            preferences.clearResumeAlarmId()
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Log.w(TAG, "Failed to clear resume marker on snooze", e)
+        }
         // Re-post after the swipe removed it — the stop button stays available.
         startForeground(
             AlarmNotificationController.NOTIFICATION_ID,
@@ -386,6 +462,7 @@ class AlarmAudioService : Service() {
             return
         }
         Log.i(TAG, "Snooze expired — resuming ringing")
+        persistResumeSession(snoozing.alarmId)
         lastRingTimeMs = System.currentTimeMillis()
         updatePlaybackState(PlaybackState.Ringing(snoozing.alarmId))
         postActiveNotification(null)
@@ -427,7 +504,7 @@ class AlarmAudioService : Service() {
      * one-shot "alarm stopped" notification, then let the optional keep-alive
      * layer decide whether the service stays alive as the idle FGS.
      */
-    private suspend fun transitionToIdle(
+    internal suspend fun transitionToIdle(
         showStoppedNotification: Boolean,
         cancelPendingSnooze: Boolean = true
     ) {
@@ -435,6 +512,16 @@ class AlarmAudioService : Service() {
         snoozeJob?.cancel(); snoozeJob = null
         idleRefreshJob?.cancel(); idleRefreshJob = null
         if (cancelPendingSnooze) scheduler.cancelSnoozeExpiry()
+
+        // Clear the process-death resume marker before releasing resources:
+        // once this explicit stop wins, a restart must not start ringing again.
+        try {
+            preferences.clearResumeAlarmId()
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Log.w(TAG, "Failed to clear resume marker on idle", e)
+        }
 
         val ringing = state as? PlaybackState.Ringing
         updatePlaybackState(PlaybackState.Idle)

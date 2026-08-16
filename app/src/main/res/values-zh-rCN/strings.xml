@@ -48,7 +48,6 @@
     <string name="shizuku_connected">已连接并授权</string>
     <string name="shizuku_waiting_permission">等待授权</string>
     <string name="shizuku_not_installed">未安装</string>
-    <string name="shizuku_install">安装 Shizuku</string>
     <string name="shizuku_authorize">授权</string>
     <string name="disable_battery_optimization">关闭电池优化</string>
     <string name="shizuku_activated">Shizuku 已连接 — 防杀保护已启用</string>

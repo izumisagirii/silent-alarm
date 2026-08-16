@@ -43,7 +43,6 @@
     <string name="shizuku_connected">Terhubung dan diberi izin</string>
     <string name="shizuku_waiting_permission">Menunggu izin</string>
     <string name="shizuku_not_installed">Belum terpasang</string>
-    <string name="shizuku_install">Pasang Shizuku</string>
     <string name="shizuku_authorize">Beri izin</string>
     <string name="disable_battery_optimization">Matikan optimasi baterai</string>
     <string name="shizuku_activated">Shizuku terhubung, perlindungan anti-kill aktif</string>

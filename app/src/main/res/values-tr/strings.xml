@@ -43,7 +43,6 @@
     <string name="shizuku_connected">Bağlı ve yetkili</string>
     <string name="shizuku_waiting_permission">İzin bekleniyor</string>
     <string name="shizuku_not_installed">Kurulu değil</string>
-    <string name="shizuku_install">Shizuku kur</string>
     <string name="shizuku_authorize">Yetkilendir</string>
     <string name="disable_battery_optimization">Pil iyileştirmesini kapat</string>
     <string name="shizuku_activated">Shizuku bağlı, işlem koruması aktif</string>

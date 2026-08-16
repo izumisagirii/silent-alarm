@@ -9,7 +9,10 @@ import android.os.IBinder
 import android.os.Looper
 import android.os.Parcel
 import android.util.Log
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -18,9 +21,24 @@ import rikka.shizuku.Shizuku
 import java.io.IOException
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.coroutines.cancellation.CancellationException
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlinx.coroutines.suspendCancellableCoroutine
+
+/**
+ * Outcome of one privileged shell invocation.
+ *
+ * [exitCode] is the process exit code, or -1 when the command could be started
+ * but failed before producing a real exit status. [output] is the combined
+ * stdout/stderr text (may be blank).
+ */
+data class ShellResult(
+    val exitCode: Int,
+    val output: String
+) {
+    val isSuccess: Boolean get() = exitCode == 0
+}
 
 /**
  * Executes a single privileged shell command.
@@ -35,7 +53,13 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 interface PrivilegedShell {
     suspend fun isAvailable(): Boolean
     suspend fun isPermitted(): Boolean
-    suspend fun execute(command: String): String?
+
+    /**
+     * Executes [command] and returns its real exit code/output, or null when
+     * the command could not be dispatched at all (no shell, timeout, binder
+     * transport failure).
+     */
+    suspend fun execute(command: String): ShellResult?
 
     /** Non-blocking UI hook for backends that need user consent. */
     fun requestPermissionIfNeeded() {}
@@ -70,7 +94,7 @@ class SuShell internal constructor() : PrivilegedShell {
 
     override suspend fun isPermitted(): Boolean = isAvailable()
 
-    override suspend fun execute(command: String): String? = withContext(Dispatchers.IO) {
+    override suspend fun execute(command: String): ShellResult? = withContext(Dispatchers.IO) {
         val process = try {
             Runtime.getRuntime().exec(arrayOf("su", "-c", command))
         } catch (e: IOException) {
@@ -93,10 +117,16 @@ class SuShell internal constructor() : PrivilegedShell {
             }
             stdoutThread.join(1_000)
             stderrThread.join(1_000)
-            if (process.exitValue() != 0) {
-                Log.w(TAG, "su command exited ${process.exitValue()}: $command")
+            val exitCode = process.exitValue()
+            if (exitCode != 0) {
+                Log.w(TAG, "su command exited $exitCode: $command")
             }
-            stdout.toString().ifBlank { stderr.toString() }.ifBlank { "ok" }
+            ShellResult(
+                exitCode = exitCode,
+                output = listOf(stdout.toString(), stderr.toString())
+                    .filter { it.isNotBlank() }
+                    .joinToString("\n")
+            )
         } catch (e: Exception) {
             Log.w(TAG, "su command failed: ${e.message}", e)
             null
@@ -140,16 +170,23 @@ class SuShell internal constructor() : PrivilegedShell {
 class ShizukuShell internal constructor(context: Context) : PrivilegedShell {
     companion object {
         private const val TAG = "ShizukuShell"
-        private const val BIND_TIMEOUT_MS = 10_000L
+        private const val EXECUTE_TIMEOUT_MS = 15_000L
         private const val SHELL_SERVICE_TAG = "shell_service"
     }
 
     private val appContext: Context = context.applicationContext
     private val mainHandler = Handler(Looper.getMainLooper())
 
+    /**
+     * Binder transactions are synchronous and the remote [ShellService] can
+     * block for the command timeout. Run them away from the main dispatcher
+     * so a slow `cmd deviceidle`/`am` call cannot freeze the UI.
+     */
+    private val transactScope = CoroutineScope(SupervisorJob() + Dispatchers.IO.limitedParallelism(1))
+
     private val shellServiceArgs = Shizuku.UserServiceArgs(
         ComponentName(appContext.packageName, ShellService::class.java.name)
-    ).daemon(false).version(1).tag(SHELL_SERVICE_TAG).processNameSuffix("shell")
+    ).daemon(false).version(2).tag(SHELL_SERVICE_TAG).processNameSuffix("shell")
 
     /** Serializes bind/transact/unbind sequences. */
     private val commandMutex = Mutex()
@@ -183,22 +220,22 @@ class ShizukuShell internal constructor(context: Context) : PrivilegedShell {
         }
     }
 
-    override suspend fun execute(command: String): String? =
+    override suspend fun execute(command: String): ShellResult? =
         commandMutex.withLock {
             withContext(Dispatchers.Main) {
-                val result = withTimeoutOrNull(BIND_TIMEOUT_MS) {
+                val result = withTimeoutOrNull(EXECUTE_TIMEOUT_MS) {
                     bindAndTransact(command)
                 }
                 if (result == null) {
                     throw IOException(
-                        "Shizuku UserService bind timed out after ${BIND_TIMEOUT_MS}ms"
+                        "Shizuku UserService transaction timed out after ${EXECUTE_TIMEOUT_MS}ms"
                     )
                 }
                 result
             }
         }
 
-    private suspend fun bindAndTransact(command: String): String? =
+    private suspend fun bindAndTransact(command: String): ShellResult? =
         suspendCancellableCoroutine { cont ->
             val settled = AtomicBoolean(false)
             var connection: ServiceConnection? = null
@@ -211,7 +248,7 @@ class ShizukuShell internal constructor(context: Context) : PrivilegedShell {
                 }
             }
 
-            fun complete(value: String?, error: Throwable?) {
+            fun complete(value: ShellResult?, error: Throwable?) {
                 if (!settled.compareAndSet(false, true)) return
                 mainHandler.post {
                     cleanup(remove = error != null)
@@ -234,26 +271,19 @@ class ShizukuShell internal constructor(context: Context) : PrivilegedShell {
                         return
                     }
 
-                    var value: String? = null
-                    var error: Throwable? = null
-                    try {
-                        val data = Parcel.obtain()
-                        val reply = Parcel.obtain()
+                    // The actual synchronous transact runs on a private IO
+                    // dispatcher; completion is then marshalled back to main.
+                    transactScope.launch {
+                        var value: ShellResult? = null
+                        var error: Throwable? = null
                         try {
-                            data.writeInterfaceToken(ShellService.DESCRIPTOR)
-                            data.writeString(command)
-                            service.transact(ShellService.TRANSACTION_EXECUTE, data, reply, 0)
-                            reply.readException()
-                            value = reply.readString()
-                        } finally {
-                            reply.recycle()
-                            data.recycle()
+                            value = transact(service, command)
+                        } catch (e: Exception) {
+                            Log.e(TAG, "UserService transact error: ${e.message}", e)
+                            error = e
                         }
-                    } catch (e: Exception) {
-                        Log.e(TAG, "UserService transact error: ${e.message}", e)
-                        error = e
+                        complete(value, error)
                     }
-                    complete(value, error)
                 }
 
                 override fun onServiceDisconnected(name: ComponentName?) {
@@ -270,6 +300,24 @@ class ShizukuShell internal constructor(context: Context) : PrivilegedShell {
                 complete(null, e)
             }
         }
+
+    private fun transact(binder: IBinder, command: String): ShellResult {
+        val data = Parcel.obtain()
+        val reply = Parcel.obtain()
+        try {
+            data.writeInterfaceToken(ShellService.DESCRIPTOR)
+            data.writeString(command)
+            binder.transact(ShellService.TRANSACTION_EXECUTE, data, reply, 0)
+            reply.readException()
+            return ShellResult(
+                exitCode = reply.readInt(),
+                output = reply.readString().orEmpty()
+            )
+        } finally {
+            reply.recycle()
+            data.recycle()
+        }
+    }
 }
 
 /**
@@ -338,9 +386,37 @@ class ShellManager private constructor(context: Context) {
         val shell = current() ?: return false
         val pkg = appContext.packageName
         Log.i(TAG, "Applying anti-kill tweaks for $pkg")
-        shell.execute(CMD_DEVICEIDLE_WHITELIST.format(pkg))
-        shell.execute(CMD_STANDBY_BUCKET.format(pkg))
-        return true
+
+        val commands = listOf(
+            CMD_DEVICEIDLE_WHITELIST.format(pkg) to "deviceidle whitelist",
+            CMD_STANDBY_BUCKET.format(pkg) to "standby bucket"
+        )
+
+        var allSucceeded = true
+        for ((command, label) in commands) {
+            val result = try {
+                shell.execute(command)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.e(TAG, "$label command failed with exception", e)
+                allSucceeded = false
+                continue
+            }
+            if (result == null) {
+                Log.e(TAG, "$label command could not be executed")
+                allSucceeded = false
+            } else if (!result.isSuccess) {
+                Log.e(
+                    TAG,
+                    "$label command failed with exit ${result.exitCode}: ${result.output}"
+                )
+                allSucceeded = false
+            } else {
+                Log.i(TAG, "$label applied successfully")
+            }
+        }
+        return allSucceeded
     }
 
     fun requestPermissionIfNeeded() {

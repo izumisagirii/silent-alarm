@@ -180,13 +180,17 @@ class AlarmViewModel(application: Application) : AndroidViewModel(application) {
 
         viewModelScope.launch {
             if (privilegedEnabled.value && !privilegedTweaksApplied) {
-                privilegedTweaksApplied = true
                 try {
                     val applied = withContext(Dispatchers.IO) {
                         shellManager.applyAntiKillTweaks()
                     }
                     if (applied) {
+                        // Mark only after a confirmed success so a transient
+                        // failure can be retried on the next refresh.
+                        privilegedTweaksApplied = true
                         _snackbarMessage.value = SnackbarEvent(msg(R.string.shizuku_activated))
+                    } else {
+                        Log.w(TAG, "Privileged anti-kill tweaks are not ready; will retry")
                     }
                 } catch (e: kotlinx.coroutines.CancellationException) {
                     throw e
@@ -316,15 +320,23 @@ class AlarmViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             var target = enabled
             if (enabled) {
-                val applied = withContext(Dispatchers.IO) {
-                    shellManager.applyAntiKillTweaks()
+                val applied = try {
+                    withContext(Dispatchers.IO) {
+                        shellManager.applyAntiKillTweaks()
+                    }
+                } catch (e: kotlinx.coroutines.CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    Log.e(TAG, "Failed to apply privileged anti-kill tweaks", e)
+                    false
                 }
                 if (!applied) {
-                    // No usable backend — roll the switch back instead of
-                    // leaving it "on" while doing nothing.
+                    // No usable backend or the shell commands failed — roll the
+                    // switch back instead of leaving it "on" while doing nothing.
                     target = false
-                    _snackbarMessage.value = SnackbarEvent(msg(R.string.shizuku_not_installed))
+                    _snackbarMessage.value = SnackbarEvent(msg(R.string.privileged_apply_failed))
                 } else {
+                    privilegedTweaksApplied = true
                     _snackbarMessage.value = SnackbarEvent(msg(R.string.shizuku_activated))
                 }
             }

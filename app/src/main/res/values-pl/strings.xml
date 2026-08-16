@@ -43,7 +43,6 @@
     <string name="shizuku_connected">Połączono i autoryzowano</string>
     <string name="shizuku_waiting_permission">Oczekiwanie na uprawnienie</string>
     <string name="shizuku_not_installed">Nie zainstalowano</string>
-    <string name="shizuku_install">Zainstaluj Shizuku</string>
     <string name="shizuku_authorize">Autoryzuj</string>
     <string name="disable_battery_optimization">Wyłącz optymalizację baterii</string>
     <string name="shizuku_activated">Shizuku połączone, ochrona procesu aktywna</string>

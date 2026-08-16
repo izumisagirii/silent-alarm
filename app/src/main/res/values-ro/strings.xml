@@ -43,7 +43,6 @@
     <string name="shizuku_connected">Conectat și autorizat</string>
     <string name="shizuku_waiting_permission">Se așteaptă permisiunea</string>
     <string name="shizuku_not_installed">Neinstalat</string>
-    <string name="shizuku_install">Instalează Shizuku</string>
     <string name="shizuku_authorize">Autorizează</string>
     <string name="disable_battery_optimization">Dezactivează optimizarea bateriei</string>
     <string name="shizuku_activated">Shizuku conectat, protecția procesului activă</string>

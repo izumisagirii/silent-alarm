@@ -83,6 +83,7 @@ class MainActivity : AppCompatActivity() {
                         viewModel = viewModel,
                         onPickRingtone = { launchRingtonePicker() },
                         onRequestNotificationPermission = ::requestNotificationPermission,
+                        onRequestExactAlarmPermission = ::launchExactAlarmRequest,
                         onRequestBatteryExemption = ::launchBatteryExemption
                     )
                 }
@@ -145,6 +146,26 @@ class MainActivity : AppCompatActivity() {
             )
         } catch (e: Exception) {
             Log.e(TAG, "App notification settings unavailable", e)
+        }
+    }
+
+    private fun launchExactAlarmRequest() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return
+
+        val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)
+            .apply { data = "package:$packageName".toUri() }
+        try {
+            startActivity(intent)
+        } catch (e: Exception) {
+            Log.w(TAG, "Exact alarm request unavailable — opening app details", e)
+            runCatching {
+                startActivity(
+                    Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                        .apply { data = "package:$packageName".toUri() }
+                )
+            }.onFailure { e2 ->
+                Log.e(TAG, "App details settings unavailable", e2)
+            }
         }
     }
 

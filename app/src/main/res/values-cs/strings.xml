@@ -43,7 +43,6 @@
     <string name="shizuku_connected">Připojeno a autorizováno</string>
     <string name="shizuku_waiting_permission">Čekání na oprávnění</string>
     <string name="shizuku_not_installed">Není nainstalováno</string>
-    <string name="shizuku_install">Nainstalovat Shizuku</string>
     <string name="shizuku_authorize">Autorizovat</string>
     <string name="disable_battery_optimization">Vypnout optimalizaci baterie</string>
     <string name="shizuku_activated">Shizuku připojeno, ochrana procesu aktivní</string>

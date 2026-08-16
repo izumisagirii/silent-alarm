@@ -43,7 +43,6 @@
     <string name="shizuku_connected">เชื่อมต่อและได้รับสิทธิ์แล้ว</string>
     <string name="shizuku_waiting_permission">กำลังรอสิทธิ์</string>
     <string name="shizuku_not_installed">ยังไม่ได้ติดตั้ง</string>
-    <string name="shizuku_install">ติดตั้ง Shizuku</string>
     <string name="shizuku_authorize">ให้สิทธิ์</string>
     <string name="disable_battery_optimization">ปิดการประหยัดแบตเตอรี่</string>
     <string name="shizuku_activated">เชื่อมต่อ Shizuku แล้ว เปิดการป้องกันกระบวนการ</string>

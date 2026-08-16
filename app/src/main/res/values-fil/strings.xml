@@ -43,7 +43,6 @@
     <string name="shizuku_connected">Nakakonekta at awtorisado</string>
     <string name="shizuku_waiting_permission">Naghihintay ng pahintulot</string>
     <string name="shizuku_not_installed">Hindi naka-install</string>
-    <string name="shizuku_install">I-install ang Shizuku</string>
     <string name="shizuku_authorize">Pahintulutan</string>
     <string name="disable_battery_optimization">I-off ang battery optimization</string>
     <string name="shizuku_activated">Nakakonekta ang Shizuku, aktibo ang proteksyon ng proseso</string>

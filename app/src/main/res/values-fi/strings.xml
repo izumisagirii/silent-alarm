@@ -43,7 +43,6 @@
     <string name="shizuku_connected">Yhdistetty ja valtuutettu</string>
     <string name="shizuku_waiting_permission">Odotetaan käyttöoikeutta</string>
     <string name="shizuku_not_installed">Ei asennettu</string>
-    <string name="shizuku_install">Asenna Shizuku</string>
     <string name="shizuku_authorize">Valtuuta</string>
     <string name="disable_battery_optimization">Poista akun optimointi käytöstä</string>
     <string name="shizuku_activated">Shizuku yhdistetty, prosessisuojaus käytössä</string>

@@ -73,6 +73,7 @@ fun AlarmDashboardScreen(
     viewModel: AlarmViewModel,
     onPickRingtone: () -> Unit,
     onRequestNotificationPermission: () -> Unit,
+    onRequestExactAlarmPermission: () -> Unit,
     onRequestBatteryExemption: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -310,6 +311,7 @@ fun AlarmDashboardScreen(
                     notificationsAllowed = notificationsAllowed,
                     onRequestNotificationPermission = onRequestNotificationPermission,
                     exactAlarmAllowed = exactAlarmAllowed,
+                    onRequestExactAlarmPermission = onRequestExactAlarmPermission,
                     batteryOptimizationIgnored = batteryOptimizationIgnored,
                     onRequestBatteryExemption = onRequestBatteryExemption,
                     keepAliveEnabled = keepAliveEnabled,

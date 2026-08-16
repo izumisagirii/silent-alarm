@@ -43,7 +43,6 @@
     <string name="shizuku_connected">Forbundet og autoriseret</string>
     <string name="shizuku_waiting_permission">Venter på tilladelse</string>
     <string name="shizuku_not_installed">Ikke installeret</string>
-    <string name="shizuku_install">Installer Shizuku</string>
     <string name="shizuku_authorize">Autoriser</string>
     <string name="disable_battery_optimization">Deaktiver batterioptimering</string>
     <string name="shizuku_activated">Shizuku forbundet, procesbeskyttelse aktiv</string>

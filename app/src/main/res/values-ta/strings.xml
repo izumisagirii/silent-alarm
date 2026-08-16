@@ -43,7 +43,6 @@
     <string name="shizuku_connected">இணைக்கப்பட்டு அங்கீகரிக்கப்பட்டது</string>
     <string name="shizuku_waiting_permission">அனுமதிக்காக காத்திருக்கிறது</string>
     <string name="shizuku_not_installed">நிறுவப்படவில்லை</string>
-    <string name="shizuku_install">Shizuku நிறுவு</string>
     <string name="shizuku_authorize">அங்கீகரி</string>
     <string name="disable_battery_optimization">பேட்டரி மேம்படுத்தலை முடக்கு</string>
     <string name="shizuku_activated">Shizuku இணைக்கப்பட்டது, செயல்முறை பாதுகாப்பு செயலில் உள்ளது</string>

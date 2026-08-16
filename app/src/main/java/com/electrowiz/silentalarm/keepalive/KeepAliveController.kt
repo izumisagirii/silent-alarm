@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlin.coroutines.cancellation.CancellationException
 
 /**
  * Single owner of the two optional keep-alive layers, reconciled together but
@@ -76,7 +77,12 @@ class KeepAliveController private constructor(context: Context) {
         appContext.getSystemService(Context.ALARM_SERVICE) as AlarmManager
     private val shellManager = ShellManager.get(appContext)
 
-    private val ioScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    /**
+     * All keep-alive reconciliation is serialized through this single-thread
+     * dispatcher so rapid CRUD/Tile/undo operations cannot finish out of order
+     * and leave recovery alarms or the idle service in a stale state.
+     */
+    private val syncScope = CoroutineScope(SupervisorJob() + Dispatchers.IO.limitedParallelism(1))
     private val watchdogMutex = Mutex()
 
     @Volatile
@@ -86,7 +92,7 @@ class KeepAliveController private constructor(context: Context) {
 
     /** Fire-and-forget wrapper used by the UI, tile, boot and service. */
     fun syncAsync(hasEnabledAlarms: Boolean, startServiceNow: Boolean = true) {
-        ioScope.launch {
+        syncScope.launch {
             try {
                 sync(hasEnabledAlarms, startServiceNow)
             } catch (e: Exception) {
@@ -220,18 +226,23 @@ class KeepAliveController private constructor(context: Context) {
         watchdogMutex.withLock {
             val shouldRun = privileged && hasEnabledAlarms && shell != null
             if (shouldRun && !watchdogRunning) {
-                startWatchdogLocked(shell)
-                watchdogRunning = true
+                watchdogRunning = startWatchdogLocked(shell)
             } else if (!shouldRun && watchdogRunning) {
-                stopWatchdogLocked(shell)
-                watchdogRunning = false
+                // Only clear the flag when pkill actually succeeded (or there
+                // was no way to run it); otherwise a future sync must retry.
+                watchdogRunning = !stopWatchdogLocked(shell)
             }
         }
     }
 
-    private suspend fun startWatchdogLocked(shell: PrivilegedShell) {
+    /**
+     * Kill any previous watchdog instance first, then start a fresh one. Old
+     * instances can outlive an app-process death and must not accumulate.
+     */
+    private suspend fun startWatchdogLocked(shell: PrivilegedShell): Boolean {
         val pkg = appContext.packageName
         val marker = "SILENTALARM_WD_$pkg"
+        val safePattern = "[" + marker.first() + "]" + marker.substring(1)
         val startCmd = "am start-foreground-service $pkg/.service.AlarmAudioService"
         val script = buildString {
             append("nohup sh -c '")
@@ -241,20 +252,56 @@ class KeepAliveController private constructor(context: Context) {
             append("sleep $WATCHDOG_INTERVAL_SEC; ")
             append("done' >/dev/null 2>&1 &")
         }
-        runCatching { shell.execute(script) }
-            .onSuccess { Log.i(TAG, "Watchdog started for $pkg") }
-            .onFailure { Log.w(TAG, "Watchdog start failed", it) }
+
+        // Best-effort cleanup; `; true` keeps the shell exit code 0 even when
+        // no previous watchdog existed.
+        try {
+            shell.execute("pkill -f '$safePattern' 2>/dev/null; true")
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Log.w(TAG, "Failed to clean old watchdog instance", e)
+        }
+
+        val result = try {
+            shell.execute(script)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Log.w(TAG, "Watchdog start failed with exception", e)
+            null
+        }
+        return if (result != null && result.isSuccess) {
+            Log.i(TAG, "Watchdog started for $pkg")
+            true
+        } else {
+            Log.w(TAG, "Watchdog start failed: ${result?.output ?: "no shell result"}")
+            false
+        }
     }
 
-    private suspend fun stopWatchdogLocked(shell: PrivilegedShell?) {
+    private suspend fun stopWatchdogLocked(shell: PrivilegedShell?): Boolean {
         val pkg = appContext.packageName
         if (shell == null) {
             Log.w(TAG, "No privileged shell available to stop watchdog")
-            return
+            return false
         }
         val marker = "SILENTALARM_WD_$pkg"
-        runCatching { shell.execute("pkill -f '$marker' 2>/dev/null; true") }
-            .onSuccess { Log.i(TAG, "Watchdog stopped for $pkg") }
-            .onFailure { Log.w(TAG, "Watchdog stop failed", it) }
+        val safePattern = "[" + marker.first() + "]" + marker.substring(1)
+        val result = try {
+            shell.execute("pkill -f '$safePattern' 2>/dev/null; true")
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Log.w(TAG, "Watchdog stop failed with exception", e)
+            null
+        }
+        return if (result != null && result.isSuccess) {
+            Log.i(TAG, "Watchdog stopped for $pkg")
+            true
+        } else {
+            Log.w(TAG, "Watchdog stop failed: ${result?.output ?: "no shell result"}")
+            false
+        }
     }
 }

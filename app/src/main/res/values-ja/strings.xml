@@ -43,7 +43,6 @@
     <string name="shizuku_connected">接続済み、権限あり</string>
     <string name="shizuku_waiting_permission">権限待ち</string>
     <string name="shizuku_not_installed">未インストール</string>
-    <string name="shizuku_install">Shizuku をインストール</string>
     <string name="shizuku_authorize">許可する</string>
     <string name="disable_battery_optimization">バッテリー最適化を無効化</string>
     <string name="shizuku_activated">Shizuku 接続済み、プロセス保護が有効です</string>

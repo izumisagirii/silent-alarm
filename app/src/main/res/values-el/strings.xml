@@ -43,7 +43,6 @@
     <string name="shizuku_connected">Συνδεδεμένο και εξουσιοδοτημένο</string>
     <string name="shizuku_waiting_permission">Αναμονή άδειας</string>
     <string name="shizuku_not_installed">Δεν είναι εγκατεστημένο</string>
-    <string name="shizuku_install">Εγκατάσταση Shizuku</string>
     <string name="shizuku_authorize">Εξουσιοδότηση</string>
     <string name="disable_battery_optimization">Απενεργοποίηση βελτιστοποίησης μπαταρίας</string>
     <string name="shizuku_activated">Το Shizuku συνδέθηκε, η προστασία διεργασίας είναι ενεργή</string>

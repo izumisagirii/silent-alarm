@@ -43,7 +43,6 @@
     <string name="shizuku_connected">Ansluten och auktoriserad</string>
     <string name="shizuku_waiting_permission">Väntar på behörighet</string>
     <string name="shizuku_not_installed">Inte installerad</string>
-    <string name="shizuku_install">Installera Shizuku</string>
     <string name="shizuku_authorize">Auktorisera</string>
     <string name="disable_battery_optimization">Inaktivera batterioptimering</string>
     <string name="shizuku_activated">Shizuku ansluten, processkydd aktivt</string>

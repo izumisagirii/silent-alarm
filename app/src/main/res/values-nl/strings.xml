@@ -43,7 +43,6 @@
     <string name="shizuku_connected">Verbonden en geautoriseerd</string>
     <string name="shizuku_waiting_permission">Wachten op toestemming</string>
     <string name="shizuku_not_installed">Niet geïnstalleerd</string>
-    <string name="shizuku_install">Shizuku installeren</string>
     <string name="shizuku_authorize">Autoriseren</string>
     <string name="disable_battery_optimization">Batterijoptimalisatie uitschakelen</string>
     <string name="shizuku_activated">Shizuku verbonden, procesbescherming actief</string>

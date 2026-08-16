@@ -55,7 +55,7 @@
             android:enabled="true"
             android:exported="true"
             android:multiprocess="false"
-            android:permission="android.permission.INTERNET" />
+            android:permission="android.permission.INTERACT_ACROSS_USERS_FULL" />
 
         <!-- ============================================================ -->
         <!-- Main Activity                                                -->
@@ -106,6 +106,7 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.TIME_SET" />
             </intent-filter>
         </receiver>
 

@@ -43,7 +43,6 @@
     <string name="shizuku_connected">Csatlakoztatva és jogosítva</string>
     <string name="shizuku_waiting_permission">Engedélyre vár</string>
     <string name="shizuku_not_installed">Nincs telepítve</string>
-    <string name="shizuku_install">Shizuku telepítése</string>
     <string name="shizuku_authorize">Jogosítás</string>
     <string name="disable_battery_optimization">Az akkumulátor-optimalizálás kikapcsolása</string>
     <string name="shizuku_activated">Shizuku csatlakoztatva, folyamatvédelem aktív</string>

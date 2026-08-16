@@ -43,7 +43,6 @@
     <string name="shizuku_connected">מחובר ומורשה</string>
     <string name="shizuku_waiting_permission">ממתין להרשאה</string>
     <string name="shizuku_not_installed">לא מותקן</string>
-    <string name="shizuku_install">התקנת Shizuku</string>
     <string name="shizuku_authorize">אישור</string>
     <string name="disable_battery_optimization">השבתת אופטימיזציית סוללה</string>
     <string name="shizuku_activated">Shizuku מחובר, הגנת התהליך פעילה</string>

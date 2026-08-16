@@ -43,7 +43,6 @@
     <string name="shizuku_connected">متصل و مجاز</string>
     <string name="shizuku_waiting_permission">در انتظار مجوز</string>
     <string name="shizuku_not_installed">نصب نشده</string>
-    <string name="shizuku_install">نصب Shizuku</string>
     <string name="shizuku_authorize">مجوز دادن</string>
     <string name="disable_battery_optimization">غیرفعال‌سازی بهینه‌سازی باتری</string>
     <string name="shizuku_activated">Shizuku متصل است، محافظت از فرایند فعال است</string>

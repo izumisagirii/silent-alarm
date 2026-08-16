@@ -33,6 +33,7 @@ internal fun ProcessKeepingCard(
     notificationsAllowed: Boolean,
     onRequestNotificationPermission: () -> Unit,
     exactAlarmAllowed: Boolean,
+    onRequestExactAlarmPermission: () -> Unit,
     batteryOptimizationIgnored: Boolean,
     onRequestBatteryExemption: () -> Unit,
     keepAliveEnabled: Boolean,
@@ -84,8 +85,16 @@ internal fun ProcessKeepingCard(
                 } else {
                     stringResource(R.string.exact_alarm_denied)
                 },
-                actionText = null,
-                onAction = null
+                actionText = if (exactAlarmAllowed) {
+                    null
+                } else {
+                    stringResource(R.string.exact_alarm_request)
+                },
+                onAction = if (exactAlarmAllowed) {
+                    null
+                } else {
+                    onRequestExactAlarmPermission
+                }
             )
 
             StatusRow(

@@ -43,7 +43,6 @@
     <string name="shizuku_connected">সংযুক্ত এবং অনুমোদিত</string>
     <string name="shizuku_waiting_permission">অনুমতির অপেক্ষা</string>
     <string name="shizuku_not_installed">ইনস্টল নেই</string>
-    <string name="shizuku_install">Shizuku ইনস্টল করুন</string>
     <string name="shizuku_authorize">অনুমোদন করুন</string>
     <string name="disable_battery_optimization">ব্যাটারি অপ্টিমাইজেশন বন্ধ করুন</string>
     <string name="shizuku_activated">Shizuku সংযুক্ত, প্রসেস সুরক্ষা সক্রিয়</string>

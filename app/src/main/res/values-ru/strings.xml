@@ -43,7 +43,6 @@
     <string name="shizuku_connected">Подключено и авторизовано</string>
     <string name="shizuku_waiting_permission">Ожидание разрешения</string>
     <string name="shizuku_not_installed">Не установлено</string>
-    <string name="shizuku_install">Установить Shizuku</string>
     <string name="shizuku_authorize">Авторизовать</string>
     <string name="disable_battery_optimization">Отключить оптимизацию батареи</string>
     <string name="shizuku_activated">Shizuku подключён, защита от остановки активна</string>

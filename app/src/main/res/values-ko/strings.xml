@@ -43,7 +43,6 @@
     <string name="shizuku_connected">연결 및 권한 허용됨</string>
     <string name="shizuku_waiting_permission">권한 대기 중</string>
     <string name="shizuku_not_installed">설치되지 않음</string>
-    <string name="shizuku_install">Shizuku 설치</string>
     <string name="shizuku_authorize">권한 허용</string>
     <string name="disable_battery_optimization">배터리 최적화 사용 안 함</string>
     <string name="shizuku_activated">Shizuku 연결됨, 프로세스 보호 활성화됨</string>

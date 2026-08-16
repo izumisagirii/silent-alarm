@@ -43,7 +43,6 @@
     <string name="shizuku_connected">Đã kết nối và cấp quyền</string>
     <string name="shizuku_waiting_permission">Đang chờ quyền</string>
     <string name="shizuku_not_installed">Chưa cài đặt</string>
-    <string name="shizuku_install">Cài Shizuku</string>
     <string name="shizuku_authorize">Cấp quyền</string>
     <string name="disable_battery_optimization">Tắt tối ưu hóa pin</string>
     <string name="shizuku_activated">Shizuku đã kết nối, bảo vệ tiến trình đang bật</string>

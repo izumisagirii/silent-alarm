@@ -43,7 +43,6 @@
     <string name="shizuku_connected">कनेक्टेड और अधिकृत</string>
     <string name="shizuku_waiting_permission">अनुमति की प्रतीक्षा है</string>
     <string name="shizuku_not_installed">इंस्टॉल नहीं है</string>
-    <string name="shizuku_install">Shizuku इंस्टॉल करें</string>
     <string name="shizuku_authorize">अधिकृत करें</string>
     <string name="disable_battery_optimization">बैटरी ऑप्टिमाइज़ेशन बंद करें</string>
     <string name="shizuku_activated">Shizuku कनेक्टेड, प्रोसेस सुरक्षा सक्रिय</string>

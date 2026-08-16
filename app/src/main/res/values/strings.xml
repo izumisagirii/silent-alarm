@@ -51,10 +51,10 @@
     <string name="shizuku_connected">Connected &amp; Authorized</string>
     <string name="shizuku_waiting_permission">Waiting for permission</string>
     <string name="shizuku_not_installed">Not installed</string>
-    <string name="shizuku_install">Install Shizuku</string>
     <string name="shizuku_authorize">Authorize</string>
     <string name="disable_battery_optimization">Disable Battery Optimization</string>
     <string name="shizuku_activated">Shizuku connected — anti-kill protection active</string>
+    <string name="privileged_apply_failed" translatable="false">Privileged command failed — protection not enabled</string>
     <string name="keep_alive_title">Notification keep-alive</string>
     <string name="keep_alive_desc">Persistent notification, auto-restore after being killed</string>
     <string name="shizuku_desc">Use Shizuku permission for stronger keep-alive</string>
