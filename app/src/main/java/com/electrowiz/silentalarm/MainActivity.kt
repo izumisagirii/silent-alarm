@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.os.PowerManager
 import android.provider.Settings
 import android.util.Log
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -20,9 +21,13 @@ import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
+import androidx.lifecycle.lifecycleScope
 import com.electrowiz.silentalarm.ui.screens.AlarmDashboardScreen
 import com.electrowiz.silentalarm.ui.theme.SilentAlarmTheme
 import com.electrowiz.silentalarm.ui.viewmodel.AlarmViewModel
+import com.electrowiz.silentalarm.util.AlarmDiagnostics
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 /**
  * Single-activity host for the earphone alarm dashboard.
@@ -66,6 +71,28 @@ class MainActivity : AppCompatActivity() {
         viewModel.refreshStatus()
     }
 
+    private var pendingLogText: String? = null
+
+    private val saveLogLauncher = registerForActivityResult(
+        ActivityResultContracts.CreateDocument("text/plain")
+    ) { uri ->
+        val text = pendingLogText
+        pendingLogText = null
+        if (uri == null || text == null) return@registerForActivityResult
+        lifecycleScope.launch(Dispatchers.IO) {
+            runCatching {
+                contentResolver.openOutputStream(uri)?.use { output ->
+                    output.bufferedWriter().use { writer -> writer.write(text) }
+                } ?: error("Unable to open destination")
+            }.onSuccess {
+                showToast(getString(R.string.log_saved))
+            }.onFailure { error ->
+                Log.e(TAG, "Failed to save diagnostics log", error)
+                showToast(getString(R.string.log_save_failed))
+            }
+        }
+    }
+
     // ── Lifecycle ────────────────────────────────────────────────────────
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -84,7 +111,8 @@ class MainActivity : AppCompatActivity() {
                         onPickRingtone = { launchRingtonePicker() },
                         onRequestNotificationPermission = ::requestNotificationPermission,
                         onRequestExactAlarmPermission = ::launchExactAlarmRequest,
-                        onRequestBatteryExemption = ::launchBatteryExemption
+                        onRequestBatteryExemption = ::launchBatteryExemption,
+                        onExportLogs = ::exportDiagnostics
                     )
                 }
             }
@@ -97,6 +125,28 @@ class MainActivity : AppCompatActivity() {
     }
 
     // ── Permissions ──────────────────────────────────────────────────────
+
+    private fun exportDiagnostics() {
+        lifecycleScope.launch {
+            val text = runCatching {
+                AlarmDiagnostics.export(this@MainActivity)
+            }.getOrElse { error ->
+                Log.e(TAG, "Failed to export diagnostics log", error)
+                showToast(getString(R.string.log_export_failed))
+                return@launch
+            }
+            pendingLogText = text
+            val stamp = java.text.SimpleDateFormat("yyyyMMdd-HHmmss", java.util.Locale.US)
+                .format(java.util.Date())
+            saveLogLauncher.launch("silent-alarm-log-$stamp.log")
+        }
+    }
+
+    private fun showToast(message: String) {
+        runOnUiThread {
+            Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+        }
+    }
 
     private fun requestPermissions() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&

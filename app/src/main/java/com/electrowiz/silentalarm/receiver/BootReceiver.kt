@@ -8,6 +8,7 @@ import com.electrowiz.silentalarm.data.AlarmPreferences
 import com.electrowiz.silentalarm.data.AlarmScheduler
 import com.electrowiz.silentalarm.daemon.ShellManager
 import com.electrowiz.silentalarm.keepalive.KeepAliveController
+import com.electrowiz.silentalarm.util.AlarmDiagnostics
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -28,13 +29,13 @@ class BootReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
         when (intent.action) {
-            Intent.ACTION_BOOT_COMPLETED -> process(context, isBoot = true)
-            Intent.ACTION_TIME_CHANGED -> process(context, isBoot = false)
+            Intent.ACTION_BOOT_COMPLETED -> process(context, isBoot = true, action = intent.action)
+            Intent.ACTION_TIME_CHANGED -> process(context, isBoot = false, action = intent.action)
             else -> return
         }
     }
 
-    private fun process(context: Context, isBoot: Boolean) {
+    private fun process(context: Context, isBoot: Boolean, action: String?) {
         Log.i(TAG, if (isBoot) "Boot completed — re-scheduling alarms" else "Time changed — re-scheduling alarms")
         val pending = goAsync()
 
@@ -54,6 +55,17 @@ class BootReceiver : BroadcastReceiver() {
                 val alarms = preferences.getAlarms().first()
                 scheduler.reconcile(alarms)
                 Log.i(TAG, "Re-scheduled ${alarms.count { it.enabled }} alarms")
+                AlarmDiagnostics.log(
+                    context,
+                    "boot_reconcile",
+                    mapOf(
+                        "action" to action,
+                        "is_boot" to isBoot,
+                        "alarm_count" to alarms.size,
+                        "enabled_alarm_count" to alarms.count { it.enabled },
+                        "exact_alarm_allowed" to scheduler.canScheduleExactAlarms()
+                    )
+                )
 
                 if (isBoot) {
                     val shellManager = ShellManager.get(context)

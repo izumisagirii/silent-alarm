@@ -22,6 +22,7 @@ import androidx.core.net.toUri
 import com.electrowiz.silentalarm.R
 import com.electrowiz.silentalarm.data.NoEarphoneAction
 import com.electrowiz.silentalarm.data.TimeoutAction
+import com.electrowiz.silentalarm.util.AlarmDiagnostics
 import com.electrowiz.silentalarm.util.AudioRouter
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -136,7 +137,10 @@ internal suspend fun AlarmAudioService.handleEarphoneDisconnected() {
     }
     activeAction = action
     when (settings.noEarphoneAction) {
-        NoEarphoneAction.VIBRATE_ONLY -> startRepeatingVibration()
+        NoEarphoneAction.VIBRATE_ONLY -> {
+            startRepeatingVibration()
+            AlarmDiagnostics.log(this, "alarm_vibration_started")
+        }
         NoEarphoneAction.LOUDSPEAKER ->
             playAudio(
                 ringtoneUri = uri,
@@ -179,7 +183,10 @@ internal fun AlarmAudioService.fallbackToNoEarphone(
     }
     activeAction = action
     when (noEarphonePref) {
-        NoEarphoneAction.VIBRATE_ONLY -> startRepeatingVibration()
+        NoEarphoneAction.VIBRATE_ONLY -> {
+            startRepeatingVibration()
+            AlarmDiagnostics.log(this, "alarm_vibration_started", mapOf("fallback" to true))
+        }
         NoEarphoneAction.LOUDSPEAKER -> {
             val speakerDevice = audioRouter.inspectRoute().speakerDevice
             Log.i(
@@ -249,6 +256,14 @@ internal fun AlarmAudioService.playAudio(
 
     player.setOnPreparedListener { prepared ->
         if (state is AlarmAudioService.PlaybackState.Ringing && mediaPlayer === prepared) {
+            AlarmDiagnostics.log(
+                this,
+                "alarm_audio_started",
+                mapOf(
+                    "use_alarm_audio" to useAlarmAudio,
+                    "device" to (preferredDevice?.productName?.toString() ?: "default")
+                )
+            )
             prepared.start()
         }
     }

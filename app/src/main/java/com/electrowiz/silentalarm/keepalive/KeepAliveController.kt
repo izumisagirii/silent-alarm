@@ -11,6 +11,7 @@ import com.electrowiz.silentalarm.data.AlarmScheduler
 import com.electrowiz.silentalarm.daemon.PrivilegedShell
 import com.electrowiz.silentalarm.daemon.ShellManager
 import com.electrowiz.silentalarm.service.AlarmAudioService
+import com.electrowiz.silentalarm.util.AlarmDiagnostics
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -149,20 +150,32 @@ class KeepAliveController private constructor(context: Context) {
     // ── Recovery alarm ───────────────────────────────────────────────────
 
     private fun scheduleRecovery(delayMs: Long) {
+        if (!canScheduleExactAlarms()) {
+            Log.w(TAG, "Exact alarm permission missing — recovery alarm skipped")
+            AlarmDiagnostics.log(
+                appContext,
+                "recovery_schedule_skipped",
+                mapOf("reason" to "exact_alarm_permission_missing")
+            )
+            return
+        }
         val pi = buildRecoveryPendingIntent()
         val triggerAt = System.currentTimeMillis() + delayMs.coerceAtLeast(0L)
         try {
-            if (canScheduleExactAlarms()) {
-                // Exact alarm keeps the Android 12+ background FGS-start
-                // exemption (alarm apps hold USE_EXACT_ALARM), so recovery
-                // still works after the process was killed.
-                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAt, pi)
-            } else {
-                alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAt, pi)
-            }
+            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAt, pi)
             Log.d(TAG, "Recovery alarm armed in ${delayMs / 1000}s")
+            AlarmDiagnostics.log(
+                appContext,
+                "recovery_scheduled",
+                mapOf("trigger_at_ms" to triggerAt, "delay_ms" to delayMs)
+            )
         } catch (e: Exception) {
             Log.w(TAG, "Failed to arm recovery alarm", e)
+            AlarmDiagnostics.log(
+                appContext,
+                "recovery_schedule_failed",
+                mapOf("reason" to e.javaClass.simpleName)
+            )
         }
     }
 

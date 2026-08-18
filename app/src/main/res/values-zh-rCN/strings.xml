@@ -43,6 +43,7 @@
     <string name="exact_alarm">精确闹钟</string>
     <string name="exact_alarm_allowed">已允许</string>
     <string name="exact_alarm_denied">未允许</string>
+    <string name="exact_alarm_required_to_add">请先允许精确闹钟，再添加新闹钟</string>
     <string name="exact_alarm_request">开启</string>
     <string name="shizuku">Shizuku</string>
     <string name="shizuku_connected">已连接并授权</string>
@@ -144,5 +145,8 @@
     <string name="alarm_label">标签</string>
 
     <string name="search_alarms">搜索闹钟</string>
+    <string name="log_saved">诊断日志已保存</string>
+    <string name="log_save_failed">诊断日志保存失败</string>
+    <string name="log_export_failed">诊断日志导出失败</string>
     <string name="no_alarms_found">没有匹配的闹钟</string>
 </resources>

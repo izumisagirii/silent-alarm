@@ -75,6 +75,7 @@ fun AlarmDashboardScreen(
     onRequestNotificationPermission: () -> Unit,
     onRequestExactAlarmPermission: () -> Unit,
     onRequestBatteryExemption: () -> Unit,
+    onExportLogs: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val alarms by viewModel.alarms.collectAsStateWithLifecycle()
@@ -159,6 +160,13 @@ fun AlarmDashboardScreen(
         }
     }
 
+    LaunchedEffect(searchQuery) {
+        if (searchQuery.trim() == "#log") {
+            onExportLogs()
+            searchQuery = ""
+        }
+    }
+
     val showEmptyState = alarms.isEmpty() ||
         (searchActive && searchQuery.isNotBlank() && visibleAlarms.isEmpty())
 
@@ -175,11 +183,18 @@ fun AlarmDashboardScreen(
             val source = remember { MutableInteractionSource() }
             val scale = rememberPressScale(source, pressedScale = 0.94f)
             FloatingActionButton(
-                onClick = { viewModel.showAddTimePicker() },
+                onClick = {
+                    if (exactAlarmAllowed) {
+                        viewModel.showAddTimePicker()
+                    } else {
+                        viewModel.showExactAlarmRequired()
+                    }
+                },
                 interactionSource = source,
                 modifier = Modifier.graphicsLayer {
                     scaleX = scale
                     scaleY = scale
+                    alpha = if (exactAlarmAllowed) 1f else 0.55f
                 }
             ) {
                 Icon(

@@ -5,6 +5,9 @@
     <string name="dashboard_title">Earphone Alarm</string>
     <string name="dashboard_subtitle">Plays through earphones only. Never wakes others.</string>
     <string name="search_alarms">Search alarms</string>
+    <string name="log_saved">Diagnostics log saved</string>
+    <string name="log_save_failed">Failed to save diagnostics log</string>
+    <string name="log_export_failed">Failed to export diagnostics log</string>
     <string name="no_alarms_found">No matching alarms</string>
     <string name="test_alarm">Test Alarm</string>
     <string name="stop">Stop</string>
@@ -46,6 +49,7 @@
     <string name="exact_alarm">Exact Alarm</string>
     <string name="exact_alarm_allowed">Allowed</string>
     <string name="exact_alarm_denied">Not allowed</string>
+    <string name="exact_alarm_required_to_add">Allow exact alarms before adding a new alarm</string>
     <string name="exact_alarm_request">Enable</string>
     <string name="shizuku">Shizuku</string>
     <string name="shizuku_connected">Connected &amp; Authorized</string>

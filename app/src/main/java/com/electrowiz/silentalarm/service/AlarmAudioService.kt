@@ -14,6 +14,7 @@ import com.electrowiz.silentalarm.data.AlarmPreferences
 import com.electrowiz.silentalarm.data.AlarmScheduler
 import com.electrowiz.silentalarm.keepalive.KeepAliveController
 import com.electrowiz.silentalarm.util.AudioRouter
+import com.electrowiz.silentalarm.util.AlarmDiagnostics
 import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -155,6 +156,7 @@ class AlarmAudioService : Service() {
         keepAliveController = KeepAliveController.get(this)
         notifications = AlarmNotificationController(this, scheduler, audioRouter)
         notifications.createChannels()
+        AlarmDiagnostics.log(this, "service_created")
         Log.i(TAG, "Service created")
     }
 
@@ -162,6 +164,15 @@ class AlarmAudioService : Service() {
         val action = intent?.action
         val alarmId = intent?.getStringExtra(AlarmScheduler.EXTRA_ALARM_ID)
         Log.i(TAG, "onStartCommand action=$action alarmId=$alarmId")
+        AlarmDiagnostics.log(
+            this,
+            "service_start_command",
+            mapOf(
+                "action" to action,
+                "alarm_id" to AlarmDiagnostics.shortAlarmId(alarmId),
+                "start_id" to startId
+            )
+        )
 
         when (action) {
             AlarmScheduler.ACTION_STOP_ALARM -> {
@@ -238,6 +249,11 @@ class AlarmAudioService : Service() {
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onDestroy() {
+        AlarmDiagnostics.log(
+            this,
+            "service_destroyed",
+            mapOf("playback_active" to playbackActive.value)
+        )
         triggerJob?.cancel(); triggerJob = null
         autoStopJob?.cancel(); autoStopJob = null
         idleRefreshJob?.cancel(); idleRefreshJob = null
@@ -333,9 +349,22 @@ class AlarmAudioService : Service() {
 
         lastRingTimeMs = System.currentTimeMillis()
         updatePlaybackState(PlaybackState.Ringing(alarmId))
+        AlarmDiagnostics.log(
+            this,
+            "alarm_trigger_accepted",
+            mapOf(
+                "alarm_id" to AlarmDiagnostics.shortAlarmId(alarmId),
+                "re_ring" to reRing
+            )
+        )
         acquireWakeLock()
         try {
             executeAlarmRoutine()
+            AlarmDiagnostics.log(
+                this,
+                "alarm_routine_started",
+                mapOf("alarm_id" to AlarmDiagnostics.shortAlarmId(alarmId))
+            )
             if (runPostAlarm && alarmId != null) runPostAlarm(alarmId)
         } catch (e: CancellationException) {
             throw e
@@ -343,6 +372,14 @@ class AlarmAudioService : Service() {
             // Never leave the service "ringing" with no sound (e.g. a
             // DataStore read fails): tear down into the idle keep-alive.
             Log.e(TAG, "Alarm routine failed — stopping", e)
+            AlarmDiagnostics.log(
+                this,
+                "alarm_routine_failed",
+                mapOf(
+                    "alarm_id" to AlarmDiagnostics.shortAlarmId(alarmId),
+                    "reason" to e.javaClass.simpleName
+                )
+            )
             transitionToIdle(showStoppedNotification = false)
         }
     }
@@ -508,6 +545,14 @@ class AlarmAudioService : Service() {
         showStoppedNotification: Boolean,
         cancelPendingSnooze: Boolean = true
     ) {
+        AlarmDiagnostics.log(
+            this,
+            "alarm_session_idle",
+            mapOf(
+                "show_stopped_notification" to showStoppedNotification,
+                "cancel_pending_snooze" to cancelPendingSnooze
+            )
+        )
         autoStopJob?.cancel(); autoStopJob = null
         snoozeJob?.cancel(); snoozeJob = null
         idleRefreshJob?.cancel(); idleRefreshJob = null

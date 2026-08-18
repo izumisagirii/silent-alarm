@@ -18,6 +18,7 @@ import com.electrowiz.silentalarm.daemon.ShellManager
 import com.electrowiz.silentalarm.keepalive.KeepAliveController
 import com.electrowiz.silentalarm.service.AlarmAudioService
 import com.electrowiz.silentalarm.service.AlarmTileService
+import com.electrowiz.silentalarm.util.AlarmDiagnostics
 import com.electrowiz.silentalarm.util.TimezoneFormatter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -385,7 +386,14 @@ class AlarmViewModel(application: Application) : AndroidViewModel(application) {
 
     // ── Time Picker ──────────────────────────────────────────────────────
 
-    fun showAddTimePicker() { editingAlarmId = null; _showTimePicker.value = true }
+    fun showAddTimePicker() {
+        if (!scheduler.canScheduleExactAlarms()) {
+            showExactAlarmRequired()
+            return
+        }
+        editingAlarmId = null
+        _showTimePicker.value = true
+    }
     fun showEditTimePicker(alarmId: String) { editingAlarmId = alarmId; _showTimePicker.value = true }
     fun hideTimePicker() { _showTimePicker.value = false }
 
@@ -395,9 +403,23 @@ class AlarmViewModel(application: Application) : AndroidViewModel(application) {
             val alarm = alarms.value.find { it.id == editing } ?: return
             updateAlarmTime(alarm.id, hour, minute, label, timeZoneId)
         } else {
+            if (!scheduler.canScheduleExactAlarms()) {
+                showExactAlarmRequired()
+                return
+            }
             addAlarm(hour, minute, label, timeZoneId)
         }
         hideTimePicker()
+    }
+
+    fun showExactAlarmRequired() {
+        _showTimePicker.value = false
+        _snackbarMessage.value = SnackbarEvent(msg(R.string.exact_alarm_required_to_add))
+        AlarmDiagnostics.log(
+            getApplication<Application>(),
+            "alarm_add_blocked",
+            mapOf("reason" to "exact_alarm_permission_missing")
+        )
     }
 
     /**

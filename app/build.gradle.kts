@@ -16,7 +16,7 @@ android {
         minSdk = 29
         targetSdk = 36
         versionCode = 2
-        versionName = "2.0"
+        versionName = "2.1"
 
         // 64-bit ABIs only. The sole native library (Compose graphics path)
         // doesn't need 32-bit support; armeabi-v7a / x86 devices can't install.

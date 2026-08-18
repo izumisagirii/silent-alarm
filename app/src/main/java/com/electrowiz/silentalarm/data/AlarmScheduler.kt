@@ -8,6 +8,7 @@ import android.os.Build
 import android.util.Log
 import com.electrowiz.silentalarm.MainActivity
 import com.electrowiz.silentalarm.service.AlarmAudioService
+import com.electrowiz.silentalarm.util.AlarmDiagnostics
 import java.util.Calendar
 import java.util.TimeZone
 
@@ -100,12 +101,28 @@ class AlarmScheduler(private val context: Context) {
     fun scheduleOne(item: AlarmItem) {
         if (!canScheduleExactAlarms()) {
             Log.w(TAG, "Exact alarm permission missing — cannot schedule '${item.label}'")
+            AlarmDiagnostics.log(
+                context,
+                "alarm_schedule_skipped",
+                mapOf(
+                    "alarm_id" to AlarmDiagnostics.shortAlarmId(item.id),
+                    "reason" to "exact_alarm_permission_missing"
+                )
+            )
             return
         }
 
         val triggerEpoch = nextFireEpoch(item)
         if (triggerEpoch <= System.currentTimeMillis()) {
             Log.w(TAG, "Alarm '${item.label}' trigger time is in the past — skipping")
+            AlarmDiagnostics.log(
+                context,
+                "alarm_schedule_skipped",
+                mapOf(
+                    "alarm_id" to AlarmDiagnostics.shortAlarmId(item.id),
+                    "reason" to "trigger_time_in_past"
+                )
+            )
             return
         }
 
@@ -115,8 +132,25 @@ class AlarmScheduler(private val context: Context) {
         try {
             alarmManager.setAlarmClock(info, pendingIntent)
             Log.i(TAG, "Alarm '${item.label}' scheduled for $triggerEpoch")
+            AlarmDiagnostics.log(
+                context,
+                "alarm_scheduled",
+                mapOf(
+                    "alarm_id" to AlarmDiagnostics.shortAlarmId(item.id),
+                    "trigger_at_ms" to triggerEpoch,
+                    "recurring" to item.daysOfWeek.isNotEmpty()
+                )
+            )
         } catch (e: SecurityException) {
             Log.e(TAG, "SCHEDULE_EXACT_ALARM permission missing", e)
+            AlarmDiagnostics.log(
+                context,
+                "alarm_schedule_failed",
+                mapOf(
+                    "alarm_id" to AlarmDiagnostics.shortAlarmId(item.id),
+                    "reason" to "security_exception"
+                )
+            )
         }
     }
 
@@ -125,6 +159,11 @@ class AlarmScheduler(private val context: Context) {
         alarmManager.cancel(pi)
         pi.cancel()
         Log.d(TAG, "Cancelled alarm $alarmId")
+        AlarmDiagnostics.log(
+            context,
+            "alarm_cancelled",
+            mapOf("alarm_id" to AlarmDiagnostics.shortAlarmId(alarmId))
+        )
     }
 
     /** Return the enabled alarm that will fire next, or null when none are enabled. */
@@ -159,6 +198,14 @@ class AlarmScheduler(private val context: Context) {
     fun scheduleSnoozeExpiry(alarmId: String?, delayMs: Long = SNOOZE_DURATION_MS): Boolean {
         if (!canScheduleExactAlarms()) {
             Log.w(TAG, "Exact alarm permission missing — snooze expiry skipped")
+            AlarmDiagnostics.log(
+                context,
+                "snooze_schedule_skipped",
+                mapOf(
+                    "alarm_id" to AlarmDiagnostics.shortAlarmId(alarmId),
+                    "reason" to "exact_alarm_permission_missing"
+                )
+            )
             return false
         }
 
@@ -167,9 +214,25 @@ class AlarmScheduler(private val context: Context) {
         return try {
             alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAt, pi)
             Log.d(TAG, "Snooze expiry armed in ${delayMs / 1000}s")
+            AlarmDiagnostics.log(
+                context,
+                "snooze_scheduled",
+                mapOf(
+                    "alarm_id" to AlarmDiagnostics.shortAlarmId(alarmId),
+                    "trigger_at_ms" to triggerAt
+                )
+            )
             true
         } catch (e: SecurityException) {
             Log.e(TAG, "SCHEDULE_EXACT_ALARM permission missing", e)
+            AlarmDiagnostics.log(
+                context,
+                "snooze_schedule_failed",
+                mapOf(
+                    "alarm_id" to AlarmDiagnostics.shortAlarmId(alarmId),
+                    "reason" to "security_exception"
+                )
+            )
             false
         }
     }
