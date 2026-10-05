@@ -139,7 +139,7 @@
     <string name="notifications_denied">未允許</string>
     <string name="notifications_request">開啟</string>
     <string name="clear_search">清除搜尋</string>
-    <string name="volume_dnd_hint">耳機播放使用媒體音量，會被勿擾模式靜音；揚聲器播放使用鬧鐘音量，不受勿擾影響。</string>
+    <string name="volume_dnd_hint">耳機播放使用媒體音訊，勿擾設定可能會將其靜音；揚聲器播放使用鬧鐘音訊，若勿擾設定封鎖鬧鐘，也可能被靜音。</string>
     <string name="volume_zero_hint">音量為 0% — 鬧鐘將靜音響鈴直到超時。</string>
     <string name="volume_restore_hint">鬧鐘結束後會自動恢復原本的音量。</string>
     <string name="expand_options">展開選項</string>

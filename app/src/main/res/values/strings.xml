@@ -156,7 +156,7 @@
     <string name="dashboard_next_alarm_format">Next: %1$s (%2$s)</string>
 
     <!-- Volume safety hints -->
-    <string name="volume_dnd_hint">Earphone playback uses the media stream and is silenced by Do Not Disturb. Speaker playback uses the alarm stream and bypasses it.</string>
+    <string name="volume_dnd_hint">Earphone playback uses media audio and may be silenced by Do Not Disturb settings. Speaker playback uses alarm audio and may be silenced if Do Not Disturb blocks alarms.</string>
     <string name="volume_zero_hint">Volume is 0%% — the alarm will ring silently until the timeout.</string>
     <string name="volume_restore_hint">Your previous volume is restored automatically after the alarm ends.</string>
     <string name="expand_options">Expand options</string>
