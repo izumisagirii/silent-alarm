@@ -3,6 +3,7 @@ package com.electrowiz.silentalarm.service
 import android.app.Service
 import android.content.BroadcastReceiver
 import android.content.Intent
+import android.content.pm.ServiceInfo
 import android.media.AudioFocusRequest
 import android.media.AudioManager
 import android.media.MediaPlayer
@@ -109,9 +110,15 @@ class AlarmAudioService : Service() {
      * the resolved mode immediately after.
      */
     internal fun postActiveNotification(action: AudioRouter.ResolvedAction?) {
+        startForegroundCompat(notifications.buildActiveNotification(action))
+    }
+
+    /** Explicit FGS type (required clarity on targetSdk 34+). */
+    private fun startForegroundCompat(notification: android.app.Notification) {
         startForeground(
             AlarmNotificationController.NOTIFICATION_ID,
-            notifications.buildActiveNotification(action)
+            notification,
+            ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK
         )
     }
 
@@ -129,6 +136,7 @@ class AlarmAudioService : Service() {
     internal var vibrator: Vibrator? = null
     internal var audioFocusRequest: AudioFocusRequest? = null
     internal var autoStopJob: Job? = null
+    internal var volumeFadeJob: Job? = null
     internal var idleRefreshJob: Job? = null
     private var snoozeJob: Job? = null
     private var triggerJob: Job? = null
@@ -221,10 +229,7 @@ class AlarmAudioService : Service() {
                     // the idle placeholder synchronously to satisfy the 5s
                     // FGS deadline, then either resume an interrupted ringing
                     // session or settle into idle keep-alive.
-                    startForeground(
-                        AlarmNotificationController.NOTIFICATION_ID,
-                        notifications.buildIdleNotification(emptyList())
-                    )
+                    startForegroundCompat(notifications.buildIdleNotification(emptyList()))
                     // cancelPendingSnooze = false: if the process died while
                     // snoozing, the AlarmManager-backed snooze-expiry alarm is
                     // still armed and must be left alone so it can resume
@@ -256,6 +261,7 @@ class AlarmAudioService : Service() {
         )
         triggerJob?.cancel(); triggerJob = null
         autoStopJob?.cancel(); autoStopJob = null
+        volumeFadeJob?.cancel(); volumeFadeJob = null
         idleRefreshJob?.cancel(); idleRefreshJob = null
         snoozeJob?.cancel(); snoozeJob = null
         postAlarmJob?.cancel(); postAlarmJob = null
@@ -486,10 +492,7 @@ class AlarmAudioService : Service() {
             Log.w(TAG, "Failed to clear resume marker on snooze", e)
         }
         // Re-post after the swipe removed it — the stop button stays available.
-        startForeground(
-            AlarmNotificationController.NOTIFICATION_ID,
-            notifications.buildSnoozeNotification()
-        )
+        startForegroundCompat(notifications.buildSnoozeNotification())
     }
 
     /** Snooze delay elapsed — resume ringing with a fresh auto-stop timer. */
@@ -554,6 +557,7 @@ class AlarmAudioService : Service() {
             )
         )
         autoStopJob?.cancel(); autoStopJob = null
+        volumeFadeJob?.cancel(); volumeFadeJob = null
         snoozeJob?.cancel(); snoozeJob = null
         idleRefreshJob?.cancel(); idleRefreshJob = null
         if (cancelPendingSnooze) scheduler.cancelSnoozeExpiry()
@@ -600,10 +604,7 @@ class AlarmAudioService : Service() {
                 keepAliveController.shouldStayIdle(alarms.any { it.enabled })
             }.getOrDefault(false)
             if (stayIdle) {
-                startForeground(
-                    AlarmNotificationController.NOTIFICATION_ID,
-                    notifications.buildIdleNotification(alarms)
-                )
+                startForegroundCompat(notifications.buildIdleNotification(alarms))
                 keepAliveController.onIdleServiceStarted()
                 startIdleRefreshTicker()
             } else {
@@ -621,17 +622,17 @@ class AlarmAudioService : Service() {
 
     /**
      * Arm the snooze-expiry timer. Prefers an exact alarm (survives process
-     * death, reliable in Doze); falls back to an in-process delay when the
-     * exact-alarm permission is unavailable.
+     * death, reliable in Doze); falls back to an inexact allowance alarm when
+     * the exact-alarm permission is unavailable (still survives process death,
+     * Doze-batchable); last resort is an in-process delay.
      */
     private fun armSnoozeExpiry(alarmId: String?) {
         snoozeJob?.cancel(); snoozeJob = null
-        val armed = scheduler.scheduleSnoozeExpiry(alarmId)
-        if (!armed) {
-            snoozeJob = serviceScope.launch {
-                delay(AlarmScheduler.SNOOZE_DURATION_MS)
-                playbackMutex.withLock { handleSnoozeExpired() }
-            }
+        if (scheduler.scheduleSnoozeExpiry(alarmId)) return
+        if (scheduler.scheduleInexactSnoozeExpiry(alarmId)) return
+        snoozeJob = serviceScope.launch {
+            delay(AlarmScheduler.SNOOZE_DURATION_MS)
+            playbackMutex.withLock { handleSnoozeExpired() }
         }
     }
 

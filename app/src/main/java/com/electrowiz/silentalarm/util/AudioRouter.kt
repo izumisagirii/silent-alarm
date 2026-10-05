@@ -12,14 +12,25 @@ import com.electrowiz.silentalarm.data.NoEarphoneAction
 class AudioRouter(private val audioManager: AudioManager) {
 
     companion object {
-        /** Device types considered "earphone" for routing purposes. */
+        /**
+         * Device types considered "earphone" for routing purposes.
+         *
+         * Absolute-time semantics: privacy first — when in doubt, treat a
+         * personal device as an earphone rather than risk speaker playback.
+         * BLUETOOTH_SCO covers classic HFP mono headsets, USB_DEVICE covers
+         * Type-C DAC dongles that report as generic USB audio, HEARING_AID
+         * covers BLE hearing aids (a separate type from BLE_HEADSET).
+         */
         @SuppressLint("InlinedApi")
         private val EARPHONE_TYPES = setOf(
             AudioDeviceInfo.TYPE_WIRED_HEADSET,
             AudioDeviceInfo.TYPE_WIRED_HEADPHONES,
             AudioDeviceInfo.TYPE_BLUETOOTH_A2DP,
+            AudioDeviceInfo.TYPE_BLUETOOTH_SCO,
             AudioDeviceInfo.TYPE_BLE_HEADSET,
-            AudioDeviceInfo.TYPE_USB_HEADSET
+            AudioDeviceInfo.TYPE_HEARING_AID,
+            AudioDeviceInfo.TYPE_USB_HEADSET,
+            AudioDeviceInfo.TYPE_USB_DEVICE
         )
     }
 

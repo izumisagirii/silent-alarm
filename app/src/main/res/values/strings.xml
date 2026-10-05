@@ -64,6 +64,10 @@
     <string name="shizuku_desc">Use Shizuku permission for stronger keep-alive</string>
     <string name="battery_not_exempt">Not exempt</string>
     <string name="notifications_title">Notifications</string>
+    <string name="notifications_allowed">Allowed</string>
+    <string name="notifications_denied">Not allowed</string>
+    <string name="notifications_request">Enable</string>
+    <string name="clear_search">Clear search</string>
 
     <!-- Language -->
     <string name="language_title">Language</string>
@@ -149,4 +153,11 @@
     <string name="undo">Undo</string>
     <string name="retry">Retry</string>
     <string name="battery_already_exempt">Battery optimization already disabled</string>
+    <string name="dashboard_next_alarm_format">Next: %1$s (%2$s)</string>
+
+    <!-- Volume safety hints -->
+    <string name="volume_dnd_hint">Earphone playback uses the media stream and is silenced by Do Not Disturb. Speaker playback uses the alarm stream and bypasses it.</string>
+    <string name="volume_zero_hint">Volume is 0%% — the alarm will ring silently until the timeout.</string>
+    <string name="volume_restore_hint">Your previous volume is restored automatically after the alarm ends.</string>
+    <string name="expand_options">Expand options</string>
 </resources>

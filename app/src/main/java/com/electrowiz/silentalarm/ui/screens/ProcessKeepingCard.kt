@@ -61,14 +61,14 @@ internal fun ProcessKeepingCard(
                 label = stringResource(R.string.notifications_title),
                 ok = notificationsAllowed,
                 statusText = if (notificationsAllowed) {
-                    stringResource(R.string.exact_alarm_allowed)
+                    stringResource(R.string.notifications_allowed)
                 } else {
-                    stringResource(R.string.exact_alarm_denied)
+                    stringResource(R.string.notifications_denied)
                 },
                 actionText = if (notificationsAllowed) {
                     null
                 } else {
-                    stringResource(R.string.exact_alarm_request)
+                    stringResource(R.string.notifications_request)
                 },
                 onAction = if (notificationsAllowed) {
                     null

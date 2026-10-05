@@ -1,4 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Alarm schedules reveal routines; never roam them to the cloud or new devices.
+     Preferences DataStore lives under files/datastore/. -->
 <data-extraction-rules>
-    <cloud-backup />
+    <cloud-backup>
+        <exclude domain="file" path="datastore/alarm_settings.preferences_pb" />
+        <exclude domain="file" path="logs/" />
+    </cloud-backup>
+    <device-transfer>
+        <exclude domain="file" path="datastore/alarm_settings.preferences_pb" />
+        <exclude domain="file" path="logs/" />
+    </device-transfer>
 </data-extraction-rules>

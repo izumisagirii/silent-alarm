@@ -134,4 +134,13 @@
     <string name="shizuku_desc">使用 Shizuku 權限增強保活</string>
     <string name="battery_not_exempt">未豁免</string>
     <string name="notifications_title">通知權限</string>
+    <string name="dashboard_next_alarm_format">下次：%1$s（%2$s）</string>
+    <string name="notifications_allowed">已允許</string>
+    <string name="notifications_denied">未允許</string>
+    <string name="notifications_request">開啟</string>
+    <string name="clear_search">清除搜尋</string>
+    <string name="volume_dnd_hint">耳機播放使用媒體音量，會被勿擾模式靜音；揚聲器播放使用鬧鐘音量，不受勿擾影響。</string>
+    <string name="volume_zero_hint">音量為 0% — 鬧鐘將靜音響鈴直到超時。</string>
+    <string name="volume_restore_hint">鬧鐘結束後會自動恢復原本的音量。</string>
+    <string name="expand_options">展開選項</string>
 </resources>

@@ -16,21 +16,28 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 /**
- * Re-schedules all enabled alarms after reboot (AlarmManager clears alarms)
- * and after the system wall-clock time changes. Timezone changes deliberately
- * do not trigger rescheduling: each alarm keeps the absolute trigger time that
- * was captured in its own timezone when it was saved.
+ * Re-schedules all enabled alarms after reboot (AlarmManager clears alarms),
+ * after the system wall-clock time changes, after app updates, and after the
+ * exact-alarm permission state changes. Timezone changes deliberately do not
+ * trigger rescheduling: each alarm keeps the absolute trigger time that was
+ * captured in its own timezone when it was saved.
  */
 class BootReceiver : BroadcastReceiver() {
 
     companion object {
         private const val TAG = "BootReceiver"
+        private const val ACTION_EXACT_ALARM_STATE_CHANGED =
+            "android.app.action.SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED"
     }
 
     override fun onReceive(context: Context, intent: Intent) {
         when (intent.action) {
             Intent.ACTION_BOOT_COMPLETED -> process(context, isBoot = true, action = intent.action)
             Intent.ACTION_TIME_CHANGED -> process(context, isBoot = false, action = intent.action)
+            Intent.ACTION_MY_PACKAGE_REPLACED ->
+                process(context, isBoot = false, action = intent.action)
+            ACTION_EXACT_ALARM_STATE_CHANGED ->
+                process(context, isBoot = false, action = intent.action)
             else -> return
         }
     }

@@ -228,7 +228,12 @@ class AlarmViewModel(application: Application) : AndroidViewModel(application) {
 
     // ── Alarm CRUD ───────────────────────────────────────────────────────
 
-    fun addAlarm(hour: Int, minute: Int, label: String = "", timeZoneId: String = "") {
+    fun addAlarm(
+        hour: Int,
+        minute: Int,
+        label: String = "",
+        timeZoneId: String = AlarmScheduler.normalizeZoneId(TimeZone.getDefault().id)
+    ) {
         viewModelScope.launch {
             val item = AlarmItem(
                 hour = hour,
@@ -397,7 +402,12 @@ class AlarmViewModel(application: Application) : AndroidViewModel(application) {
     fun showEditTimePicker(alarmId: String) { editingAlarmId = alarmId; _showTimePicker.value = true }
     fun hideTimePicker() { _showTimePicker.value = false }
 
-    fun onTimeSelected(hour: Int, minute: Int, label: String = "", timeZoneId: String = "") {
+    fun onTimeSelected(
+        hour: Int,
+        minute: Int,
+        label: String = "",
+        timeZoneId: String = AlarmScheduler.normalizeZoneId(TimeZone.getDefault().id)
+    ) {
         val editing = editingAlarmId
         if (editing != null) {
             val alarm = alarms.value.find { it.id == editing } ?: return
@@ -464,19 +474,45 @@ class AlarmViewModel(application: Application) : AndroidViewModel(application) {
     fun formatAlarmTime(item: AlarmItem): String =
         "%02d:%02d".format(item.hour, item.minute)
 
+    /** Next fire epoch for an alarm (cached per list by the dashboard). */
+    fun nextFireEpoch(item: AlarmItem): Long = scheduler.nextFireEpoch(item)
+
+    /** The enabled alarm that will fire next, or null when none are enabled. */
+    fun nextAlarmItem(): AlarmItem? = scheduler.nextAlarm(alarms.value)
+
+    /**
+     * One-line header countdown, e.g. "Next: 08:00 (in 7 hours)".
+     * Null when no alarm is enabled.
+     */
+    fun nextAlarmHeader(): String? {
+        val next = scheduler.nextAlarm(alarms.value) ?: return null
+        val epoch = scheduler.nextFireEpoch(next)
+        val relative = android.text.format.DateUtils.getRelativeTimeSpanString(
+            epoch,
+            System.currentTimeMillis(),
+            android.text.format.DateUtils.MINUTE_IN_MILLIS,
+            android.text.format.DateUtils.FORMAT_ABBREV_RELATIVE
+        )
+        return getApplication<Application>().getString(
+            R.string.dashboard_next_alarm_format,
+            formatAlarmTime(next),
+            relative
+        )
+    }
+
     /** The same alarm instant shown in the system's current timezone. */
-    fun formatAlarmLocalTime(item: AlarmItem): String =
-        formatEpochInZone(scheduler.nextFireEpoch(item), TimeZone.getDefault())
+    fun formatAlarmLocalTime(item: AlarmItem, epoch: Long = nextFireEpoch(item)): String =
+        formatEpochInZone(epoch, TimeZone.getDefault())
 
     /**
      * Small caption for the alarm card: the current-timezone equivalent of
      * the alarm time, shown only when it differs from the alarm's own time.
      * The "本地时间 / Local time" prefix is the user-facing hint.
      */
-    fun localTimeCaption(item: AlarmItem): String? {
+    fun localTimeCaption(item: AlarmItem, epoch: Long = nextFireEpoch(item)): String? {
         if (!item.enabled) return null
         val own = formatAlarmTime(item)
-        val local = formatAlarmLocalTime(item)
+        val local = formatAlarmLocalTime(item, epoch)
         return if (own != local) {
             getApplication<Application>().getString(R.string.alarm_local_time_format, local)
         } else {
@@ -484,10 +520,18 @@ class AlarmViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    /** Return the alarm time that should be shown in the editor, in current-zone wall time. */
+    /**
+     * Return the alarm time that should be shown in the editor.
+     *
+     * Absolute-time semantics (scheme A): show the wall-clock time in the
+     * alarm's own timezone, so opening and saving without changes is a no-op
+     * even when the device has travelled to another zone.
+     */
     fun alarmPickerHourMinute(item: AlarmItem): Pair<Int, Int> {
+        val zone = item.timeZoneId.takeIf { it.isNotBlank() }
+            ?.let { TimeZone.getTimeZone(it) } ?: TimeZone.getDefault()
         val epoch = scheduler.nextFireEpoch(item)
-        val cal = Calendar.getInstance(TimeZone.getDefault()).apply { timeInMillis = epoch }
+        val cal = Calendar.getInstance(zone).apply { timeInMillis = epoch }
         return cal.get(Calendar.HOUR_OF_DAY) to cal.get(Calendar.MINUTE)
     }
 
@@ -502,16 +546,10 @@ class AlarmViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     /** Compact label for the timezone captured on an individual alarm. */
-    fun timezoneLabelForAlarm(item: AlarmItem): String {
-        val zone = TimeZone.getTimeZone(
+    fun timezoneLabelForAlarm(item: AlarmItem): String =
+        TimezoneFormatter.displayLabel(
             item.timeZoneId.takeIf { it.isNotBlank() } ?: TimeZone.getDefault().id
         )
-        return timezoneLabel(zone)
-    }
-
-    private fun timezoneLabel(zone: TimeZone): String {
-        return "${zone.id} (${TimezoneFormatter.offsetLabel(zone)})"
-    }
 
     private fun formatEpochInZone(epoch: Long, zone: TimeZone): String {
         val cal = Calendar.getInstance(zone).apply { timeInMillis = epoch }

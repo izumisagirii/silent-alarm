@@ -125,7 +125,7 @@ fun LanguageSettingsCard(modifier: Modifier = Modifier) {
                     text = selectedLabel,
                     modifier = Modifier.weight(1f)
                 )
-                Icon(Icons.Default.ArrowDropDown, contentDescription = null)
+                Icon(Icons.Default.ArrowDropDown, contentDescription = stringResource(R.string.expand_options))
             }
         }
     }

@@ -262,17 +262,30 @@ private fun stripVersionPrefix(tag: String): String =
 
 /** Read the current app version from the package manager. */
 private fun getAppVersion(context: Context): String =
-    context.packageManager.getPackageInfo(context.packageName, 0).versionName
-        ?: "0.0"
+    try {
+        val pm = context.packageManager
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            pm.getPackageInfo(
+                context.packageName,
+                android.content.pm.PackageManager.PackageInfoFlags.of(0)
+            ).versionName
+        } else {
+            @Suppress("DEPRECATION")
+            pm.getPackageInfo(context.packageName, 0).versionName
+        } ?: "0.0"
+    } catch (_: Exception) {
+        "0.0"
+    }
 
 /**
  * Compare two dot-separated version strings.
  * Returns >0 if [a] is newer, <0 if [b] is newer, 0 if equal.
- * Handles different segment counts (e.g. 1.0 vs 1.0.0).
+ * Handles different segment counts (e.g. 1.0 vs 1.0.0) and ignores
+ * pre-release suffixes (e.g. 1.0-beta is treated as 1.0).
  */
 private fun compareVersions(a: String, b: String): Int {
-    val aParts = a.split(".").map { it.toIntOrNull() ?: 0 }
-    val bParts = b.split(".").map { it.toIntOrNull() ?: 0 }
+    val aParts = a.substringBefore("-").split(".").map { it.toIntOrNull() ?: 0 }
+    val bParts = b.substringBefore("-").split(".").map { it.toIntOrNull() ?: 0 }
     val maxLen = maxOf(aParts.size, bParts.size)
     for (i in 0 until maxLen) {
         val av = aParts.getOrElse(i) { 0 }

@@ -42,6 +42,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -54,6 +55,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.electrowiz.silentalarm.R
+import com.electrowiz.silentalarm.data.AlarmScheduler
 import com.electrowiz.silentalarm.ui.components.GitHubRepoCard
 import com.electrowiz.silentalarm.ui.components.LanguageSettingsCard
 import com.electrowiz.silentalarm.ui.components.SearchableSelectSheet
@@ -62,6 +64,7 @@ import com.electrowiz.silentalarm.ui.viewmodel.AlarmViewModel
 import com.electrowiz.silentalarm.util.TimezoneFormatter
 import java.util.Calendar
 import java.util.TimeZone
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 /**
@@ -79,19 +82,22 @@ fun AlarmDashboardScreen(
     modifier: Modifier = Modifier
 ) {
     val alarms by viewModel.alarms.collectAsStateWithLifecycle()
-    val earphoneVolume by viewModel.earphoneVolume.collectAsStateWithLifecycle()
-    val speakerVolume by viewModel.speakerVolume.collectAsStateWithLifecycle()
-    val noEarphoneAction by viewModel.noEarphoneAction.collectAsStateWithLifecycle()
-    val globalRingtoneUri by viewModel.globalRingtoneUri.collectAsStateWithLifecycle()
-    val timeoutSeconds by viewModel.timeoutSeconds.collectAsStateWithLifecycle()
-    val timeoutAction by viewModel.timeoutAction.collectAsStateWithLifecycle()
     val showTimePicker by viewModel.showTimePicker.collectAsStateWithLifecycle()
     val snackbarMessage by viewModel.snackbarMessage.collectAsStateWithLifecycle()
     var pendingDeleteId by remember { mutableStateOf<String?>(null) }
-    var deletingAlarmId by remember { mutableStateOf<String?>(null) }
+    var deletingAlarmIds by remember { mutableStateOf<Set<String>>(emptySet()) }
     var searchActive by remember { mutableStateOf(false) }
     var searchQuery by remember { mutableStateOf("") }
     var emptyStateHiding by remember { mutableStateOf(false) }
+    // Minute ticker: refreshes the header countdown and the cached epochs
+    // (one-shot rollover depends on "now") without touching the alarm list.
+    var tickMinute by remember { mutableLongStateOf(System.currentTimeMillis() / 60_000) }
+    LaunchedEffect(Unit) {
+        while (true) {
+            delay(60_000 - (System.currentTimeMillis() % 60_000))
+            tickMinute = System.currentTimeMillis() / 60_000
+        }
+    }
     val cultureQuote = remember { timeQuotes.random() }
     val listState = rememberLazyListState()
     val quoteVisible by remember(listState) {
@@ -106,12 +112,21 @@ fun AlarmDashboardScreen(
         label = "quoteAlpha"
     )
 
-    val visibleAlarms = remember(alarms, searchActive, searchQuery, viewModel) {
+    // Cached fire epochs: one Calendar computation per alarm per list/minute
+    // change instead of once per item per recomposition (filter + card read
+    // the same map). Keyed on the minute for one-shot day rollover.
+    val epochs = remember(alarms, tickMinute) {
+        alarms.associate { it.id to viewModel.nextFireEpoch(it) }
+    }
+    val nextAlarmText = remember(alarms, tickMinute) { viewModel.nextAlarmHeader() }
+
+    val visibleAlarms = remember(alarms, searchActive, searchQuery, epochs) {
         if (searchActive && searchQuery.isNotBlank()) {
             alarms.filter { alarm ->
+                val epoch = epochs[alarm.id] ?: viewModel.nextFireEpoch(alarm)
                 alarm.label.contains(searchQuery, ignoreCase = true) ||
                     viewModel.formatAlarmTime(alarm).contains(searchQuery) ||
-                    viewModel.formatAlarmLocalTime(alarm).contains(searchQuery)
+                    viewModel.formatAlarmLocalTime(alarm, epoch).contains(searchQuery)
             }
         } else {
             alarms
@@ -221,7 +236,13 @@ fun AlarmDashboardScreen(
             item(key = "header") {
                 DashboardHeader(
                     searchActive = searchActive,
-                    onToggleSearch = { searchActive = !searchActive },
+                    onToggleSearch = {
+                        // Closing search clears the query so the next open
+                        // doesn't flash the previous result.
+                        if (searchActive) searchQuery = ""
+                        searchActive = !searchActive
+                    },
+                    nextAlarmText = nextAlarmText,
                     modifier = itemAnim()
                 )
             }
@@ -266,10 +287,12 @@ fun AlarmDashboardScreen(
             itemsIndexed(visibleAlarms, key = { _, it -> it.id }) { _, alarm ->
                 AlarmListItem(
                     alarm = alarm,
-                    deletingAlarmId = deletingAlarmId,
+                    deletingAlarmIds = deletingAlarmIds,
                     onDeleteRequest = { pendingDeleteId = alarm.id },
                     onDelete = { viewModel.deleteAlarm(it) },
-                    onDeleteAnimationFinished = { deletingAlarmId = null },
+                    onDeleteAnimationFinished = { finishedId ->
+                        deletingAlarmIds = deletingAlarmIds - finishedId
+                    },
                     onToggle = { viewModel.toggleAlarm(alarm.id, it) },
                     onEditTime = { viewModel.showEditTimePicker(alarm.id) },
                     onToggleDay = { day ->
@@ -280,15 +303,18 @@ fun AlarmDashboardScreen(
                     formatTime = { viewModel.formatAlarmTime(alarm) },
                     formatSchedule = { viewModel.formatSchedule(alarm) },
                     timezoneText = viewModel.timezoneLabelForAlarm(alarm),
-                    localTimeText = viewModel.localTimeCaption(alarm),
+                    localTimeText = viewModel.localTimeCaption(
+                        alarm,
+                        epochs[alarm.id] ?: viewModel.nextFireEpoch(alarm)
+                    ),
                     modifier = itemAnim()
                 )
             }
 
             item(key = "volume-settings") {
                 VolumeSettingsCard(
-                    earphoneVolume = earphoneVolume,
-                    speakerVolume = speakerVolume,
+                    earphoneVolumeFlow = viewModel.earphoneVolume,
+                    speakerVolumeFlow = viewModel.speakerVolume,
                     onEarphoneVolumeChange = { viewModel.setEarphoneVolume(it) },
                     onSpeakerVolumeChange = { viewModel.setSpeakerVolume(it) },
                     modifier = itemAnim()
@@ -297,8 +323,8 @@ fun AlarmDashboardScreen(
 
             item(key = "alarm-timeout") {
                 AlarmTimeoutCard(
-                    timeoutSeconds = timeoutSeconds,
-                    timeoutAction = timeoutAction,
+                    timeoutSecondsFlow = viewModel.timeoutSeconds,
+                    timeoutActionFlow = viewModel.timeoutAction,
                     onSecondsChange = { viewModel.setTimeoutSeconds((it / 10) * 10) },
                     onActionChange = { viewModel.setTimeoutAction(it) },
                     modifier = itemAnim()
@@ -307,7 +333,7 @@ fun AlarmDashboardScreen(
 
             item(key = "no-earphone") {
                 NoEarphoneCard(
-                    noEarphoneAction = noEarphoneAction,
+                    noEarphoneActionFlow = viewModel.noEarphoneAction,
                     onActionChange = { viewModel.setNoEarphoneAction(it) },
                     modifier = itemAnim()
                 )
@@ -315,7 +341,7 @@ fun AlarmDashboardScreen(
 
             item(key = "ringtone") {
                 RingtoneCard(
-                    globalRingtoneUri = globalRingtoneUri,
+                    globalRingtoneUriFlow = viewModel.globalRingtoneUri,
                     onPickRingtone = onPickRingtone,
                     modifier = itemAnim()
                 )
@@ -370,12 +396,15 @@ fun AlarmDashboardScreen(
     if (showTimePicker) {
         val editing = viewModel.editingAlarm()
         // New alarms default to the next full hour. Existing alarms are shown
-        // as their absolute trigger time converted to the current timezone.
+        // as their own-zone wall-clock time (absolute-time semantics): opening
+        // and saving without changes is a no-op in any system timezone.
         val editingTime = editing?.let { viewModel.alarmPickerHourMinute(it) }
         var label by remember(editing?.id) { mutableStateOf(editing?.label.orEmpty()) }
         var timeZoneId by remember(editing?.id) {
             mutableStateOf(
-                editing?.timeZoneId?.takeIf { it.isNotBlank() } ?: TimeZone.getDefault().id
+                AlarmScheduler.normalizeZoneId(
+                    editing?.timeZoneId?.takeIf { it.isNotBlank() } ?: TimeZone.getDefault().id
+                )
             )
         }
         val nextHour = remember { (Calendar.getInstance().get(Calendar.HOUR_OF_DAY) + 1) % 24 }
@@ -435,7 +464,7 @@ fun AlarmDashboardScreen(
                 TextButton(
                     onClick = {
                         pendingDeleteId = null
-                        deletingAlarmId = alarmId
+                        deletingAlarmIds = deletingAlarmIds + alarmId
                     }
                 ) {
                     Text(stringResource(R.string.delete_alarm))
@@ -483,7 +512,7 @@ private fun TimezoneSelector(selectedId: String, onSelect: (String) -> Unit) {
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
-        Icon(Icons.Default.ArrowDropDown, contentDescription = null)
+        Icon(Icons.Default.ArrowDropDown, contentDescription = stringResource(R.string.expand_options))
     }
 
     if (showSheet) {
@@ -502,7 +531,4 @@ private fun TimezoneSelector(selectedId: String, onSelect: (String) -> Unit) {
     }
 }
 
-private fun timezoneDisplayLabel(id: String): String {
-    val zone = TimeZone.getTimeZone(id.takeIf { it.isNotBlank() } ?: TimeZone.getDefault().id)
-    return "${zone.id} (${TimezoneFormatter.offsetLabel(zone)})"
-}
+private fun timezoneDisplayLabel(id: String): String = TimezoneFormatter.displayLabel(id)

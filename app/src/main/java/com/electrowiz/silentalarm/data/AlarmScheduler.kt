@@ -28,6 +28,33 @@ class AlarmScheduler(private val context: Context) {
     companion object {
         private const val TAG = "AlarmScheduler"
 
+        /** Cached set of valid Olson zone IDs. */
+        private val VALID_ZONE_IDS: Set<String> = TimeZone.getAvailableIDs().toSet()
+
+        /**
+         * Normalize a zone ID to one the scheduler can safely persist.
+         *
+         * Some ROMs report non-Olson default zones (e.g. "Asia/Beijing") that
+         * [TimeZone.getTimeZone] would silently map to GMT. Never persist those
+         * verbatim: prefer an Olson zone with identical rules (preserves DST
+         * and absolute instants), else a fixed GMT-offset zone, else UTC.
+         * Read and write paths must agree — a saved alarm must never vanish
+         * on the next read.
+         */
+        fun normalizeZoneId(raw: String): String {
+            val id = raw.ifBlank { TimeZone.getDefault().id }
+            if (id in VALID_ZONE_IDS) return id
+            val sample = TimeZone.getTimeZone(id)
+            TimeZone.getAvailableIDs().firstOrNull {
+                TimeZone.getTimeZone(it).hasSameRules(sample)
+            }?.let { return it }
+            val offsetMinutes = sample.rawOffset / 60_000
+            if (offsetMinutes == 0) return "UTC"
+            val sign = if (offsetMinutes >= 0) "+" else "-"
+            val abs = kotlin.math.abs(offsetMinutes)
+            return "GMT$sign%02d:%02d".format(abs / 60, abs % 60)
+        }
+
         /** Base request code — each alarm's ID hash is added to avoid collisions. */
         private const val REQUEST_CODE_BASE = 9000
 
@@ -177,9 +204,9 @@ class AlarmScheduler(private val context: Context) {
         computeNextFireEpoch(item.hour, item.minute, item.daysOfWeek, timeZoneFor(item))
 
     private fun timeZoneFor(item: AlarmItem): TimeZone =
-        item.timeZoneId.takeIf { it.isNotBlank() }
-            ?.let { TimeZone.getTimeZone(it) }
-            ?: TimeZone.getDefault()
+        // Zones are normalized at write and healed at parse, so this is
+        // always a functional ID (Olson or GMT-offset) — never silent GMT.
+        TimeZone.getTimeZone(normalizeZoneId(item.timeZoneId))
 
     /** Used before re-scheduling from [reconcile]. */
     private fun cancelAll(alarms: List<AlarmItem>) {
@@ -233,6 +260,32 @@ class AlarmScheduler(private val context: Context) {
                     "reason" to "security_exception"
                 )
             )
+            false
+        }
+    }
+
+    /**
+     * Arm the snooze-expiry timer with an inexact allowance alarm.
+     * Used when exact-alarm permission is unavailable: survives process death
+     * (unlike the in-process delay) at the cost of Doze-batchable timing.
+     */
+    fun scheduleInexactSnoozeExpiry(alarmId: String?, delayMs: Long = SNOOZE_DURATION_MS): Boolean {
+        val pi = buildSnoozeExpiryPendingIntent(alarmId)
+        val triggerAt = System.currentTimeMillis() + delayMs.coerceAtLeast(0L)
+        return try {
+            alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAt, pi)
+            Log.d(TAG, "Inexact snooze expiry armed in ${delayMs / 1000}s")
+            AlarmDiagnostics.log(
+                context,
+                "snooze_scheduled_inexact",
+                mapOf(
+                    "alarm_id" to AlarmDiagnostics.shortAlarmId(alarmId),
+                    "trigger_at_ms" to triggerAt
+                )
+            )
+            true
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to arm inexact snooze expiry", e)
             false
         }
     }

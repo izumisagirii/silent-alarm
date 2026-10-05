@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A quiet alarm clock nested inside over-ear headphones. -->
+<vector
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <group android:translateY="-2">
+    <!-- Headband: a single balanced arc around the clock. -->
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M30,59 A24,24 0,0 1,78 59"
+        android:strokeColor="#F1F0E9"
+        android:strokeWidth="5.5"
+        android:strokeLineCap="round" />
+
+    <!-- Soft rectangular earcups, set symmetrically around the dial. -->
+    <path
+        android:fillColor="#F1F0E9"
+        android:pathData="M28,52 C28,49.8 29.8,48 32,48 L37,48 L37,73 L32,73 C29.8,73 28,71.2 28,69 Z M80,52 C80,49.8 78.2,48 76,48 L71,48 L71,73 L76,73 C78.2,73 80,71.2 80,69 Z" />
+
+    <!-- Concentric dial: warm rim, muted sage face. -->
+    <path
+        android:fillColor="#F1F0E9"
+        android:pathData="M54,39 A18,18 0,1 1,54 75 A18,18 0,1 1,54 39 Z" />
+    <path
+        android:fillColor="#A8B9B0"
+        android:pathData="M54,43 A14,14 0,1 1,54 71 A14,14 0,1 1,54 43 Z" />
+
+    <!-- Two simple hands and a centered pivot. -->
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M54,57 L48,50 M54,57 L61,49"
+        android:strokeColor="#20283A"
+        android:strokeWidth="2.8"
+        android:strokeLineCap="round" />
+    <path
+        android:fillColor="#20283A"
+        android:pathData="M54,57 m-2,0 a2,2 0,1 0,4 0 a2,2 0,1 0,-4 0" />
+    </group>
+</vector>

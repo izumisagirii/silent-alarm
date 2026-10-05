@@ -9,6 +9,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -30,9 +31,11 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.HeadsetOff
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.MusicNote
 import androidx.compose.material.icons.outlined.Shield
 import androidx.compose.material.icons.outlined.Timer
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -44,12 +47,19 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.flow.StateFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -67,6 +77,7 @@ import kotlinx.coroutines.flow.first
 internal fun DashboardHeader(
     searchActive: Boolean,
     onToggleSearch: () -> Unit,
+    nextAlarmText: String? = null,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -84,6 +95,16 @@ internal fun DashboardHeader(
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+            if (nextAlarmText != null) {
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    nextAlarmText,
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.primary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
         }
         Surface(
             onClick = onToggleSearch,
@@ -123,7 +144,7 @@ internal fun DashboardSearchField(
         trailingIcon = if (searchQuery.isNotEmpty()) {
             {
                 IconButton(onClick = { onSearchQueryChange("") }) {
-                    Icon(Icons.Default.Close, contentDescription = null)
+                    Icon(Icons.Default.Close, contentDescription = stringResource(R.string.clear_search))
                 }
             }
         } else {
@@ -237,10 +258,10 @@ internal fun EmptyAlarmState(
 @Composable
 internal fun AlarmListItem(
     alarm: AlarmItem,
-    deletingAlarmId: String?,
+    deletingAlarmIds: Set<String>,
     onDeleteRequest: () -> Unit,
     onDelete: (String) -> Unit,
-    onDeleteAnimationFinished: () -> Unit,
+    onDeleteAnimationFinished: (String) -> Unit,
     onToggle: (Boolean) -> Unit,
     onEditTime: () -> Unit,
     onToggleDay: (Int) -> Unit,
@@ -258,13 +279,13 @@ internal fun AlarmListItem(
         visibleState.targetState = true
     }
 
-    LaunchedEffect(deletingAlarmId, alarm.id) {
-        if (deletingAlarmId == alarm.id) {
+    LaunchedEffect(deletingAlarmIds, alarm.id) {
+        if (alarm.id in deletingAlarmIds) {
             visibleState.targetState = false
             snapshotFlow { visibleState.isIdle && !visibleState.currentState }
                 .first { it }
             onDelete(alarm.id)
-            onDeleteAnimationFinished()
+            onDeleteAnimationFinished(alarm.id)
         }
     }
 
@@ -303,36 +324,97 @@ internal fun AlarmListItem(
 
 @Composable
 internal fun VolumeSettingsCard(
-    earphoneVolume: Int,
-    speakerVolume: Int,
+    earphoneVolumeFlow: StateFlow<Int>,
+    speakerVolumeFlow: StateFlow<Int>,
     onEarphoneVolumeChange: (Int) -> Unit,
     onSpeakerVolumeChange: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val earphoneVolume by earphoneVolumeFlow.collectAsStateWithLifecycle()
+    val speakerVolume by speakerVolumeFlow.collectAsStateWithLifecycle()
+    var showInfo by remember { mutableStateOf(false) }
     Card(modifier = modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(16.dp)) {
-            SettingsCardHeader(
-                icon = Icons.AutoMirrored.Outlined.VolumeUp,
-                title = stringResource(R.string.volume_settings)
-            )
+            // Fixed 24dp header row: same height as every other card header.
+            Row(
+                modifier = Modifier.height(24.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                SettingsCardHeader(
+                    icon = Icons.AutoMirrored.Outlined.VolumeUp,
+                    title = stringResource(R.string.volume_settings),
+                    modifier = Modifier.weight(1f)
+                )
+                Icon(
+                    Icons.Outlined.Info,
+                    contentDescription = stringResource(R.string.expand_options),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier
+                        .size(24.dp)
+                        .clip(CircleShape)
+                        .clickable { showInfo = true }
+                        .padding(3.dp)
+                )
+            }
             Spacer(modifier = Modifier.height(8.dp))
             VolumeSlider(stringResource(R.string.earphone), earphoneVolume,
                 onValueChange = onEarphoneVolumeChange)
             Spacer(modifier = Modifier.height(4.dp))
             VolumeSlider(stringResource(R.string.speaker), speakerVolume,
                 onValueChange = onSpeakerVolumeChange)
+            if (earphoneVolume == 0 || speakerVolume == 0) {
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    stringResource(R.string.volume_zero_hint),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error
+                )
+            }
         }
+    }
+
+    if (showInfo) {
+        AlertDialog(
+            onDismissRequest = { showInfo = false },
+            icon = {
+                Icon(
+                    Icons.AutoMirrored.Outlined.VolumeUp,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            },
+            title = { Text(stringResource(R.string.volume_settings)) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(
+                        stringResource(R.string.volume_dnd_hint),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Text(
+                        stringResource(R.string.volume_restore_hint),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showInfo = false }) {
+                    Text(stringResource(R.string.ok))
+                }
+            }
+        )
     }
 }
 
 @Composable
 internal fun AlarmTimeoutCard(
-    timeoutSeconds: Int,
-    timeoutAction: TimeoutAction,
+    timeoutSecondsFlow: StateFlow<Int>,
+    timeoutActionFlow: StateFlow<TimeoutAction>,
     onSecondsChange: (Int) -> Unit,
     onActionChange: (TimeoutAction) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val timeoutSeconds by timeoutSecondsFlow.collectAsStateWithLifecycle()
+    val timeoutAction by timeoutActionFlow.collectAsStateWithLifecycle()
     Card(modifier = modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(16.dp)) {
             SettingsCardHeader(
@@ -395,10 +477,11 @@ internal fun AlarmTimeoutCard(
 
 @Composable
 internal fun NoEarphoneCard(
-    noEarphoneAction: NoEarphoneAction,
+    noEarphoneActionFlow: StateFlow<NoEarphoneAction>,
     onActionChange: (NoEarphoneAction) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val noEarphoneAction by noEarphoneActionFlow.collectAsStateWithLifecycle()
     Card(modifier = modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(16.dp)) {
             SettingsCardHeader(
@@ -432,10 +515,11 @@ internal fun NoEarphoneCard(
 
 @Composable
 internal fun RingtoneCard(
-    globalRingtoneUri: String,
+    globalRingtoneUriFlow: StateFlow<String>,
     onPickRingtone: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val globalRingtoneUri by globalRingtoneUriFlow.collectAsStateWithLifecycle()
     Card(modifier = modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(16.dp)) {
             SettingsCardHeader(

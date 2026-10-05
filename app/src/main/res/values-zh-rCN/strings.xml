@@ -149,4 +149,13 @@
     <string name="log_save_failed">诊断日志保存失败</string>
     <string name="log_export_failed">诊断日志导出失败</string>
     <string name="no_alarms_found">没有匹配的闹钟</string>
+    <string name="dashboard_next_alarm_format">下次：%1$s（%2$s）</string>
+    <string name="notifications_allowed">已允许</string>
+    <string name="notifications_denied">未允许</string>
+    <string name="notifications_request">开启</string>
+    <string name="clear_search">清除搜索</string>
+    <string name="volume_dnd_hint">耳机播放使用媒体音量，会被勿扰模式静音；扬声器播放使用闹钟音量，不受勿扰影响。</string>
+    <string name="volume_zero_hint">音量为 0% — 闹钟将静音响铃直到超时。</string>
+    <string name="volume_restore_hint">闹钟结束后会自动恢复原来的音量。</string>
+    <string name="expand_options">展开选项</string>
 </resources>

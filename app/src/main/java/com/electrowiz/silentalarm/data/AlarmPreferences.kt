@@ -56,8 +56,9 @@ enum class TimeoutAction {
  * @property label user-visible name (e.g. "Morning Meds")
  * @property daysOfWeek which days of the week this alarm fires;
  *             empty set means "one-shot" (fires once, next occurrence)
- * @property timeZoneId timezone captured when the alarm was last saved/edited;
- *             blank means legacy data and is treated as the system timezone.
+ * @property timeZoneId timezone captured when the alarm was last saved/edited,
+ *             always normalized via [AlarmScheduler.normalizeZoneId] so read
+ *             and write paths agree and rows are never dropped for it.
  */
 data class AlarmItem(
     val id: String = UUID.randomUUID().toString(),
@@ -97,8 +98,10 @@ class AlarmPreferences(private val context: Context) {
         /**
          * Bump this only when the persisted shape changes incompatibly.
          * Alarm/timezone data is cleared when the stored schema is older.
+         * v2: timeZoneId is mandatory (absolute-time semantics) — legacy
+         * blank-zone alarms are dropped on migration.
          */
-        private const val SCHEMA_VERSION = 1
+        private const val SCHEMA_VERSION = 2
 
         /** Default earphone playback volume, 0–100. */
         const val DEFAULT_EARPHONE_VOLUME = 80
@@ -203,11 +206,23 @@ class AlarmPreferences(private val context: Context) {
     /**
      * Remove legacy or corrupt alarm data before it reaches the scheduler.
      * Existing preferences are otherwise left intact.
+     * Since schema 2, alarms without a valid timeZoneId are dropped.
      */
     suspend fun migrateOrReset() {
         context.dataStore.edit { prefs ->
             val current = prefs[Keys.SCHEMA_VERSION] ?: 0
-            if (current >= SCHEMA_VERSION) return@edit
+            if (current >= SCHEMA_VERSION) {
+                // Same-version pass: drop only structurally corrupt rows
+                // (zones are healed at parse time, never dropped). Compare
+                // row counts — key order/whitespace alone must not rewrite.
+                val json = prefs[Keys.ALARMS_JSON] ?: return@edit
+                val rawCount = runCatching { JSONArray(json).length() }.getOrNull()
+                val cleaned = parseAlarms(json)
+                if (rawCount != null && cleaned.size < rawCount) {
+                    prefs[Keys.ALARMS_JSON] = serializeAlarms(cleaned)
+                }
+                return@edit
+            }
 
             // Older builds did not have a schema version and their alarm/timezone
             // payloads may be incompatible with the current editor. Reset those
@@ -377,6 +392,9 @@ class AlarmPreferences(private val context: Context) {
                     val obj = arr.optJSONObject(index) ?: return@runCatching null
                     val id = obj.optString("id", "").takeIf { it.isNotBlank() }
                         ?: return@runCatching null
+                    // Heal (never drop) zone problems: blank or non-Olson IDs
+                    // are normalized so a saved alarm always survives the read.
+                    val zoneId = AlarmScheduler.normalizeZoneId(obj.optString("timeZoneId", ""))
                     AlarmItem(
                         id = id,
                         hour = obj.optInt("hour", 8).coerceIn(0, 23),
@@ -385,7 +403,7 @@ class AlarmPreferences(private val context: Context) {
                         label = obj.optString("label", ""),
                         daysOfWeek = jsonArrayToIntSet(obj.optJSONArray("daysOfWeek"))
                             .filterTo(mutableSetOf()) { it in 1..7 },
-                        timeZoneId = obj.optString("timeZoneId", "")
+                        timeZoneId = zoneId
                     )
                 }.getOrNull()
             }

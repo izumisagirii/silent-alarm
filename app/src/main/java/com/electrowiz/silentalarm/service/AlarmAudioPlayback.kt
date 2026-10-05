@@ -30,6 +30,10 @@ import kotlinx.coroutines.sync.withLock
 
 private const val TAG = "AlarmAudioService"
 
+/** Fade-in ramp: 10 steps x 1s ≈ 10s from ~10% to the target volume. */
+private const val VOLUME_FADE_STEPS = 10
+private const val VOLUME_FADE_STEP_MS = 1_000L
+
 internal suspend fun AlarmAudioService.executeAlarmRoutine() {
     val route = audioRouter.inspectRoute()
     val settings = preferences.snapshot()
@@ -224,7 +228,7 @@ internal fun AlarmAudioService.playAudio(
         "playAudio stream=${if (useAlarmAudio) "ALARM" else "MUSIC"} " +
             "volume=$volumePercent% device=${preferredDevice?.productName ?: "default"}"
     )
-    setAlarmVolume(volumePercent, useAlarmAudio)
+    setAlarmVolumeWithFade(volumePercent, useAlarmAudio)
     requestAudioFocus(useAlarmAudio)
 
     val silentUri = "android.resource://${packageName}/${R.raw.silent_500ms}".toUri()
@@ -424,12 +428,19 @@ internal fun AlarmAudioService.requestAudioFocus(useAlarmAudio: Boolean) {
         .setAudioAttributes(AudioAttributes.Builder()
             .setUsage(usage)
             .setContentType(contentType).build())
+        .setAcceptsDelayedFocusGain(true)
+        .setWillPauseWhenDucked(true)
         .setOnAudioFocusChangeListener { change ->
             serviceScope.launch {
                 playbackMutex.withLock {
                     when (change) {
-                        AudioManager.AUDIOFOCUS_LOSS -> handleStop()
-                        AudioManager.AUDIOFOCUS_LOSS_TRANSIENT ->
+                        // Permanent loss pauses instead of stopping: navigation
+                        // or assistant ducking must not kill the whole alarm.
+                        // The auto-stop timeout still bounds the session, and
+                        // GAIN below resumes playback.
+                        AudioManager.AUDIOFOCUS_LOSS,
+                        AudioManager.AUDIOFOCUS_LOSS_TRANSIENT,
+                        AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK ->
                             if (state is AlarmAudioService.PlaybackState.Ringing) mediaPlayer?.pause()
                         AudioManager.AUDIOFOCUS_GAIN ->
                             if (state is AlarmAudioService.PlaybackState.Ringing) mediaPlayer?.start()
@@ -438,7 +449,12 @@ internal fun AlarmAudioService.requestAudioFocus(useAlarmAudio: Boolean) {
             }
         }.build()
     audioFocusRequest = req
-    audioManager.requestAudioFocus(req)
+    val focusResult = audioManager.requestAudioFocus(req)
+    if (focusResult == AudioManager.AUDIOFOCUS_REQUEST_DELAYED) {
+        Log.i(TAG, "Audio focus delayed — playback starts on GAIN")
+    } else if (focusResult == AudioManager.AUDIOFOCUS_REQUEST_FAILED) {
+        Log.w(TAG, "Audio focus request failed — playing anyway")
+    }
 }
 
 internal fun AlarmAudioService.startRepeatingVibration() {
@@ -483,6 +499,7 @@ internal fun AlarmAudioService.startRepeatingVibration() {
  */
 internal fun AlarmAudioService.teardownPlaybackSession() {
     autoStopJob?.cancel(); autoStopJob = null
+    volumeFadeJob?.cancel(); volumeFadeJob = null
     activeAction = null
     releaseMediaPlayer()
     releaseVibrator()
@@ -536,7 +553,44 @@ internal fun AlarmAudioService.setAlarmVolume(volumePercent: Int, useAlarmAudio:
     Log.i(TAG, "Stream $stream set to $target/$max ($volumePercent%)")
 }
 
+/**
+ * Set the alarm volume with a ~10s fade-in ramp (10 steps x 1s) so a
+ * deep-night earphone alarm doesn't startle at full level. The previous
+ * volume snapshot + restore path is shared with [setAlarmVolume].
+ */
+internal fun AlarmAudioService.setAlarmVolumeWithFade(volumePercent: Int, useAlarmAudio: Boolean) {
+    volumeFadeJob?.cancel(); volumeFadeJob = null
+    if (volumePercent <= 0) {
+        setAlarmVolume(0, useAlarmAudio)
+        return
+    }
+    val stream = if (useAlarmAudio) AudioManager.STREAM_ALARM else AudioManager.STREAM_MUSIC
+    val max = audioManager.getStreamMaxVolume(stream)
+    val target = (max * volumePercent / 100).coerceIn(0, max)
+    if (target <= 1) {
+        setAlarmVolume(volumePercent, useAlarmAudio)
+        return
+    }
+    // Snapshot the previous volume, then start quiet immediately.
+    setAlarmVolume((volumePercent / VOLUME_FADE_STEPS).coerceAtLeast(1), useAlarmAudio)
+    volumeFadeJob = serviceScope.launch {
+        for (step in 2..VOLUME_FADE_STEPS) {
+            delay(VOLUME_FADE_STEP_MS)
+            if (state !is AlarmAudioService.PlaybackState.Ringing) break
+            audioManager.setStreamVolume(
+                stream,
+                (target * step / VOLUME_FADE_STEPS).coerceIn(1, max),
+                0
+            )
+        }
+        volumeFadeJob = null
+    }
+}
+
 internal fun AlarmAudioService.restoreVolume(stream: Int? = null) {
+    // A fade ramp must never outlive the session that started it: stop it
+    // before touching the stream so a stale step can't clobber the restore.
+    volumeFadeJob?.cancel(); volumeFadeJob = null
     if (stream == null) {
         previousVolumes.forEach { (s, volume) ->
             audioManager.setStreamVolume(s, volume, 0)

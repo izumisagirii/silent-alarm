@@ -45,6 +45,11 @@ android {
     androidResources {
         generateLocaleConfig = true
     }
+    lint {
+        // Snapshot of known issues (mostly MissingTranslation for locales the
+        // translation script hasn't covered yet). New issues still fail the build.
+        baseline = file("lint-baseline.xml")
+    }
 }
 
 dependencies {
